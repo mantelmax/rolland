@@ -146,4 +146,4 @@ class RandomArrangement(Arrangement):
         sd = sd + 1e-6  # Low value added to avoid error.
         minv = minv - 1e-6
         max_v = max_v + 1e-6
-        return float(truncnorm((minv - mean) / sd, (max_v - mean) / sd, loc=mean, scale=sd).rvs(1))
+        return float(truncnorm((minv - mean) / sd, (max_v - mean) / sd, loc=mean, scale=sd).rvs(1).item())
