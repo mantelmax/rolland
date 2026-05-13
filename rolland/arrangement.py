@@ -51,7 +51,7 @@ class PeriodicArrangement(Arrangement):
     >>> from rolland.database.rail.db_rail import UIC60
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.arrangement import PeriodicArrangement
-    >>> from track import ArrangedBallastedSingleRailTrack
+    >>> from rolland.track import ArrangedBallastedSingleRailTrack
 
     >>> thepadA = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> thepadB = DiscrPad(sp = [400*10**6, 0], dp = [40000, 0])
