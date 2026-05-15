@@ -3,3 +3,6 @@
 .idea
 demo/
 __pycache__
+
+# macOS
+.DS_Store
