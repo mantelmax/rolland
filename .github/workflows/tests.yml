@@ -4,28 +4,45 @@ on:
   push:
     branches:
       - master
+      - chore/**
+      - feature/**
+      - integration/**
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'pytest.ini'
+      - '.github/workflows/tests.yml'
   pull_request:
     branches:
       - master
+    paths:
+      - '**.py'
+      - 'pyproject.toml'
+      - 'pytest.ini'
+      - '.github/workflows/tests.yml'
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: 'pyproject.toml'
 
-    - name: Install dependencies
-      run: |
-        pip install --upgrade pip
-        pip install .
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install .[dev]
 
-    - name: Run pytest
-      run: |
-        pytest
+      - name: Run pytest
+        run: |
+          pytest -v --tb=short
