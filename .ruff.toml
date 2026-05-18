@@ -1,52 +1,100 @@
-target-version = "py312" # Python version in your project
-exclude = ["demo", "docs"]
+# Require a specific Ruff version for reproducible linting across environments
+required-version = ">=0.6.0"
 
+# Target Python version for type checking and syntax validation
+target-version = "py312"
+
+# Directories and files to exclude from linting
+exclude = [
+    "demo",    # Example/demo code not subject to strict linting
+    "docs",    # Documentation source files
+]
+
+# Maximum line length for both linting and formatting
 line-length = 120
 
 [lint]
+# Base rule sets to enable
 select = [
-        "F", # pyflakes
-        "C","E","R", "W",  # pylint (including pycodestyle)
-        "C90", "I", "N","D", "UP",
-        "YTT", "ASYNC", "ASYNC1", "BLE", "B", "A", "COM", # flake8 plugins
-        "C4", "DTZ","T10","EM", "FA", "ISC", "ICN", # flake8 plugins
-        "LOG", "G", "INP", "PIE", "T20", "PYI", "PT", "RSE", # flake8 plugins
-        "RET", "SLF", "SLOT", "SIM", "TID", "TCH", "INT", "ARG", "TD", "FIX", # flake8 plugins
-        "C901" # others
-        ]
-
-ignore = [
-    "F811", # redefinition of unused '...'
-    "ARG002", # Argument name "..." doesn't match the function signature
+    # Pyflakes - basic syntax and undefined name checking
+    "F",
+    # Pycodestyle (PEP 8) - style violations
+    "E", "W",
+    # Pylint - various code quality checks
+    "C", "R",
+    # isort - import sorting (covered by Ruff natively)
+    "I",
+    # Pyupgrade - Python version compatibility
+    "UP",
+    # Flake8 plugins (grouped by category)
+    "C4",   # flake8-comprehensions
+    "C90",  # McCabe complexity
+    "B",    # flake8-bugbear
+    "BLE",  # flake8-blind-except
+    "A",    # flake8-builtins
+    "COM",  # flake8-commas
+    "DTZ",  # flake8-datetimez
+    "T10",  # flake8-debugger
+    "EM",   # flake8-errmsg
+    "FA",   # flake8-future-annotations
+    "ISC",  # flake8-implicit-str-concat
+    "ICN",  # flake8-import-conventions
+    "LOG",  # flake8-logging
+    "G",    # flake8-logging-format
+    "INP",  # flake8-no-pep420
+    "PIE",  # flake8-pie
+    "T20",  # flake8-print
+    "PYI",  # flake8-pyi
+    "PT",   # flake8-pytest-style
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "SLOT", # flake8-slots
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    "TCH",  # flake8-type-checking
+    "INT",  # flake8-gettext
+    "ARG",  # flake8-pie
+    "TD",   # flake8-todos
+    "FIX",  # flake8-fixme
+    # Additional categories
+    "N",    # pep8-naming
+    "D",    # pydocstyle
+    "YTT",  # flake8-2020
+    "ASYNC", # flake8-async
 ]
 
-# Allow fix for all enabled rules (when `--fix`) is provided.
+# Rules to ignore with justification
+ignore = [
+    "F811",    # Redefinition of unused name (common in tests/notebooks)
+    "ARG002",  # Unused function argument (false positives with **kwargs)
+]
+
+# All enabled rules are fixable by default
 fixable = ["ALL"]
 unfixable = []
 
+# Pycodestyle (PEP 8) specific overrides
 [lint.pycodestyle]
+# Don't flag overlong comments in task markers (e.g., TODO, FIXME)
 ignore-overlong-task-comments = true
+# Maximum length for docstrings (separate from code line-length)
 max-doc-length = 100
 
+# Pydocstyle configuration
 [lint.pydocstyle]
-convention = "numpy"  # Accepts: "google", "numpy", or "pep257".
+# Use numpy docstring convention for this project
+convention = "numpy"
 
+# Formatting rules (applied with `ruff format`)
 [format]
+# Use single quotes for strings
 quote-style = "single"
+# Use spaces for indentation (PEP 8 default)
 indent-style = "space"
+# Don't skip trailing commas in multi-line collections
 skip-magic-trailing-comma = false
-
-# Enable auto-formatting of code examples in docstrings. Markdown,
-# reStructuredText code/literal blocks and doctests are all supported.
-#
-# This is currently disabled by default, but it is planned for this
-# to be opt-out in the future.
+# Format code examples in docstrings
 docstring-code-format = true
-
-# Set the line length limit used when formatting code snippets in
-# docstrings.
-#
-# This only has an effect when the `docstring-code-format` setting is
-# enabled.
+# Use dynamic line length for docstring code (matches main line-length)
 docstring-code-line-length = "dynamic"
-
