@@ -2,24 +2,7 @@ name: Run Tests
 
 on:
   push:
-    branches:
-      - master
-      - chore/**
-      - feature/**
-      - integration/**
-    paths:
-      - '**.py'
-      - 'pyproject.toml'
-      - 'pytest.ini'
-      - '.github/workflows/tests.yml'
   pull_request:
-    branches:
-      - master
-    paths:
-      - '**.py'
-      - 'pyproject.toml'
-      - 'pytest.ini'
-      - '.github/workflows/tests.yml'
 
 jobs:
   test:

@@ -3,17 +3,7 @@ name: Ruff lint
 
 on:
   push:
-    # Only trigger on changes to Python files or Ruff config
-    paths:
-      - '**.py'
-      - '.ruff.toml'
-      - 'pyproject.toml'
   pull_request:
-    # Only trigger PR checks on changes to Python files or Ruff config
-    paths:
-      - '**.py'
-      - '.ruff.toml'
-      - 'pyproject.toml'
 
 jobs:
   ruff:
