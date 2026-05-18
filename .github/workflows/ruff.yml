@@ -1,8 +1,31 @@
-name: Ruff check
-on: [ push, pull_request ]
+# Name of the workflow - shown in GitHub Actions UI
+name: Ruff lint
+
+on:
+  push:
+    # Only trigger on changes to Python files or Ruff config
+    paths:
+      - '**.py'
+      - '.ruff.toml'
+      - 'pyproject.toml'
+  pull_request:
+    # Only trigger PR checks on changes to Python files or Ruff config
+    paths:
+      - '**.py'
+      - '.ruff.toml'
+      - 'pyproject.toml'
+
 jobs:
   ruff:
+    # Run on latest Ubuntu runner
     runs-on: ubuntu-latest
+    # Minimal permissions for security - only needs to read repo contents
+    permissions:
+      contents: read
     steps:
+      # Check out the repository code
       - uses: actions/checkout@v4
+      # Run Ruff linter with caching enabled for faster subsequent runs
       - uses: astral-sh/ruff-action@v3
+        with:
+          args: --cache-dir ~/.cache/ruff
