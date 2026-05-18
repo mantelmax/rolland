@@ -1,9 +1,7 @@
 # Name of the workflow - shown in GitHub Actions UI
 name: Ruff lint
 
-on:
-  push:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
   ruff:
