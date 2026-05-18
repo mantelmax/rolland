@@ -25,7 +25,5 @@ jobs:
     steps:
       # Check out the repository code
       - uses: actions/checkout@v4
-      # Run Ruff linter with caching enabled for faster subsequent runs
+      # Run Ruff linter (caching is handled automatically by the action)
       - uses: astral-sh/ruff-action@v3
-        with:
-          args: --cache-dir ~/.cache/ruff
