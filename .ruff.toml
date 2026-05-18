@@ -56,7 +56,7 @@ select = [
     "INT",  # flake8-gettext
     "ARG",  # flake8-pie
     "TD",   # flake8-todos
-    "FIX",  # flake8-fixme
+    "FIX",  # flake8-ffixme
     # Additional categories
     "N",    # pep8-naming
     "D",    # pydocstyle
@@ -76,7 +76,7 @@ unfixable = []
 
 # Pycodestyle (PEP 8) specific overrides
 [lint.pycodestyle]
-# Don't flag overlong comments in task markers (e.g., TODO, FIXME)
+# Don't flag overlong comments in task markers
 ignore-overlong-task-comments = true
 # Maximum length for docstrings (separate from code line-length)
 max-doc-length = 100
