@@ -43,6 +43,11 @@ docs = [
     "sphinx>=7.0",
     "myst-parser>=2.0",
     "sphinx-rtd-theme>=1.0",
+    "sphinxawesome-theme",
+    "sphinxcontrib-bibtex",
+    "autodoc-traits",
+    "sphinx-design",
+    "sphinx-docsearch",
 ]
 
 # I/O support for data handling
