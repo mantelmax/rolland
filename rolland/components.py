@@ -14,79 +14,96 @@
     WheelRoughness
     WheelGreensfunc
 """
+from dataclasses import dataclass
 
 from traitlets import Float, HasTraits, List, Tuple, Unicode
 from traittypes import Array
 
 
-class Rail(HasTraits):
-    r"""Rail Class.
+@dataclass(kw_only=True)
+class Rail:
+    r"""Represents a rail with specific physical and geometric properties.
 
-    Defines a rail with certain properties. UIC 60 rail is usually used as default rail.
+    UIC 60 rail is typically used as the default rail profile.
 
-    .. hint:: A set of predefined rail instances is available in the `database` module.
+    .. hint::
+        A set of predefined rail instances is available in the :mod:`database` module.
 
     Attributes
     ----------
-    rl_geo : list of tuple of float
-        Rail outline coordinates :math:`[m]`. TODO: Define coordinate system!
+    rl_geo : list[tuple[float, float]]
+        Rail outline coordinates in :math:`[\mathrm{m}]`.
     E : float
-        Young's modulus of rail :math:`[Pa]`.
+        Young's modulus of rail in :math:`[\mathrm{Pa}]`.
     G : float
-        Shear modulus of rail :math:`[Pa]`.
+        Shear modulus of rail in :math:`[\mathrm{Pa}]`.
     nu : float
         Poisson's ratio of rail :math:`[-]`.
-    kap : list of float
+    kap : list[float]
         Timoshenko shear correction factor (vertical, lateral) :math:`[-]`.
     mr : float
-        Rail mass per unit length :math:`[kg/m]`.
+        Rail mass per unit length in :math:`[\mathrm{kg/m}]`.
     rho : float
-        Density of rail :math:`[kg/m^3]`.
+        Density of rail in :math:`[\mathrm{kg/m^3}]`.
     etar : float
         Rail loss factor :math:`[-]`.
     fresr : float
-        Rail resonance frequency :math:`[Hz]`.
+        Rail resonance frequency in :math:`[\mathrm{Hz}]`.
     dr : float
-        Rail damping coefficient (viscous) :math:`[Ns/m]`.
-    gamr : list of float
-        Coordinates of rail shear center :math:`[m]`.
-    epsr : list of float
-        Coordinates of center of gravity :math:`[m]`.
+        Rail damping coefficient (viscous) in :math:`[\mathrm{Ns/m}]`.
+    gamr : list[float]
+        Coordinates of rail shear center in :math:`[\mathrm{m}]`.
+    epsr : list[float]
+        Coordinates of center of gravity in :math:`[\mathrm{m}]`.
     Iyr : float
-        Area moment of inertia of rail around y-axis :math:`[m^4]`.
+        Area moment of inertia of rail around y-axis in :math:`[\mathrm{m^4}]`.
     Izr : float
-        Area moment of inertia of rail around z-axis :math:`[m^4]`.
+        Area moment of inertia of rail around z-axis in :math:`[\mathrm{m^4}]`.
     Itr : float
-        Torsional constant of rail :math:`[m^4]`.
+        Torsional constant of rail in :math:`[\mathrm{m^4}]`.
     Ipr : float
-        Polar moment of inertia of rail :math:`[m^4]`.
+        Polar moment of inertia of rail in :math:`[\mathrm{m^4}]`.
     Ar : float
-        Cross-sectional area of rail :math:`[m^2]`.
+        Cross-sectional area of rail in :math:`[\mathrm{m^2}]`.
     Asr : float
-        Surface area per unit length of rail :math:`[m^2/m]`.
+        Surface area per unit length of rail in :math:`[\mathrm{m^2/m}]`.
     Vr : float
-        Volume per unit length of rail :math:`[m^3/m]`.
+        Volume per unit length of rail in :math:`[\mathrm{m^3/m}]`.
+
+    Examples
+    --------
+    Create a custom rail profile:
+
+    >>> custom_rail = Rail(
+    ...     rl_geo=[(0.0, 0.0), (0.075, 0.0)],
+    ...     E=2.1e11,
+    ...     G=8.1e10,
+    ...     nu=0.3,
+    ...     kap=[0.4, 0.4],
+    ...     mr=60.0,
+    ...     # ... specify remaining parameters ...
+    ... )
     """
 
-    rl_geo = List(Tuple(Float(), Float()))
-    E = Float()
-    G = Float()
-    nu = Float()
-    kap = List(Float())
-    mr = Float()
-    rho = Float()
-    etar = Float()
-    fresr = Float()
-    dr = Float()
-    gamr = List(Float())
-    epsr = List(Float())
-    Iyr = Float()
-    Izr = Float()
-    Itr = Float()
-    Ipr = Float()
-    Ar = Float()
-    Asr = Float()
-    Vr = Float()
+    rl_geo: list[tuple[float, float]]
+    E: float
+    G: float
+    nu: float
+    kap: list[float]
+    mr: float
+    rho: float
+    etar: float
+    fresr: float
+    dr: float
+    gamr: list[float]
+    epsr: list[float]
+    Iyr: float
+    Izr: float
+    Itr: float
+    Ipr: float
+    Ar: float
+    Asr: float
+    Vr: float
 
 
 class RailRoughness(HasTraits):
