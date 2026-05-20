@@ -1,8 +1,17 @@
-name: Ruff check
-on: [ push, pull_request ]
+# Name of the workflow - shown in GitHub Actions UI
+name: Ruff lint
+
+on: [push, pull_request]
+
 jobs:
   ruff:
+    # Run on latest Ubuntu runner
     runs-on: ubuntu-latest
+    # Minimal permissions for security - only needs to read repo contents
+    permissions:
+      contents: read
     steps:
+      # Check out the repository code
       - uses: actions/checkout@v4
+      # Run Ruff linter (caching is handled automatically by the action)
       - uses: astral-sh/ruff-action@v3
