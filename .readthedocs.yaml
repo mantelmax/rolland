@@ -9,8 +9,6 @@ build:
   os: ubuntu-24.04
   tools:
     python: "3.12"
-  # Fail only on docs build errors, not on warnings
-  failure_level: error
 
 # Documentation builder
 sphinx:
