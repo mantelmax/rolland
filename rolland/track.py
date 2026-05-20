@@ -20,11 +20,12 @@
 import abc
 from decimal import Decimal
 
-from traitlets import Dict, Float, Instance, Integer, Tuple, observe
+from traitlets import Dict, Float, Instance, Integer, Tuple
 
 from .abstract_traits import ABCHasTraits
 from .arrangement import Arrangement
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper
+from .observing import observe, observable
 
 
 class Track(ABCHasTraits):
