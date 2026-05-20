@@ -1,21 +1,27 @@
-
-
 # Read the Docs configuration file
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
 # Required
 version: 2
 
-# Set the OS, Python version, and other tools you might need
+# Project identification
+name: rolland
+
+# Build environment
 build:
   os: ubuntu-24.04
   tools:
     python: "3.12"
+  # Fail only on docs build errors, not on warnings
+  failure_level: error
 
-# Build documentation in the "docs/" directory with Sphinx
+# Documentation builder
 sphinx:
-   configuration: docs/source/conf.py
+  configuration: docs/source/conf.py
 
+# Python installation
 python:
   install:
     - requirements: docs/requirements.txt
+    - method: pip
+      path: .

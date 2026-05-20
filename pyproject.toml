@@ -1,36 +1,87 @@
 [project]
 name = "rolland"
 version = "0.1"
-dependencies = [
-    "numpy",
-    "scipy>=1.1.0",
-    "traitlets>=5.0",
-    "traittypes",
-    "ruff",
-    "pytest",
-    "matplotlib",
+description = "Time-domain simulation of rolling noise for railway applications"
+authors = [
+    { name = "Maximilian Mantel", email = "maximilian.mantel@tu-berlin.de" },
+    { name = "Ennes Sarradj", email = "ennes.sarradj@tu-berlin.de" },
+]
+license = { text = "BSD-3-Clause" }
+readme = "README.md"
+requires-python = ">=3.12"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: Physics",
 ]
 
-[tool.hatch.envs.hatch-static-analysis]
-config-path = [".ruff.toml"]
+# Runtime dependencies (installed with pip install rolland)
 dependencies = [
-    "numpy",
-    "scipy>=1.1.0",
+    "numpy>=1.24.0",
+    "scipy>=1.10.0",
     "traitlets>=5.0",
-    "traittypes",
-    "ruff",
-    "matplotlib",
-    "pytest",
+    "traittypes>=0.2.0",
+    "matplotlib>=3.5.0",
+]
+
+# Optional dependencies (pip install rolland[dev,docs,io])
+[project.optional-dependencies]
+# Development tools
+dev = [
+    "ruff>=0.6.0",
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "hypothesis>=6.0",
+]
+
+# Documentation
+docs = [
+    "sphinx>=7.0",
+    "myst-parser>=2.0",
+    "sphinx-rtd-theme>=1.0",
+    "sphinxawesome-theme",
+    "sphinxcontrib-bibtex",
+    "autodoc-traits",
+    "sphinx-design",
+    "sphinx-docsearch",
+]
+
+# I/O support for data handling
+io = [
+    "pandas>=2.0",
+    "pyyaml>=6.0",
+]
+
+# All optional dependencies
+all = [
+    "ruff>=0.6.0",
+    "pytest>=8.0",
+    "pytest-cov>=4.0",
+    "hypothesis>=6.0",
+    "sphinx>=7.0",
+    "myst-parser>=2.0",
+    "sphinx-rtd-theme>=1.0",
+    "pandas>=2.0",
+    "pyyaml>=6.0",
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.21.0"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.sdist]
-include = [
-  "/rolland",
+# Hatch static analysis - only needs ruff
+[tool.hatch.envs.hatch-static-analysis]
+config-path = [".ruff.toml"]
+dependencies = [
+    "ruff>=0.6.0",
 ]
+
+[tool.hatch.build.targets.sdist]
+include = ["/rolland"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["rolland"]
