@@ -4,9 +4,6 @@
 # Required
 version: 2
 
-# Project identification
-name: rolland
-
 # Build environment
 build:
   os: ubuntu-24.04
