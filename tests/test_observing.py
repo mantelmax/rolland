@@ -148,7 +148,7 @@ class TestObservableDecorator:
                 self.change_count += 1
 
         obj = TestClass()
-        obj._internal = 10  # Should not trigger observer
+        obj._internal = 10  # Should not trigger observer  # noqa: SLF001
 
         assert obj.change_count == 0
 

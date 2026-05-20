@@ -25,7 +25,7 @@ from traitlets import Dict, Float, Instance, Integer, Tuple
 from .abstract_traits import ABCHasTraits
 from .arrangement import Arrangement
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper
-from .observing import observe, observable
+from .observing import observe
 
 
 class Track(ABCHasTraits):
