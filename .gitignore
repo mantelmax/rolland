@@ -12,3 +12,6 @@ docs/build/
 
 # created by vscode
 .vscode
+
+# private tests
+tests/sandbox/

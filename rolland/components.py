@@ -14,10 +14,10 @@
     WheelRoughness
     WheelGreensfunc
 """
-from dataclasses import dataclass
 
-from traitlets import Float, HasTraits, List, Tuple, Unicode
-from traittypes import Array
+from dataclasses import dataclass, field
+
+from numpy import ndarray
 
 
 @dataclass(kw_only=True)
@@ -105,8 +105,8 @@ class Rail:
     Asr: float
     Vr: float
 
-
-class RailRoughness(HasTraits):
+@dataclass(kw_only=True)
+class RailRoughness:
     r"""Rail Roughness Class.
 
     Contains a rail roughness spectrum in frequency domain, which can later be used to calculate the
@@ -114,71 +114,73 @@ class RailRoughness(HasTraits):
 
     Attributes
     ----------
-    r_rough : Tuple containing two lists of float
+    r_rough : tuple[list[float], list[float]]
         Rail roughness spectrum :math:`[f, m]`.
     """
 
-    r_rough = Tuple(List(Float()), List(Float()))
+    r_rough: tuple[list[float], list[float]]
 
-
-class DiscrPad(HasTraits):
+@dataclass(kw_only=True)
+class DiscrPad:
     r"""Discrete Pad Class.
 
     Contains the properties of a discrete pad.
 
     Attributes
     ----------
-    sp : list of float
+    sp : list[float], default=[0.0, 0.0]
         Vertical/lateral pad stiffness (total value) :math:`[N/m]`. Lateral value can be set to zero
         when lateral rail deflections are omitted.
     wdthp : float
         Pad width in x-direction :math:`[m]`.
     etap : float
         Pad loss factor :math:`[-]`.
-    fresp : list of float
+    fresp : list[float], default=[0.0, 0.0]
         Vertical/lateral pad resonance frequencies [Hz]. This frequency is needed for calculating
         the viscous damping coefficient if it is not provided. Lateral value can be set to zero when
         lateral rail deflections are omitted.
-    dp : list of float
+    dp : list[float], default=[0.0, 0.0]
         Vertical/lateral pad damping coefficient (viscous) :math:`[Ns/m]`. Lateral value can be set
         to zero when lateral rail deflections are omitted.
     """
 
-    sp = List(Float(), default_value=[0.0, 0.0], maxlen=2)
-    wdthp = Float()
-    etap = Float()
-    fresp = List(Float(), default_value=[0.0, 0.0], maxlen=2)
-    dp = List(Float(), default_value=[0.0, 0.0], maxlen=2)
+    sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    wdthp: float
+    etap: float
+    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
 
 
-class ContPad(HasTraits):
+@dataclass(kw_only=True)
+class ContPad:
     r"""Cont Pad Class.
 
     Contains the properties of a continuous pad.
 
     Attributes
     ----------
-    sp : list of float
+    sp : list[float], default=[0.0, 0.0]
         Vertical/lateral pad stiffness (per meter) :math:`[N/m^2]`. Lateral value can be set to zero
         when lateral rail deflections are omitted.
     etap : float
         Pad loss factor :math:`[-]`.
-    fresp : list of float
+    fresp : list[float], default=[0.0, 0.0]
         Vertical/lateral pad resonance frequencies :math:`[Hz]`. These frequencies are needed for
         calculating the viscous damping coefficients if they are not provided. Lateral value can be
         set to zero when lateral rail deflections are omitted.
-    dp : list of float
+    dp : list[float], default=[0.0, 0.0]
         Vertical/lateral viscous damping coefficient (per meter) :math:`[Ns/m^2]`. Lateral value can
         be set to zero when lateral rail deflections are omitted.
     """
 
-    sp = List(Float(), default_value=[0.0, 0.0], maxlen=2)
-    etap = Float()
-    fresp = List(Float(), default_value=[0.0, 0.0], maxlen=2)
-    dp = List(Float(), default_value=[0.0, 0.0], maxlen=2)
+    sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    etap: float
+    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
 
 
-class Sleeper(HasTraits):
+@dataclass(kw_only=True)
+class Sleeper:
     r"""Sleeper Class.
 
     Contains the properties of a sleeper.
@@ -195,23 +197,32 @@ class Sleeper(HasTraits):
         Sleeper width in x-direction :math:`[m]`.
     """
 
-    ms = Float()
-    Bs = Float()
-    ls = Float()
-    wdths = Float()
+    ms: float
+    Bs: float
+    ls: float
+    wdths: float
 
 
-class Slab(HasTraits):
-    r"""Slab class."""
+@dataclass(kw_only=True)
+class Slab:
+    r"""Slab class.
 
-    # Slab mass per unit length [kg/m]
-    ms = Float()
+    Contains the properties of the slab.
 
-    # Slab depth [m]
-    ls = Float()
+    Attributes
+    ----------
+    ms : float
+        Slab mass per unit length :math:`[kg/m]`.
+    ls : float
+        Slab depth :math:`[m]`.
+    """
+
+    ms: float
+    ls: float
 
 
-class Ballast(HasTraits):
+@dataclass(kw_only=True)
+class Ballast:
     r"""Ballast Class.
 
     Contains the properties of the ballast.
@@ -223,40 +234,41 @@ class Ballast(HasTraits):
 
     Attributes
     ----------
-    sb : list of float
+    sb : list[float], default=[0.0, 0.0]
         Vertical/lateral ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
         Lateral value can be set to zero when lateral rail deflections are omitted.
 
     etab : float
         Ballast loss factor :math:`[-]`.
-    fresb : list of float
+    fresb : list[float], default=[0.0, 0.0]
         Vertical/lateral ballast resonance frequencies :math:`[Hz]`. These frequencies are needed
         for calculating the viscous damping coefficients if they are not provided. Lateral value can
         be set to zero when lateral rail deflections are omitted.
-    db : list of float
+    db : list[float], default=[0.0, 0.0]
         Vertical/lateral viscous damping coefficient (per meter) :math:`[Ns/m]`. Lateral value can
         be set to zero when lateral rail deflections are omitted.
     """
 
-    sb = List(Float(), default_value=[0.0, 0.0], maxlen=2)
-    etab = Float()
-    fresb = List(Float(), default_value=[0.0, 0.0], maxlen=2)
-    db = List(Float(), default_value=[0.0, 0.0], maxlen=2)
+    sb: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    etab: float
+    fresb: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    db: list[float] = field(default_factory=lambda: [0.0, 0.0])
 
 
-class Wheel(HasTraits):
+@dataclass(kw_only=True)
+class Wheel:
     r"""Wheel Class.
 
     Contains the properties of a wheel.
 
     Attributes
     ----------
-    w_geo_cross_sec : list of tuple of float
+    w_geo_cross_sec : list[tuple[float, float]]
         Wheel cross-sectional geometry coordinates (y-z plane) :math:`[m]`.
         TODO: Define coordinate system
     w_prof : str
         Wheel running surface profile.
-    w_geo : list of tuple of float
+    w_geo : list[tuple[float, float]]
         Wheel geometry coordinates (x-y plane) :math:`[m]`.
         TODO: Define coordinate system
     mw : float
@@ -268,41 +280,43 @@ class Wheel(HasTraits):
         Wheel radius from the axis of rotation to the contact point :math:`[m]`.
     """
 
-    w_geo_cross_sec = List(Tuple(Float(), Float()))
-    w_prof = Unicode()
-    w_geo = List(Tuple(Float(), Float()))
-    mw = Float()
-    mw_red = Float()
-    rw = Float()
+    w_geo_cross_sec: list[tuple[float, float]]
+    w_prof: str
+    w_geo: list[tuple[float, float]]
+    mw: float
+    mw_red: float
+    rw: float
 
 
-class WheelRoughness(HasTraits):
+@dataclass(kw_only=True)
+class WheelRoughness:
     r"""Wheel Roughness Class.
 
     Contains a wheel roughness spectrum in frequency domain.
 
     Attributes
     ----------
-    w_rough : tuple of two lists of float
+    w_rough : tuple[list[float], list[float]]
         Wheel roughness spectrum :math:`[f, m]`.
     """
 
-    w_rough = Tuple(List(Float()), List(Float()))
+    w_rough: tuple[list[float], list[float]]
 
 
-class WheelGreensfunc(HasTraits):
+@dataclass(kw_only=True)
+class WheelGreensfunc:
     r"""Wheel Greens Function Class.
 
     Contains the Green's function of a wheel.
 
     Attributes
     ----------
-    w_gf : numpy.ndarray
+    w_gf : ndarray
         Green's function data. Contains the response of the wheel to a unit impulse at
         multiple points :math:`[m/N]`.
-    w_gf_freq : numpy.ndarray
+    w_gf_freq : ndarray
         Frequency values of the Green's function :math:`[Hz]`.
     """
 
-    w_gf = Array()
-    w_gf_freq = Array()
+    w_gf: ndarray
+    w_gf_freq: ndarray
