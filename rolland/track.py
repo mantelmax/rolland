@@ -17,24 +17,21 @@
     ArrangedBallastedSingleRailTrack
 """
 
-import abc
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 from decimal import Decimal
 
-from traitlets import Dict, Float, Instance, Integer, Tuple
-
-from .abstract_traits import ABCHasTraits
 from .arrangement import Arrangement
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper
-from .observing import observe
+from .observing import observable, observe
 
 
-class Track(ABCHasTraits):
+class Track(ABC):
     r"""Abstract base class for track classes."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_track(self):
         """Validate the track configuration."""
-
 
 class SingleRailTrack(Track):
     r"""Abstract base class for single rail track classes.
@@ -45,18 +42,18 @@ class SingleRailTrack(Track):
         Rail instance.
     """
 
-    rail = Instance(Rail)
+    rail: Rail
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_single_rail_track(self):
         """Validate the single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class SlabSingleRailTrack(SingleRailTrack):
     r"""Abstract base class for slab single rail track classes.
 
-    Slab mass is set to a very large number to avoid displacement in order to avoid
-    displacement and simulate a rigid slab.
+    Slab mass is set to a very large number to avoid displacement and simulate a rigid slab.
 
     Attributes
     ----------
@@ -66,18 +63,14 @@ class SlabSingleRailTrack(SingleRailTrack):
         Slab instance.
     """
 
-    slab = Slab()
+    slab: Slab = field(default_factory=lambda: Slab(ms=1e20))
 
-    def __init__(self, *args, **kwargs):
-        # Set the mass of the slab to a very large number to avoid displacement
-        super().__init__(*args, **kwargs)
-        self.slab.ms = 1e20
-
-    @abc.abstractmethod
+    @abstractmethod
     def validate_slab_single_rail_track(self):
         """Validate the slab single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class ContSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Single rail slab track with continuous support.
 
@@ -104,7 +97,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
         Slab instance.
     pad : ContPad
         Continuous pad instance.
-    l_track : float
+    l_track : float, default=100.0
         Track length :math:`[m]`. (May change slightly after discretization.
         The inclusion of boundary and calculation domain is required).
 
@@ -121,8 +114,8 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     ...
     """
 
-    pad = Instance(ContPad)
-    l_track = Float(default_value=100.0)
+    pad: ContPad
+    l_track: float = field(default=100.0)
 
     def validate_track(self):
         """Validate the track configuration."""
@@ -134,6 +127,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
         """Validate the slab single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Abstract base class for discrete slab single rail track classes.
 
@@ -147,15 +141,15 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
         Slab instance.
     pad : DiscrPad
         Discrete pad instance.
-    mount_prop : dict
+    mount_prop : dict[float, tuple[DiscrPad, None, None]] 
         Dictionary for discrete mounting positions (x-> (Pad, None)).
     """
 
-    pad = Instance(DiscrPad)
+    pad: DiscrPad
 
     # Dictionary for discrete mounting positions (x-> (Pad)).
     # May have nonuniform properties.
-    mount_prop = Dict(value_trait=Float(), key_trait=Tuple(DiscrPad, None, None))
+    mount_prop: dict[float, tuple[DiscrPad, None, None]]
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -165,11 +159,13 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_discr_slab_single_rail_track(self):
         """Validate the discrete slab single rail configuration."""
 
 
+@observable
+@dataclass(kw_only=True)
 class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     r"""Single rail slab track with simple periodic support.
 
@@ -195,13 +191,13 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         Slab instance.
     pad : DiscrPad
         Discrete pad instance.
-    distance : float
+    distance : float, default=0.6
         Distance between mounting positions.
-    num_mount : int
+    num_mount : int, default=100
         Number of mounting positions.
-    mount_prop : dict
+    mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, None)).
-    l_track : float
+    l_track : float, default=100.0
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
 
@@ -223,8 +219,8 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...
     """
 
-    distance = Float(default_value=0.6)
-    num_mount = Integer(default_value=100)
+    distance: float = field(default=0.6)
+    num_mount: int = field(default=100)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -252,6 +248,8 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         """Validate the discrete slab single rail configuration."""
 
 
+@observable
+@dataclass(kw_only=True)
 class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     """Single rail slab track with varying periodic support.
 
@@ -280,11 +278,11 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         Arrangement instance containing multiple pads.
     distance : Arrangement
         Arrangement instance containing multiple distances.
-    num_mount : int
+    num_mount : int, default=100
         Number of mounting positions.
-    mount_prop : dict
+    mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, None)).
-    l_track : float
+    l_track : float, default=100.0
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
 
@@ -310,12 +308,12 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...
     """
 
-    pad = Instance(Arrangement)
-    distance = Instance(Arrangement)
-    num_mount = Integer(default_value=100)
+    pad: Arrangement
+    distance: Arrangement
+    num_mount: int = 100
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self, *args, **kwargs):
+        super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
     @observe('num_mount', 'distance', 'pad')
@@ -348,13 +346,18 @@ class BallastedSingleRailTrack(SingleRailTrack):
     ----------
     rail : Rail
         Rail instance.
+    ballast : Ballast
+        Ballast instance.
     """
 
-    @abc.abstractmethod
+    ballast: Ballast
+
+    @abstractmethod
     def validate_ballasted_single_rail_track(self):
         """Validate the ballasted single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     r"""Single rail slab track with ballasted support.
 
@@ -384,7 +387,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         Slab instance.
     ballast : Ballast
         Ballast instance.
-    l_track : float
+    l_track : float, default=100.0
         Track length :math:`[m]`. (May change slightly after discretization.
         The inclusion of boundary and calculation domain is required).
 
@@ -400,10 +403,9 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     ...
     """
 
-    pad = Instance(ContPad)
-    slab = Instance(Slab)
-    ballast = Instance(Ballast)
-    l_track = Float(default_value=100.0)
+    pad: ContPad
+    slab: Slab
+    l_track: float = 100.0
 
     def validate_track(self):
         """Validate the track configuration."""
@@ -415,6 +417,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         """Validate the ballasted single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
     """Abstract base class for discrete ballasted single rail track classes.
 
@@ -426,12 +429,12 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
         Rail instance.
     ballast : Ballast
         Ballast instance.
-    mount_prop : dict
+    mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
     """
 
     # Pads and sleepers may have nonuniform properties Dictionary (x-> (Pad, Sleeper))
-    mount_prop = Dict(value_trait=Float(), key_trait=Tuple(DiscrPad, Sleeper, Ballast))
+    mount_prop: dict[float, tuple[DiscrPad, None, None]]
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -441,11 +444,13 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_discr_ballasted_single_rail_track(self):
         """Validate the discrete ballasted single rail configuration."""
 
 
+@observable
+@dataclass(kw_only=True)
 class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     """Single rail ballasted track with simple periodic support.
 
@@ -476,9 +481,9 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Continuous pad instance.
     sleeper : Instance of :class:`~rolland.components.sleeper` class
         Sleeper instance.
-    distance : float
+    distance : float, default=0.6
         Distance between mounting positions.
-    num_mount : int
+    num_mount : int, default=100
         Number of mounting positions.
     mount_prop : dict
         Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
@@ -503,14 +508,14 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...     distance=distance)
     """
 
-    sleeper = Instance(Sleeper)
-    pad = Instance(DiscrPad)
-    ballast = Instance(Ballast)
-    distance = Float(default_value=0.6)
-    num_mount = Integer(default_value=100)
+    sleeper: Sleeper
+    pad: DiscrPad
+    ballast: Ballast
+    distance: float = field(default=0.6)
+    num_mount: int = field(default=100)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self, *args, **kwargs):
+        super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
     @observe('num_mount', 'distance', 'pad', 'sleeper')
@@ -536,6 +541,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         """Validate the discrete ballasted single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     """Single rail ballasted track with varying periodic support.
 
@@ -567,7 +573,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Arrangement instance containing multiple sleepers.
     distance : Arrangement
         Arrangement instance containing multiple distances.
-    num_mount : int
+    num_mount : int, default=100
         Number of mounting positions.
     mount_prop : dict
         Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
@@ -597,14 +603,14 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...     distance=distance)
     """
 
-    sleeper = Instance(Arrangement)
-    pad = Instance(Arrangement)
-    ballast = Instance(Arrangement)
-    distance = Instance(Arrangement)
-    num_mount = Integer(default_value=100)
+    sleeper: Arrangement
+    pad: Arrangement
+    ballast: Arrangement
+    distance: Arrangement
+    num_mount: int = field(default=100)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self, *args, **kwargs):
+        super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
     #@observe('num_mount', 'distance', 'pad', 'sleeper', 'ballast')
