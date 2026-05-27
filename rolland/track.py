@@ -141,7 +141,7 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
         Slab instance.
     pad : DiscrPad
         Discrete pad instance.
-    mount_prop : dict[float, tuple[DiscrPad, None, None]] 
+    mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, None)).
     """
 
