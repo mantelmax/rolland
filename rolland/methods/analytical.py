@@ -16,8 +16,8 @@ from numpy import array, exp, eye, lib, linalg, newaxis, pi, real, sqrt, squeeze
 from traitlets import Float, Instance, List, Union, observe
 from traittypes import Array
 
+from rolland.abstract_traits import ABCHasTraits
 from rolland.track import (
-    ABCHasTraits,
     ContBallastedSingleRailTrack,
     ContSlabSingleRailTrack,
     DiscrBallastedSingleRailTrack,
