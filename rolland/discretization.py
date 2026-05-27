@@ -9,14 +9,13 @@
     DiscretizationEBBVerticTimeDepend
 """
 
-import abc
 import warnings
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from numpy import linspace, ones, zeros
 from scipy.sparse import SparseEfficiencyWarning, csc_matrix, diags, eye
-from traitlets import Float, Instance
 
-from .abstract_traits import ABCHasTraits
 from .boundary import PMLRailDampVertic
 from .track import (
     ArrangedBallastedSingleRailTrack,
@@ -29,14 +28,15 @@ from .track import (
 )
 
 
-class Discretization(ABCHasTraits):
+class Discretization(ABC):
     r"""Abstract base class for discretization classes."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_discretization(self):
         """Validate the discretization."""
 
 
+@dataclass(kw_only=True)
 class DiscretizationEBBVertic(Discretization):
     r"""Abstract base class for FDM discretization according to :cite:t:`stampka2022a`.
 
@@ -47,11 +47,11 @@ class DiscretizationEBBVertic(Discretization):
     ----------
     track : Track
         Track instance.
-    dt : float
+    dt : float, default=2e-5
         Step size in time :math:`[s]`.
-    req_simt : float
+    req_simt : float, default=0.4
         Requested simulation time :math:`[s]`.
-    bx : float
+    bx : float, default=1.0
         Stability coefficient for dx calculation (must be :math:`b_x \geq 1`) :math:`[-]`.
     nt : int
         Number of time steps :math:`[-]`.
@@ -77,11 +77,11 @@ class DiscretizationEBBVertic(Discretization):
         Coefficient matrix C.
     """
 
-    track = Instance(Track)
-    bound = Instance(PMLRailDampVertic)
-    dt = Float(default_value=2e-5)
-    req_simt = Float(default_value=0.4)
-    bx = Float(default_value=1.0)
+    track: Track
+    bound: PMLRailDampVertic
+    dt: float = 2e-5
+    req_simt: float = 0.4
+    bx: float = 1.0
 
     def calc_grid(self):
         """Calculate grid parameters."""
@@ -219,7 +219,7 @@ class DiscretizationEBBVertic(Discretization):
         self.C[self.nx:2 * self.nx, 0:self.nx] = C21
         self.C[self.nx:2 * self.nx, self.nx:2 * self.nx] = C22
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_discretization_stampka(self):
         """Validate the discretization according to Stampka."""
 

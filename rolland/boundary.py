@@ -6,10 +6,11 @@
     PMLRailDampVertic
 """
 
-from traitlets import Float, HasTraits
+from dataclasses import dataclass
 
 
-class PMLRailDampVertic(HasTraits):
+@dataclass
+class PMLRailDampVertic:
     r"""Calculate the boundary domain properties according to :cite:t:`stampka2022a`.
 
     A perfectly matched layer (PML) method is used which increases the rail damping
@@ -17,14 +18,14 @@ class PMLRailDampVertic(HasTraits):
 
     Attributes
     ----------
-    alpha : float
+    alpha : float, default=7.0
         Damping exponent :math:`[-]`.
-    l_bound : float
+    l_bound : float, default=33.0
         Length of the boundary domain (single sided) :math:`[m]`.
     """
 
-    alpha = Float(default_value=7)
-    l_bound = Float(default_value=33.0)
+    alpha: float = 7.0
+    l_bound: float = 33.0
 
     def pml(self, drbc, xbc):
         """Exponential increasing rail damping, added to dr."""

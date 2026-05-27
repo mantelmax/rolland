@@ -275,8 +275,6 @@ class TDR(RollandPP):
     tdr: ndarray = field(default_factory=lambda: array([]))
     filter: str | None = None
     freq: ndarray = field(default_factory=lambda: array([]))
-    ind_tdr: list[int]
-    x_tdr: ndarray = field(default_factory=lambda: array([]))
 
     def __post_init__(self):
         """Initialize TDR and calculate TDR values."""
