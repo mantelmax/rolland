@@ -313,6 +313,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     num_mount: int = 100
 
     def __post_init__(self, *args, **kwargs):
+        """post_init method to calculate mounting properties after initialization."""
         super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
@@ -515,6 +516,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     num_mount: int = field(default=100)
 
     def __post_init__(self, *args, **kwargs):
+        """post_init method to calculate mounting properties after initialization."""
         super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
@@ -610,6 +612,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     num_mount: int = field(default=100)
 
     def __post_init__(self, *args, **kwargs):
+        """post_init method to calculate mounting properties after initialization."""
         super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
