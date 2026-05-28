@@ -150,7 +150,7 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
 
     # Dictionary for discrete mounting positions (x-> (Pad)).
     # May have nonuniform properties.
-    mount_prop: dict[float, tuple[DiscrPad, None, None]]
+    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict) #
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -220,11 +220,11 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...
     """
 
-    distance: float = field(default=0.6)
-    num_mount: int = field(default=100)
+    distance: float = 0.6
+    num_mount: int = 100
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self, *args, **kwargs):
+        """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
     @observe('num_mount', 'distance', 'pad')
@@ -315,7 +315,6 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
-        super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
     @observe('num_mount', 'distance', 'pad')
@@ -341,6 +340,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         """Validate the discrete slab single rail configuration."""
 
 
+@dataclass(kw_only=True)
 class BallastedSingleRailTrack(SingleRailTrack):
     r"""Abstract base class for ballasted single rail track classes.
 
@@ -436,7 +436,7 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
     """
 
     # Pads and sleepers may have nonuniform properties Dictionary (x-> (Pad, Sleeper))
-    mount_prop: dict[float, tuple[DiscrPad, None, None]]
+    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict)
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -518,7 +518,6 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
-        super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
     @observe('num_mount', 'distance', 'pad', 'sleeper')
@@ -614,7 +613,6 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
-        super().__post_init__(*args, **kwargs)
         self.calc_mount_prop()
 
     #@observe('num_mount', 'distance', 'pad', 'sleeper', 'ballast')

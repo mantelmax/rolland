@@ -134,6 +134,7 @@ class AnalyticPP(PostProcessing):
         return self.vb / (self.results.omega * 1j)
 
 
+@dataclass(kw_only=True)
 class RollandPP(PostProcessing):
     r"""Rolland postprocessing base class.
 
@@ -149,21 +150,9 @@ class RollandPP(PostProcessing):
         Maximum frequency for response calculation :math:`[Hz]`.
     """
 
-    def __init__(self, results: Deflection, f_min: float = 100.0, f_max: float = 3000.0):
-        """Initialize RollandPP.
-
-        Parameters
-        ----------
-        results : Deflection
-            Instance of the Deflection class containing the results.
-        f_min : float, default=100.0
-            Minimum frequency for response calculation.
-        f_max : float, default=3000.0
-            Maximum frequency for response calculation.
-        """
-        self.results = results
-        self.f_min = f_min
-        self.f_max = f_max
+    results: Deflection
+    f_min: float = 100.0
+    f_max: float = 3000.0
 
     def validate_postprocessing(self):
         """Validate the postprocessing methods."""

@@ -145,7 +145,7 @@ class DiscrPad:
     """
 
     sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    wdthp: float
+    wdthp: float = 0.0
     etap: float
     fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
     dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
@@ -197,10 +197,10 @@ class Sleeper:
         Sleeper width in x-direction :math:`[m]`.
     """
 
-    ms: float
-    Bs: float
-    ls: float
-    wdths: float
+    ms: float = 0.0
+    Bs: float = 0.0
+    ls: float = 0.0
+    wdths: float = 0.0
 
 
 @dataclass(kw_only=True)
@@ -218,7 +218,7 @@ class Slab:
     """
 
     ms: float
-    ls: float
+    ls: float = 0.0
 
 
 @dataclass(kw_only=True)
@@ -250,7 +250,7 @@ class Ballast:
     """
 
     sb: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    etab: float
+    etab: float = 0.0
     fresb: list[float] = field(default_factory=lambda: [0.0, 0.0])
     db: list[float] = field(default_factory=lambda: [0.0, 0.0])
 

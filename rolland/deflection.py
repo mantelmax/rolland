@@ -34,7 +34,8 @@ class Deflection(ABC):
     excit: Excitation
     track: Track = field(init=False)
 
-    def __init__(self, *args, **kwargs):
+    def __post_init__(self, *args, **kwargs):
+        """post_init method to set track attribute after initialization."""
         self.track = self.discr.track
 
     @abstractmethod
