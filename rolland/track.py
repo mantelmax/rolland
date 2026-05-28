@@ -33,6 +33,7 @@ class Track(ABC):
     def validate_track(self):
         """Validate the track configuration."""
 
+@dataclass(kw_only=True)
 class SingleRailTrack(Track):
     r"""Abstract base class for single rail track classes.
 
