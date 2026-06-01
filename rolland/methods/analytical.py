@@ -10,14 +10,13 @@
     TSDiscr1LSupp
     TSDiscr2LSupp
 """
-import abc
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 
-from numpy import array, exp, eye, lib, linalg, newaxis, pi, real, sqrt, squeeze, zeros
-from traitlets import Float, Instance, List, Union, observe
-from traittypes import Array
+from numpy import array, exp, eye, lib, linalg, ndarray, newaxis, pi, real, sqrt, squeeze, zeros
 
+from rolland.observing import observable, observe
 from rolland.track import (
-    ABCHasTraits,
     ContBallastedSingleRailTrack,
     ContSlabSingleRailTrack,
     DiscrBallastedSingleRailTrack,
@@ -25,7 +24,9 @@ from rolland.track import (
 )
 
 
-class AnalyticalMethods(ABCHasTraits):
+@observable
+@dataclass(kw_only=True)
+class AnalyticalMethods(ABC):
     r"""Abstract base class for analytical methods.
 
     Attributes
@@ -34,30 +35,22 @@ class AnalyticalMethods(ABCHasTraits):
         Excitation frequencies :math:`[Hz]`.
     force : numpy.ndarray
         Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float or list
+    x : float | list, default = 0.0
         Distances to the excitation point :math:`[m]`.
-    x_excit : numpy.ndarray
+    x_excit : float, default = 0.0
         Excitation point :math:`[m]`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/N]`.
     """
 
-    f = Array()
-    force = Array(default_value=1.0)
-    x_excit = Float(default_value=0.0)
-    x = Union([Float(default_value=0.0), List()])
-    mobility = Array()
+    f: ndarray = field(default_factory=lambda: array([]))
+    force: ndarray = field(default_factory=lambda: array(1.0))
+    x_excit: float = 0.0
+    x: list | float = 0.0
+    mobility: ndarray = field(init=False, default_factory=lambda: array([]))
 
-    def __init__(self, **kwargs):
-        """
-        Initialize the AnalyticalMethods class.
-
-        Parameters
-        ----------
-        **kwargs : dict
-            Keyword arguments to initialize the class attributes.
-        """
-        super().__init__(**kwargs)
+    def __post_init__(self):
+        """Post-initialization to compute mobility."""
         self.compute_mobility()
 
     @observe('f', 'force', 'x_excit', 'x')
@@ -74,7 +67,7 @@ class AnalyticalMethods(ABCHasTraits):
         """Calculate the angular frequency."""
         return 2 * pi * self.f
 
-    @abc.abstractmethod
+    @abstractmethod
     def compute_mobility(self):
         """
         Compute the mobility of the track.
@@ -88,6 +81,7 @@ class AnalyticalMethods(ABCHasTraits):
         raise NotImplementedError(message)
 
 
+@dataclass(kw_only=True)
 class EBBCont1LSupp(AnalyticalMethods):
     r"""Method for continuous slab single rail track according to :cite:t:`thompson2024j`.
 
@@ -109,7 +103,7 @@ class EBBCont1LSupp(AnalyticalMethods):
         Track instance.
     """
 
-    track = Instance(ContSlabSingleRailTrack)
+    track: ContSlabSingleRailTrack
 
     def compute_mobility(self):
         r"""
@@ -163,6 +157,7 @@ class EBBCont1LSupp(AnalyticalMethods):
         self.mobility = squeeze(self.mobility) # Remove axes of length one
 
 
+@dataclass(kw_only=True)
 class EBBCont2LSupp(AnalyticalMethods):
     r"""Method for continuous ballasted single rail track according to :cite:t:`thompson2024j`.
 
@@ -188,7 +183,7 @@ class EBBCont2LSupp(AnalyticalMethods):
         Mobility matrix :math:`[m/N]`.
     """
 
-    track = Instance(ContBallastedSingleRailTrack)
+    track: ContBallastedSingleRailTrack
 
     def compute_mobility(self):
         r"""
@@ -268,7 +263,7 @@ class TBDiscr(AnalyticalMethods):
         Excitation point :math:`[m]`.
     """
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_method(self):
         """Validate method."""
 
@@ -405,6 +400,7 @@ class TBDiscr(AnalyticalMethods):
         self.mobility = squeeze(self.mobility)  # Remove axes of length one
 
 
+@dataclass(kw_only=True)
 class TSDiscr1LSupp(TBDiscr):
     r"""Method for discrete slab track according to :cite:t:`thompson2024j` and :cite:t:`heckl1995`.
 
@@ -436,7 +432,7 @@ class TSDiscr1LSupp(TBDiscr):
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     """
 
-    track = Instance(DiscrSlabSingleRailTrack)
+    track: DiscrSlabSingleRailTrack
 
     def validate_method(self):
         """Validate method."""
@@ -456,6 +452,7 @@ class TSDiscr1LSupp(TBDiscr):
         self.compute_mobility_common(self.track, self.track.slab.ms, 1e20, 0)
 
 
+@dataclass(kw_only=True)
 class TSDiscr2LSupp(TBDiscr):
     r"""Method for discrete ballasted track according to :cite:t:`thompson2024j`.
 
@@ -491,7 +488,7 @@ class TSDiscr2LSupp(TBDiscr):
         Resonance frequency rail <--> slab :math:`[Hz]`.
     """
 
-    track = Instance(DiscrBallastedSingleRailTrack)
+    track: DiscrBallastedSingleRailTrack
 
     def validate_method(self):
         """Validate method."""

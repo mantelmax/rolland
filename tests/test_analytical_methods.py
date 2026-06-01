@@ -57,11 +57,11 @@ def tracks():
     return {
         'track_cont_slab': ContSlabSingleRailTrack(
             rail=UIC60,
-            pad=ContPad(sp=[300e6, 0], dp=[30000, 0]),
+            pad=ContPad(sp=[300e6, 0], dp=[30000, 0], etap=0.25),
         ),
         'track_cont_ball': ContBallastedSingleRailTrack(
             rail=UIC60,
-            pad=ContPad(sp=[300e6, 0], dp=[30000, 0]),
+            pad=ContPad(sp=[300e6, 0], dp=[30000, 0], etap=0.25),
             slab=Slab(ms=250),
             ballast=Ballast(sb=[100e6, 0], db=[80000, 0]),
         ),

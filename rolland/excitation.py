@@ -9,18 +9,16 @@
     MovingExcitation
 """
 
-import abc
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 from numpy import exp
-from traitlets import Float, List, Union
-
-from .abstract_traits import ABCHasTraits
 
 
-class Excitation(ABCHasTraits):
+class Excitation(ABC):
     """Abstract base class for excitation."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_excitation(self):
         """Validate excitation parameters."""
 
@@ -28,11 +26,12 @@ class Excitation(ABCHasTraits):
 class StationaryExcitation(Excitation):
     """Abstract base class for stationary excitation."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_stationary_excitation(self):
         """Validate stationary excitation parameters."""
 
 
+@dataclass(kw_only=True)
 class GaussianImpulse(StationaryExcitation):
     """Gaussian impulse excitation class.
 
@@ -41,17 +40,17 @@ class GaussianImpulse(StationaryExcitation):
 
     Attributes
     ----------
-    sigma : float
+    sigma : float, default=0.7e-4
         Pulse parameter (regulates pulse-time) :math:`[-]`.
-    a : float
+    a : float, default=0.5e2
         Pulse parameter (regulates amplitude) :math:`[s]`.
-    x_excit : float
+    x_excit : list | float, default=50.0
         Excitation position :math:`[m]`.
     """
 
-    sigma = Float(default_value=0.7e-4)
-    a = Float(default_value=0.5e2)
-    x_excit = Union([List(), Float(default_value=50.0)])
+    sigma: float = 0.7e-4
+    a: float = 0.5e2
+    x_excit: list | float = 50.0
 
     def validate_excitation(self):
         """Validate excitation parameters."""

@@ -4,13 +4,13 @@
 
 """The Rolland library: several classes for the implementation of rolling noise calculation."""
 
-from .abstract_traits import ABCHasStrictTraits, ABCHasTraits
 from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
 from .boundary import PMLRailDampVertic
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, WheelGreensfunc
 from .deflection import Deflection, DeflectionEBBVertic
 from .discretization import Discretization, DiscretizationEBBVerticConst
 from .excitation import Excitation, GaussianImpulse
+from .observing import observable, observe
 from .postprocessing import PostProcessing
 from .track import (
                     ArrangedBallastedSingleRailTrack,
@@ -19,7 +19,6 @@ from .track import (
                     ContSlabSingleRailTrack,
                     SimplePeriodicBallastedSingleRailTrack,
                     SimplePeriodicSlabSingleRailTrack,
-                    Track,
 )
 
 __all__ = ["Arrangement",
@@ -33,8 +32,8 @@ __all__ = ["Arrangement",
            "Sleeper",
            "Wheel",
            "WheelGreensfunc",
-           "ABCHasTraits",
-           "ABCHasStrictTraits",
+           "observe",
+           "observable",
            "DiscretizationEBBVerticConst",
            "Excitation",
            "ArrangedBallastedSingleRailTrack",
@@ -43,7 +42,6 @@ __all__ = ["Arrangement",
            "ContSlabSingleRailTrack",
            "SimplePeriodicBallastedSingleRailTrack",
            "SimplePeriodicSlabSingleRailTrack",
-           "Track",
            "PMLRailDampVertic",
            "Deflection",
            "DeflectionEBBVertic",
