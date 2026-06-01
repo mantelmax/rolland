@@ -19,7 +19,6 @@ from .track import (
                     ContSlabSingleRailTrack,
                     SimplePeriodicBallastedSingleRailTrack,
                     SimplePeriodicSlabSingleRailTrack,
-                    Track,
 )
 
 __all__ = ["Arrangement",
