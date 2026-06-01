@@ -30,8 +30,8 @@ class Track(ABC):
     r"""Abstract base class for track classes."""
 
     @abstractmethod
-    def validate_track(self):
-        """Validate the track configuration."""
+    def _abstract(self) -> None:
+        """Prevents instantiation of abstract classes."""
 
 @dataclass(kw_only=True)
 class SingleRailTrack(Track):
@@ -44,10 +44,6 @@ class SingleRailTrack(Track):
     """
 
     rail: Rail
-
-    @abstractmethod
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
 
 
 @dataclass(kw_only=True)
@@ -65,10 +61,6 @@ class SlabSingleRailTrack(SingleRailTrack):
     """
 
     slab: Slab = field(default_factory=lambda: Slab(ms=1e20))
-
-    @abstractmethod
-    def validate_slab_single_rail_track(self):
-        """Validate the slab single rail configuration."""
 
 
 @dataclass(kw_only=True)
@@ -118,14 +110,8 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     pad: ContPad
     l_track: float = field(default=100.0)
 
-    def validate_track(self):
-        """Validate the track configuration."""
-
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
-
-    def validate_slab_single_rail_track(self):
-        """Validate the slab single rail configuration."""
+    def _abstract(self) -> None:
+        pass
 
 
 @dataclass(kw_only=True)
@@ -159,10 +145,6 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
             p, s, b= self.mount_prop[x]
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
-
-    @abstractmethod
-    def validate_discr_slab_single_rail_track(self):
-        """Validate the discrete slab single rail configuration."""
 
 
 @observable
@@ -236,17 +218,8 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
             self.mount_prop[x] = (self.pad, None, None)
         self.l_track = max(self.mount_prop.keys())
 
-    def validate_track(self):
-        """Validate the track configuration."""
-
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
-
-    def validate_slab_single_rail_track(self):
-        """Validate the slab single rail configuration."""
-
-    def validate_discr_slab_single_rail_track(self):
-        """Validate the discrete slab single rail configuration."""
+    def _abstract(self) -> None:
+        pass
 
 
 @observable
@@ -327,17 +300,8 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
             x += Decimal(str(d))
         self.l_track = max(self.mount_prop.keys())
 
-    def validate_track(self):
-        """Validate the track configuration."""
-
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
-
-    def validate_slab_single_rail_track(self):
-        """Validate the slab single rail configuration."""
-
-    def validate_discr_slab_single_rail_track(self):
-        """Validate the discrete slab single rail configuration."""
+    def _abstract(self) -> None:
+        pass
 
 
 @dataclass(kw_only=True)
@@ -353,10 +317,6 @@ class BallastedSingleRailTrack(SingleRailTrack):
     """
 
     ballast: Ballast
-
-    @abstractmethod
-    def validate_ballasted_single_rail_track(self):
-        """Validate the ballasted single rail configuration."""
 
 
 @dataclass(kw_only=True)
@@ -409,14 +369,8 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     slab: Slab
     l_track: float = 100.0
 
-    def validate_track(self):
-        """Validate the track configuration."""
-
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
-
-    def validate_ballasted_single_rail_track(self):
-        """Validate the ballasted single rail configuration."""
+    def _abstract(self) -> None:
+        pass
 
 
 @dataclass(kw_only=True)
@@ -445,10 +399,6 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
             p, s, b = self.mount_prop[x]
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
-
-    @abstractmethod
-    def validate_discr_ballasted_single_rail_track(self):
-        """Validate the discrete ballasted single rail configuration."""
 
 
 @observable
@@ -530,17 +480,8 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             self.mount_prop[x] = (self.pad, self.sleeper, self.ballast)
         self.l_track = max(self.mount_prop.keys())
 
-    def validate_track(self):
-        """Validate the track configuration."""
-
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
-
-    def validate_ballasted_single_rail_track(self):
-        """Validate the ballasted single rail configuration."""
-
-    def validate_discr_ballasted_single_rail_track(self):
-        """Validate the discrete ballasted single rail configuration."""
+    def _abstract(self) -> None:
+        pass
 
 
 @dataclass(kw_only=True)
@@ -627,14 +568,5 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             x += Decimal(str(d))
         self.l_track = max(self.mount_prop.keys())
 
-    def validate_track(self):
-        """Validate the track configuration."""
-
-    def validate_single_rail_track(self):
-        """Validate the single rail configuration."""
-
-    def validate_ballasted_single_rail_track(self):
-        """Validate the ballasted single rail configuration."""
-
-    def validate_discr_ballasted_single_rail_track(self):
-        """Validate the discrete ballasted single rail configuration."""
+    def _abstract(self) -> None:
+        pass
