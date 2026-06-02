@@ -63,6 +63,7 @@ class SlabSingleRailTrack(SingleRailTrack):
     slab: Slab = field(default_factory=lambda: Slab(ms=1e20))
 
 
+@observable
 @dataclass(kw_only=True)
 class ContSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Single rail slab track with continuous support.
@@ -110,10 +111,20 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     pad: ContPad
     l_track: float = field(default=100.0)
 
+    def __post_init__(self, *args, **kwargs):
+        """Initialize observers for critical parameters."""
+
+    @observe('rail', 'pad', 'slab', 'l_track')
+    def _on_critical_change(self, change):
+        """Invalidate cached results when critical parameters change."""
+        if hasattr(self, '_cache'):
+            self._cache.clear()
+
     def _abstract(self) -> None:
         pass
 
 
+@observable
 @dataclass(kw_only=True)
 class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Abstract base class for discrete slab single rail track classes.
@@ -145,6 +156,12 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
             p, s, b= self.mount_prop[x]
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
+
+    @observe('rail', 'pad', 'slab', 'mount_prop')
+    def _on_critical_change(self, change):
+        """Invalidate cached results when critical parameters change."""
+        if hasattr(self, '_cache'):
+            self._cache.clear()
 
 
 @observable
@@ -304,6 +321,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         pass
 
 
+@observable
 @dataclass(kw_only=True)
 class BallastedSingleRailTrack(SingleRailTrack):
     r"""Abstract base class for ballasted single rail track classes.
@@ -318,7 +336,14 @@ class BallastedSingleRailTrack(SingleRailTrack):
 
     ballast: Ballast
 
+    @observe('rail', 'ballast')
+    def _on_critical_change(self, change):
+        """Invalidate cached results when critical parameters change."""
+        if hasattr(self, '_cache'):
+            self._cache.clear()
 
+
+@observable
 @dataclass(kw_only=True)
 class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     r"""Single rail slab track with ballasted support.
@@ -369,10 +394,20 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     slab: Slab
     l_track: float = 100.0
 
+    def __post_init__(self, *args, **kwargs):
+        """Initialize observers for critical parameters."""
+
+    @observe('rail', 'pad', 'slab', 'ballast', 'l_track')
+    def _on_critical_change(self, change):
+        """Invalidate cached results when critical parameters change."""
+        if hasattr(self, '_cache'):
+            self._cache.clear()
+
     def _abstract(self) -> None:
         pass
 
 
+@observable
 @dataclass(kw_only=True)
 class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
     """Abstract base class for discrete ballasted single rail track classes.
@@ -399,6 +434,12 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
             p, s, b = self.mount_prop[x]
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
+
+    @observe('rail', 'ballast', 'mount_prop')
+    def _on_critical_change(self, change):
+        """Invalidate cached results when critical parameters change."""
+        if hasattr(self, '_cache'):
+            self._cache.clear()
 
 
 @observable
@@ -556,7 +597,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
-    #@observe('num_mount', 'distance', 'pad', 'sleeper', 'ballast')
+    @observe('num_mount', 'distance', 'pad', 'sleeper', 'ballast')
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         x = Decimal(str(0))
@@ -567,6 +608,12 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             self.mount_prop[float(Decimal(str(x)))] = (p, s, b)
             x += Decimal(str(d))
         self.l_track = max(self.mount_prop.keys())
+
+    @observe('rail', 'ballast', 'sleeper', 'pad', 'distance', 'num_mount', 'mount_prop')
+    def _on_critical_change(self, change):
+        """Invalidate cached results when critical parameters change."""
+        if hasattr(self, '_cache'):
+            self._cache.clear()
 
     def _abstract(self) -> None:
         pass
