@@ -39,25 +39,25 @@ def tracks():
     return {
         'track_cont_slab': ContSlabSingleRailTrack(
             rail=UIC60,
-            pad=ContPad(sp=[300 * 10**6, 0], dp=[30000, 0], etap=0.25),
+            pad=ContPad(sp=[300 * 10**6, 0], dp=[30000, 0]),
             l_track=90,
         ),
         'track_cont_ball': ContBallastedSingleRailTrack(
             rail=UIC60,
-            pad=ContPad(sp=[300 * 10**6, 0], dp=[30000, 0], etap=0.25),
+            pad=ContPad(sp=[300 * 10**6, 0], dp=[30000, 0]),
             slab=Slab(ms=250),
             ballast=Ballast(sb=[100 * 10**6, 0], db=[80000, 0]),
             l_track=90,
         ),
         'track_discr_slab': SimplePeriodicSlabSingleRailTrack(
             rail=UIC60,
-            pad=DiscrPad(sp=[180 * 10**6, 0], dp=[30000, 0], etap=0.25),
+            pad=DiscrPad(sp=[180 * 10**6, 0], dp=[30000, 0]),
             num_mount=int(90/0.6),
             distance=0.6,
         ),
         'track_discr_ball': SimplePeriodicBallastedSingleRailTrack(
             rail=UIC60,
-            pad=DiscrPad(sp=[180 * 10**6, 0], dp=[18000, 0], etap=0.25),
+            pad=DiscrPad(sp=[180 * 10**6, 0], dp=[18000, 0]),
             sleeper=Sleeper(ms=150),
             ballast=Ballast(sb=[105 * 10**6, 0], db=[48000, 0]),
             num_mount=int(90/0.6),

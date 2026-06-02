@@ -23,6 +23,8 @@ classifiers = [
 dependencies = [
     "numpy>=1.24.0",
     "scipy>=1.10.0",
+    "traitlets>=5.0",
+    "traittypes>=0.2.0",
     "matplotlib>=3.5.0",
 ]
 
@@ -43,6 +45,7 @@ docs = [
     "sphinx-rtd-theme>=1.0",
     "sphinxawesome-theme",
     "sphinxcontrib-bibtex",
+    "autodoc-traits",
     "sphinx-design",
     "sphinx-docsearch",
 ]
