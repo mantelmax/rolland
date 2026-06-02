@@ -8,16 +8,16 @@
     RandomArrangement
 """
 
-import abc
 import random
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any
 
 from scipy.stats import truncnorm
-from traitlets import Any
-
-from .abstract_traits import ABCHasTraits
 
 
-class Arrangement(ABCHasTraits):
+@dataclass(kw_only=True)
+class Arrangement(ABC):
     r"""Abstract base class for the definition of non-uniform mounting properties.
 
     Attributes
@@ -26,9 +26,9 @@ class Arrangement(ABCHasTraits):
         Characteristic object or objects to repeat.
     """
 
-    item = Any()
+    item: Any
 
-    @abc.abstractmethod
+    @abstractmethod
     def generate(self, num_mount):
         """Generate count repetitions of objects."""
 

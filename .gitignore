@@ -6,3 +6,12 @@ __pycache__
 
 # macOS
 .DS_Store
+
+# Dokumentation
+docs/build/
+
+# created by vscode
+.vscode
+
+# private tests
+tests/sandbox/

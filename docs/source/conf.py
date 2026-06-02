@@ -27,7 +27,6 @@ extensions = [
     'sphinx.ext.mathjax',             # For LaTeX math rendering
     'sphinxcontrib.bibtex',           # Citation support
     'sphinx.ext.autosummary',         # Generate autodoc summaries
-    'autodoc_traits',                 # Support for traitlets
     'sphinx_design',                  # Design extension
     'myst_parser',                    # Markdown support
     'sphinx_docsearch',                # Docsearch extension
