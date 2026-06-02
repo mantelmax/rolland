@@ -146,7 +146,7 @@ class DiscrPad:
 
     sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
     wdthp: float = 0.0
-    etap: float
+    etap: float= 0
     fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
     dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
 
@@ -174,7 +174,7 @@ class ContPad:
     """
 
     sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    etap: float
+    etap: float= 0
     fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
     dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
 
