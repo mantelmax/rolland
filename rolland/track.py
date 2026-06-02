@@ -211,7 +211,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
     @observe('num_mount', 'distance', 'pad')
     def calc_mount_prop(self, change=None):
-        """"Calculate the mounting properties."""
+        """Calculate the mounting properties."""
         self.mount_prop = {}
         for _i in range(self.num_mount):
             x = float(Decimal(str(_i)) * Decimal(str(self.distance)))
