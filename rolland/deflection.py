@@ -7,19 +7,18 @@
     DeflectionEBBVertic
 """
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
+import abc
 
 from numpy import empty, linspace, zeros
 from scipy.sparse.linalg import splu
+from traitlets import Instance
 
+from .abstract_traits import ABCHasTraits
 from .discretization import Discretization
 from .excitation import Excitation
-from .track import Track
 
 
-@dataclass(kw_only=True)
-class Deflection(ABC):
+class Deflection(ABCHasTraits):
     r"""Abstract base class for deflection classes.
 
     Attributes
@@ -30,15 +29,14 @@ class Deflection(ABC):
         Discretization instance.
     """
 
-    discr: Discretization
-    excit: Excitation
-    track: Track = field(init=False)
+    discr = Instance(Discretization)
+    excit = Instance(Excitation)
 
-    def __post_init__(self, *args, **kwargs):
-        """post_init method to set track attribute after initialization."""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.track = self.discr.track
 
-    @abstractmethod
+    @abc.abstractmethod
     def validate_deflection(self):
         """Validate deflection."""
 
