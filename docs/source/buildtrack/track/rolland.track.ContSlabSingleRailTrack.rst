@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.track
 
-.. autoconfigurable:: ContSlabSingleRailTrack
+.. autoclass:: ContSlabSingleRailTrack
+   :show-inheritance:
+   :members:

@@ -7,7 +7,5 @@ sphinx_design
 myst_parser
 numpy
 scipy
-traitlets
-traittypes
 sphinx_docsearch
 matplotlib

@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.track
 
-.. autoconfigurable:: Track
+.. autoclass:: Track
+   :show-inheritance:
+   :members:

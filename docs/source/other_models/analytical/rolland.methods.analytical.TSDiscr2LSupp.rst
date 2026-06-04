@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.methods.analytical
 
-.. autoconfigurable:: TSDiscr2LSupp
+.. autoclass:: TSDiscr2LSupp
+   :show-inheritance:
+   :members:

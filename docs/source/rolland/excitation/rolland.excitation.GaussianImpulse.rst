@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.excitation
 
-.. autoconfigurable:: GaussianImpulse
+.. autoclass:: GaussianImpulse
+   :show-inheritance:
+   :members:

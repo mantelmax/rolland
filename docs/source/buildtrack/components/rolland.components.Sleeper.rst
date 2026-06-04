@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: Sleeper
+.. autoclass:: Sleeper
+   :show-inheritance:
+   :members:

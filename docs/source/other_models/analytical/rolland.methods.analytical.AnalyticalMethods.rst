@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.methods.analytical
 
-.. autoconfigurable:: AnalyticalMethods
+.. autoclass:: AnalyticalMethods
+   :show-inheritance:
+   :members:

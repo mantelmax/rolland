@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.track
 
-.. autoconfigurable:: SimplePeriodicSlabSingleRailTrack
+.. autoclass:: SimplePeriodicSlabSingleRailTrack
+   :show-inheritance:
+   :members:

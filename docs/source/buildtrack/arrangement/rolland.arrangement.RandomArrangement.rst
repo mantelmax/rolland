@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.arrangement
 
-.. autoconfigurable:: RandomArrangement
+.. autoclass:: RandomArrangement
+   :show-inheritance:
+   :members:

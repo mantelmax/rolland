@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.methods.analytical
 
-.. autoconfigurable:: TBDiscr
+.. autoclass:: TBDiscr
+   :show-inheritance:
+   :members:

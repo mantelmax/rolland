@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: WheelRoughness
+.. autoclass:: WheelRoughness
+   :show-inheritance:
+   :members:

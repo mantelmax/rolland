@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: ContPad
+.. autoclass:: ContPad
+   :show-inheritance:
+   :members:

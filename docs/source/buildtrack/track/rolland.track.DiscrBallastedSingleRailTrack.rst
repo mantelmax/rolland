@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.track
 
-.. autoconfigurable:: DiscrBallastedSingleRailTrack
+.. autoclass:: DiscrBallastedSingleRailTrack
+   :show-inheritance:
+   :members:

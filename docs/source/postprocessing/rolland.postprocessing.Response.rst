@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.postprocessing
 
-.. autoconfigurable:: Response
+.. autoclass:: Response
+   :show-inheritance:
+   :members:

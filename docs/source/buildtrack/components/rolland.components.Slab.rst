@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: Slab
+.. autoclass:: Slab
+   :show-inheritance:
+   :members:

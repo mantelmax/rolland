@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: DiscrPad
+.. autoclass:: DiscrPad
+   :show-inheritance:
+   :members:

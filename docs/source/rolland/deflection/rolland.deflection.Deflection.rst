@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.deflection
 
-.. autoconfigurable:: Deflection
+.. autoclass:: Deflection
+   :show-inheritance:
+   :members:

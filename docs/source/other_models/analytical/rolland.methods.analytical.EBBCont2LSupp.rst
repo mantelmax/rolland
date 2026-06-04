@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.methods.analytical
 
-.. autoconfigurable:: EBBCont2LSupp
+.. autoclass:: EBBCont2LSupp
+   :show-inheritance:
+   :members:

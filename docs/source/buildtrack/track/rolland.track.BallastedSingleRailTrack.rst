@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.track
 
-.. autoconfigurable:: BallastedSingleRailTrack
+.. autoclass:: BallastedSingleRailTrack
+   :show-inheritance:
+   :members:

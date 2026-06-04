@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: Ballast
+.. autoclass:: Ballast
+   :show-inheritance:
+   :members:

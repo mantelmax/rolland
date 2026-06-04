@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.excitation
 
-.. autoconfigurable:: MovingExcitation
+.. autoclass:: MovingExcitation
+   :show-inheritance:
+   :members:

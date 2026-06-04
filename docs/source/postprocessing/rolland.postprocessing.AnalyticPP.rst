@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.postprocessing
 
-.. autoconfigurable:: AnalyticPP
+.. autoclass:: AnalyticPP
+   :show-inheritance:
+   :members:

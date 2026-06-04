@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: RailRoughness
+.. autoclass:: RailRoughness
+   :show-inheritance:
+   :members:

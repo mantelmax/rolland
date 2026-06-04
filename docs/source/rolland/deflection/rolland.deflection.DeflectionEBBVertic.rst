@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.deflection
 
-.. autoconfigurable:: DeflectionEBBVertic
+.. autoclass:: DeflectionEBBVertic
+   :show-inheritance:
+   :members:

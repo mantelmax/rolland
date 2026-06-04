@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.discretization
 
-.. autoconfigurable:: Discretization
+.. autoclass:: Discretization
+   :show-inheritance:
+   :members:

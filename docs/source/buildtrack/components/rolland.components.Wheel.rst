@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: Wheel
+.. autoclass:: Wheel
+   :show-inheritance:
+   :members:

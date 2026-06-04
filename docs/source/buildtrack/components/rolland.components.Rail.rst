@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: Rail
+.. autoclass:: Rail
+   :show-inheritance:
+   :members:

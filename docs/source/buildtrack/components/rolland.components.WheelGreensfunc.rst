@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.components
 
-.. autoconfigurable:: WheelGreensfunc
+.. autoclass:: WheelGreensfunc
+   :show-inheritance:
+   :members:

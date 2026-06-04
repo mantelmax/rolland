@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.arrangement
 
-.. autoconfigurable:: PeriodicArrangement
+.. autoclass:: PeriodicArrangement
+   :show-inheritance:
+   :members:

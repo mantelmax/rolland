@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.postprocessing
 
-.. autoconfigurable:: TDR
+.. autoclass:: TDR
+   :show-inheritance:
+   :members:

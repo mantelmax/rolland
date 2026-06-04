@@ -3,4 +3,6 @@
 
 .. currentmodule:: rolland.discretization
 
-.. autoconfigurable:: DiscretizationEBBVerticConst
+.. autoclass:: DiscretizationEBBVerticConst
+   :show-inheritance:
+   :members:
