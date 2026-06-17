@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.methods.analytical
 
 .. autoclass:: AnalyticalMethods
-   :show-inheritance:
    :members:
+   :show-inheritance:

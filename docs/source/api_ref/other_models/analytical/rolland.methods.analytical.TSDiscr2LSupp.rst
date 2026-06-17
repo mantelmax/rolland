@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.methods.analytical
 
 .. autoclass:: TSDiscr2LSupp
-   :show-inheritance:
    :members:
+   :show-inheritance:

@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.postprocessing
 
 .. autoclass:: AnalyticPP
-   :show-inheritance:
    :members:
+   :show-inheritance:

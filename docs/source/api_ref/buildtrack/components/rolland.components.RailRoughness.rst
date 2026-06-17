@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: RailRoughness
-   :show-inheritance:
    :members:
+   :show-inheritance:

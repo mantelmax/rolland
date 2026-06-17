@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.arrangement
 
 .. autoclass:: RandomArrangement
-   :show-inheritance:
    :members:
+   :show-inheritance:

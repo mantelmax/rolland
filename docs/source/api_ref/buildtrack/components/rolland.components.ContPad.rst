@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: ContPad
-   :show-inheritance:
    :members:
+   :show-inheritance:

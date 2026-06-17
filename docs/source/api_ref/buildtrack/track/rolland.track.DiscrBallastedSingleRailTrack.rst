@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.track
 
 .. autoclass:: DiscrBallastedSingleRailTrack
-   :show-inheritance:
    :members:
+   :show-inheritance:

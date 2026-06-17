@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: Ballast
-   :show-inheritance:
    :members:
+   :show-inheritance:

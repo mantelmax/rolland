@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.excitation
 
 .. autoclass:: MovingExcitation
-   :show-inheritance:
    :members:
+   :show-inheritance:

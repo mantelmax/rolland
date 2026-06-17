@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.postprocessing
 
 .. autoclass:: TDR
-   :show-inheritance:
    :members:
+   :show-inheritance:

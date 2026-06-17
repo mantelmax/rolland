@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: Slab
-   :show-inheritance:
    :members:
+   :show-inheritance:

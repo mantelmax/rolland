@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.arrangement
 
 .. autoclass:: PeriodicArrangement
-   :show-inheritance:
    :members:
+   :show-inheritance:

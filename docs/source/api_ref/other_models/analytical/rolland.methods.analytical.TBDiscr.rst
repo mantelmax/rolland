@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.methods.analytical
 
 .. autoclass:: TBDiscr
-   :show-inheritance:
    :members:
+   :show-inheritance:

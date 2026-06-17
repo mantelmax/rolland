@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.postprocessing
 
 .. autoclass:: PostProcessing
-   :show-inheritance:
    :members:
+   :show-inheritance:

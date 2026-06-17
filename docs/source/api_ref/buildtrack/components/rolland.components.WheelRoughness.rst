@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: WheelRoughness
-   :show-inheritance:
    :members:
+   :show-inheritance:

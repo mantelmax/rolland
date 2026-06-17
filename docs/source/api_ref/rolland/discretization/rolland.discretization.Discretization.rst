@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.discretization
 
 .. autoclass:: Discretization
-   :show-inheritance:
    :members:
+   :show-inheritance:

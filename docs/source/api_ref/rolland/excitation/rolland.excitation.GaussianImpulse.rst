@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.excitation
 
 .. autoclass:: GaussianImpulse
-   :show-inheritance:
    :members:
+   :show-inheritance:

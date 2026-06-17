@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.track
 
 .. autoclass:: Track
-   :show-inheritance:
    :members:
+   :show-inheritance:

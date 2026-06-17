@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: Rail
-   :show-inheritance:
    :members:
+   :show-inheritance:

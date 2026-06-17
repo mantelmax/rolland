@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.deflection
 
 .. autoclass:: Deflection
-   :show-inheritance:
    :members:
+   :show-inheritance:

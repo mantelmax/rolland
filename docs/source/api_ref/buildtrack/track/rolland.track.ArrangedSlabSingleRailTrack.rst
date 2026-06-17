@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.track
 
 .. autoclass:: ArrangedSlabSingleRailTrack
-   :show-inheritance:
    :members:
+   :show-inheritance:

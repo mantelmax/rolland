@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: WheelGreensfunc
-   :show-inheritance:
    :members:
+   :show-inheritance:

@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.components
 
 .. autoclass:: DiscrPad
-   :show-inheritance:
    :members:
+   :show-inheritance:

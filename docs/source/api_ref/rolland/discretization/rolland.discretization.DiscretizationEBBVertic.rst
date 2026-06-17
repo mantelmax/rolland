@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.discretization
 
 .. autoclass:: DiscretizationEBBVertic
-   :show-inheritance:
    :members:
+   :show-inheritance:

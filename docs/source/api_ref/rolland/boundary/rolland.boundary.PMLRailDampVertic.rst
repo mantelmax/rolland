@@ -4,5 +4,5 @@
 .. currentmodule:: rolland.boundary
 
 .. autoclass:: PMLRailDampVertic
-   :show-inheritance:
    :members:
+   :show-inheritance:
