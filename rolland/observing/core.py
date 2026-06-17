@@ -8,6 +8,7 @@ This module provides:
 from __future__ import annotations
 
 import functools
+import inspect
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -182,6 +183,8 @@ def observable(cls: type[T]) -> type[T]:  # noqa: UP047
         original_init(self, *args, **kwargs)
         # Register observers after initialization
         _register_observers(self)
+
+    __init__.__signature__ = inspect.signature(original_init)
 
     # Override class methods
     cls.__init__ = __init__  # type: ignore[method-assign]
