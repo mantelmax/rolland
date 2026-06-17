@@ -144,11 +144,11 @@ class DiscrPad:
         to zero when lateral rail deflections are omitted.
     """
 
-    sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    sp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
     wdthp: float = 0.0
     etap: float= 0
-    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
+    dp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
 
 
 @dataclass(kw_only=True)
@@ -173,10 +173,10 @@ class ContPad:
         be set to zero when lateral rail deflections are omitted.
     """
 
-    sp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    sp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
     etap: float= 0
-    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    dp: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
+    dp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
 
 
 @dataclass(kw_only=True)
@@ -249,10 +249,10 @@ class Ballast:
         be set to zero when lateral rail deflections are omitted.
     """
 
-    sb: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    sb: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
     etab: float = 0.0
-    fresb: list[float] = field(default_factory=lambda: [0.0, 0.0])
-    db: list[float] = field(default_factory=lambda: [0.0, 0.0])
+    fresb: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
+    db: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
 
 
 @dataclass(kw_only=True)
