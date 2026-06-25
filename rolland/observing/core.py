@@ -7,6 +7,8 @@ This module provides:
 
 from __future__ import annotations
 
+import functools
+import inspect
 from collections.abc import Callable
 from typing import TYPE_CHECKING, Any, TypeVar
 
@@ -89,7 +91,7 @@ def _register_observers(self: Any) -> None:
     Scans all methods of the instance for the `__observes__` attribute
     and registers them in the `_observers` registry.
     """
-    self._observers = {}  # type: dict[str, list[Callable[[dict[str, Any]], None]]]
+    self._observers = {}  # type: ignore # type: dict[str, list[Callable[[dict[str, Any]], None]]]
     for method_name in dir(self):
         try:
             method = getattr(self, method_name)
@@ -174,12 +176,15 @@ def observable(cls: type[T]) -> type[T]:  # noqa: UP047
     # Save original __init__ if it exists
     original_init = cls.__init__
 
+    @functools.wraps(original_init) # dunder functions are not wrapped by default, need to preserve metadata manually
     def __init__(self: Any, *args: Any, **kwargs: Any) -> None:  # noqa: N807
         """Initialize instance and register observers."""
         # Call original __init__
         original_init(self, *args, **kwargs)
         # Register observers after initialization
         _register_observers(self)
+
+    __init__.__signature__ = inspect.signature(original_init)
 
     # Override class methods
     cls.__init__ = __init__  # type: ignore[method-assign]

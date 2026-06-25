@@ -43,11 +43,12 @@ class AnalyticalMethods(ABC):
         Calculated mobility of the track :math:`[m/N]`.
     """
 
-    f: ndarray = field(default_factory=lambda: array([]))
-    force: ndarray = field(default_factory=lambda: array(1.0))
+    f: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    force: ndarray = field(default_factory=lambda: array(1.0), metadata={"default_repr": "numpy.array([1.0])"})
     x_excit: float = 0.0
     x: list | float = 0.0
-    mobility: ndarray = field(init=False, default_factory=lambda: array([]))
+    mobility: ndarray = field(init=False, default_factory=lambda: array([]),
+                              metadata={"default_repr": "numpy.array([])"})
 
     def __post_init__(self):
         """Post-initialization to compute mobility."""

@@ -7,6 +7,7 @@
     DeflectionEBBVertic
 """
 
+import inspect
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
@@ -59,6 +60,31 @@ class DeflectionEBBVertic(Deflection):
     ind_excit : int
         Index of excitation point :math:`[-]`.
     """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the DeflectionFDMStampka class.
+
+        Parameters
+        ----------
+        *args : tuple
+            Variable length argument list.
+        **kwargs : dict
+            Arbitrary keyword arguments.
+
+        Attributes
+        ----------
+        deflection : numpy.ndarray
+            Array of calculated deflections with shape (2 * nx, nt + 1).
+        """
+        super().__init__(*args, **kwargs)
+        # Initialize starting values
+        self.calc_force()
+        defl = self.initialize_start_values()
+        # Calculate deflection
+        self.deflection = self.calc_deflection(defl)
+
+    __init__.__signature__ = inspect.signature(Deflection.__init__)
 
     def validate_deflection(self):
         """Validate deflection."""
@@ -149,26 +175,5 @@ class DeflectionEBBVertic(Deflection):
         return defl
 
 
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the DeflectionFDMStampka class.
 
-        Parameters
-        ----------
-        *args : tuple
-            Variable length argument list.
-        **kwargs : dict
-            Arbitrary keyword arguments.
-
-        Attributes
-        ----------
-        deflection : numpy.ndarray
-            Array of calculated deflections with shape (2 * nx, nt + 1).
-        """
-        super().__init__(*args, **kwargs)
-        # Initialize starting values
-        self.calc_force()
-        defl = self.initialize_start_values()
-        # Calculate deflection
-        self.deflection = self.calc_deflection(defl)
 

@@ -185,10 +185,10 @@ class Response(RollandPP):
 
     x_resp: list[float] | None = None
     ind_resp: list[int] | None = None
-    freq: ndarray = field(default_factory=lambda: array([]))
-    rez: ndarray = field(default_factory=lambda: array([]))
-    mob: ndarray = field(default_factory=lambda: array([]))
-    accel: ndarray = field(default_factory=lambda: array([]))
+    freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    rez: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    mob: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    accel: ndarray = field(default_factory=lambda: array([], metadata={"default_repr": "numpy.array([])"}))
 
     def __post_init__(self):
         """Initialize Response and calculate response quantities."""
@@ -261,9 +261,9 @@ class TDR(RollandPP):
         Frequency vector :math:`[Hz]`.
     """
 
-    tdr: ndarray = field(default_factory=lambda: array([]))
+    tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
     filter: str | None = None
-    freq: ndarray = field(default_factory=lambda: array([]))
+    freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
 
     def __post_init__(self):
         """Initialize TDR and calculate TDR values."""

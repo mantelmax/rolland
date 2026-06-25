@@ -56,11 +56,11 @@ class SlabSingleRailTrack(SingleRailTrack):
     ----------
     rail : Rail
         Rail instance.
-    slab : Slab
+    slab : Slab, default=Slab(ms=1e20)
         Slab instance.
     """
 
-    slab: Slab = field(default_factory=lambda: Slab(ms=1e20))
+    slab: Slab = field(default_factory=lambda: Slab(ms=1e20), metadata={'default_repr': 'Slab(ms=1e20)'})
 
 
 @observable
@@ -109,10 +109,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     """
 
     pad: ContPad
-    l_track: float = field(default=100.0)
-
-    def __post_init__(self, *args, **kwargs):
-        """Initialize observers for critical parameters."""
+    l_track: float = 100.0
 
     @observe('rail', 'pad', 'slab', 'l_track')
     def _on_critical_change(self, change):
@@ -147,7 +144,8 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
 
     # Dictionary for discrete mounting positions (x-> (Pad)).
     # May have nonuniform properties.
-    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict) #
+    # None values are placeholders
+    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict, metadata={"default_repr": "{}"})
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -425,7 +423,7 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
     """
 
     # Pads and sleepers may have nonuniform properties Dictionary (x-> (Pad, Sleeper))
-    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict)
+    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict, metadata={"default_repr": "{}"})
 
     def __repr__(self):
         """Represent mounting properties as string."""

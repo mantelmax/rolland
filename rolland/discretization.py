@@ -9,6 +9,7 @@
     DiscretizationEBBVerticTimeDepend
 """
 
+import inspect
 import warnings
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -287,6 +288,9 @@ class DiscretizationEBBVerticConst(DiscretizationEBBVertic):
         self.add_boundary_conditions()
         self.build_superstructure_vectors()
         self.build_matrix(self.vec_dr, self.vec_sp, self.vec_dp, self.vec_ms, self.vec_sb, self.vec_db)
+
+    # take signature from parent class for better documentation
+    __init__.__signature__ = inspect.signature(DiscretizationEBBVertic.__init__)
 
     def initialize_vectors(self):
         """Initialize the vectors."""
