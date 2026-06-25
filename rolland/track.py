@@ -23,7 +23,6 @@ from decimal import Decimal
 
 from .arrangement import Arrangement
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper
-from .observing import observable, observe
 
 
 class Track(ABC):
@@ -63,7 +62,6 @@ class SlabSingleRailTrack(SingleRailTrack):
     slab: Slab = field(default_factory=lambda: Slab(ms=1e20), metadata={'default_repr': 'Slab(ms=1e20)'})
 
 
-@observable
 @dataclass(kw_only=True)
 class ContSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Single rail slab track with continuous support.
@@ -111,7 +109,6 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     pad: ContPad
     l_track: float = 100.0
 
-    @observe('rail', 'pad', 'slab', 'l_track')
     def _on_critical_change(self, change):
         """Invalidate cached results when critical parameters change."""
         if hasattr(self, '_cache'):
@@ -121,7 +118,6 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
         pass
 
 
-@observable
 @dataclass(kw_only=True)
 class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Abstract base class for discrete slab single rail track classes.
@@ -155,14 +151,12 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
 
-    @observe('rail', 'pad', 'slab', 'mount_prop')
     def _on_critical_change(self, change):
         """Invalidate cached results when critical parameters change."""
         if hasattr(self, '_cache'):
             self._cache.clear()
 
 
-@observable
 @dataclass(kw_only=True)
 class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     r"""Single rail slab track with simple periodic support.
@@ -224,7 +218,6 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
-    @observe('num_mount', 'distance', 'pad')
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         self.mount_prop = {}
@@ -237,7 +230,6 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         pass
 
 
-@observable
 @dataclass(kw_only=True)
 class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     """Single rail slab track with varying periodic support.
@@ -305,7 +297,6 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
-    @observe('num_mount', 'distance', 'pad')
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         x = Decimal(str(0))
@@ -319,7 +310,6 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         pass
 
 
-@observable
 @dataclass(kw_only=True)
 class BallastedSingleRailTrack(SingleRailTrack):
     r"""Abstract base class for ballasted single rail track classes.
@@ -334,14 +324,12 @@ class BallastedSingleRailTrack(SingleRailTrack):
 
     ballast: Ballast
 
-    @observe('rail', 'ballast')
     def _on_critical_change(self, change):
         """Invalidate cached results when critical parameters change."""
         if hasattr(self, '_cache'):
             self._cache.clear()
 
 
-@observable
 @dataclass(kw_only=True)
 class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     r"""Single rail slab track with ballasted support.
@@ -392,10 +380,6 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     slab: Slab
     l_track: float = 100.0
 
-    def __post_init__(self, *args, **kwargs):
-        """Initialize observers for critical parameters."""
-
-    @observe('rail', 'pad', 'slab', 'ballast', 'l_track')
     def _on_critical_change(self, change):
         """Invalidate cached results when critical parameters change."""
         if hasattr(self, '_cache'):
@@ -405,7 +389,6 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         pass
 
 
-@observable
 @dataclass(kw_only=True)
 class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
     """Abstract base class for discrete ballasted single rail track classes.
@@ -433,14 +416,12 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
 
-    @observe('rail', 'ballast', 'mount_prop')
     def _on_critical_change(self, change):
         """Invalidate cached results when critical parameters change."""
         if hasattr(self, '_cache'):
             self._cache.clear()
 
 
-@observable
 @dataclass(kw_only=True)
 class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     """Single rail ballasted track with simple periodic support.
@@ -509,7 +490,6 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
-    @observe('num_mount', 'distance', 'pad', 'sleeper')
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         for _i in range(self.num_mount):
@@ -595,7 +575,6 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
-    @observe('num_mount', 'distance', 'pad', 'sleeper', 'ballast')
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         x = Decimal(str(0))
@@ -607,7 +586,6 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             x += Decimal(str(d))
         self.l_track = max(self.mount_prop.keys())
 
-    @observe('rail', 'ballast', 'sleeper', 'pad', 'distance', 'num_mount', 'mount_prop')
     def _on_critical_change(self, change):
         """Invalidate cached results when critical parameters change."""
         if hasattr(self, '_cache'):

@@ -15,7 +15,6 @@ from dataclasses import dataclass, field
 
 from numpy import array, exp, eye, lib, linalg, ndarray, newaxis, pi, real, sqrt, squeeze, zeros
 
-from rolland.observing import observable, observe
 from rolland.track import (
     ContBallastedSingleRailTrack,
     ContSlabSingleRailTrack,
@@ -24,7 +23,6 @@ from rolland.track import (
 )
 
 
-@observable
 @dataclass(kw_only=True)
 class AnalyticalMethods(ABC):
     r"""Abstract base class for analytical methods.
@@ -54,11 +52,9 @@ class AnalyticalMethods(ABC):
         """Post-initialization to compute mobility."""
         self.compute_mobility()
 
-    @observe('f', 'force', 'x_excit', 'x')
     def _update_on_change(self, change):
         self.compute_mobility()
 
-    @observe('x_excit')
     def _set_default_x(self, change):
         if self.x == 0.0:
             self.x = self.x_excit

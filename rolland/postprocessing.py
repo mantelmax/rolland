@@ -188,16 +188,11 @@ class Response(RollandPP):
     freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
     rez: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
     mob: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
-    accel: ndarray = field(default_factory=lambda: array([], metadata={"default_repr": "numpy.array([])"}))
+    accel: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
 
     def __post_init__(self):
         """Initialize Response and calculate response quantities."""
         self.calculate_response()
-        #self.observe(self._on_results_change, names='results')
-
-    #@observe('results')
-    #def _on_results_change(self, change):
-    #    self.calculate_response()
 
     def calculate_response(self):
         """Calculate and store response quantities (Receptance, Mobility, Accelerance)."""
@@ -269,7 +264,6 @@ class TDR(RollandPP):
         """Initialize TDR and calculate TDR values."""
         self.find_tdr_points()
         self.calculate_tdr()
-        # self.observe(self._on_results_change, names='results')
 
     def find_tdr_points(self):
         """Find the corresponding measurement points depending on track type."""

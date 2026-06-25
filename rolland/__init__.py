@@ -10,7 +10,6 @@ from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, 
 from .deflection import Deflection, DeflectionEBBVertic
 from .discretization import Discretization, DiscretizationEBBVerticConst
 from .excitation import Excitation, GaussianImpulse
-from .observing import observable, observe
 from .postprocessing import PostProcessing
 from .track import (
                     ArrangedBallastedSingleRailTrack,
@@ -32,8 +31,6 @@ __all__ = ["Arrangement",
            "Sleeper",
            "Wheel",
            "WheelGreensfunc",
-           "observe",
-           "observable",
            "DiscretizationEBBVerticConst",
            "Excitation",
            "ArrangedBallastedSingleRailTrack",
