@@ -174,7 +174,7 @@ class ContPad:
     """
 
     sp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    etap: float= 0
+    etap: float = 0
     fresp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
     dp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
 
