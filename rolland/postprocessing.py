@@ -9,15 +9,13 @@
     Response
     TDR
 """
-import abc
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
-from numpy import array, convolve, ones, pi, rint, round, squeeze, where, zeros  # noqa: A004
+from numpy import array, convolve, ndarray, ones, pi, rint, round, squeeze, where, zeros  # noqa: A004
 from numpy.fft import fft, fftfreq
-from traitlets import Float, Instance, List, Unicode
-from traittypes import Array
 
-from .abstract_traits import ABCHasTraits
 from .deflection import Deflection
 from .methods import AnalyticalMethods
 from .track import (
@@ -26,10 +24,10 @@ from .track import (
 )
 
 
-class PostProcessing(ABCHasTraits):
+class PostProcessing(ABC):
     r"""Abstract base class for postprocessing classes."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_postprocessing(self):
         """Validate the postprocessing methods."""
 
@@ -107,7 +105,15 @@ class AnalyticPP(PostProcessing):
         Instance of the AnalyticalMethods class containing the results.
     """
 
-    results = Instance(AnalyticalMethods)
+    def __init__(self, results: AnalyticalMethods):
+        """Initialize AnalyticPP.
+
+        Parameters
+        ----------
+        results : AnalyticalMethods
+            Instance of the AnalyticalMethods class containing the results.
+        """
+        self.results = results
 
     def validate_postprocessing(self):
         """Validate the postprocessing methods."""
@@ -128,6 +134,7 @@ class AnalyticPP(PostProcessing):
         return self.vb / (self.results.omega * 1j)
 
 
+@dataclass(kw_only=True)
 class RollandPP(PostProcessing):
     r"""Rolland postprocessing base class.
 
@@ -143,14 +150,15 @@ class RollandPP(PostProcessing):
         Maximum frequency for response calculation :math:`[Hz]`.
     """
 
-    results = Instance(Deflection)
-    f_min = Float(default_value=100.0, min=0.0)
-    f_max = Float(default_value=3000.0, min=0.0)
+    results: Deflection
+    f_min: float = 100.0
+    f_max: float = 3000.0
 
     def validate_postprocessing(self):
         """Validate the postprocessing methods."""
 
 
+@dataclass(kw_only=True)
 class Response(RollandPP):
     r"""Postprocessing class for Rolland response quantities.
 
@@ -161,9 +169,9 @@ class Response(RollandPP):
     ----------
     results : Deflection
         Instance of the Deflection class containing the results.
-    x_resp : list of float
+    x_resp : list[float] | None
         List of response points in meters :math:`[m]` (default value is x_excit).
-    ind_resp : list of int
+    ind_resp : list[int] | None
         List of response indices (None if x_resp is provided).
     freq : numpy.ndarray
         Frequency vector :math:`[Hz]`.
@@ -175,21 +183,16 @@ class Response(RollandPP):
         Accelerance vector :math:`[m/Ns^2]`.
     """
 
-    x_resp = List(default_value=None, allow_none=True)
-    ind_resp = List(default_value=None, allow_none=True)
-    freq = Array()
-    rez = Array()
-    mob = Array()
-    accel = Array()
+    x_resp: list[float] | None = None
+    ind_resp: list[int] | None = None
+    freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    rez: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    mob: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    accel: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self):
+        """Initialize Response and calculate response quantities."""
         self.calculate_response()
-        #self.observe(self._on_results_change, names='results')
-
-    #@observe('results')
-    #def _on_results_change(self, change):
-    #    self.calculate_response()
 
     def calculate_response(self):
         """Calculate and store response quantities (Receptance, Mobility, Accelerance)."""
@@ -231,6 +234,7 @@ class Response(RollandPP):
         self.accel = squeeze(accel[:, mask])
 
 
+@dataclass(kw_only=True)
 class TDR(RollandPP):
     r"""Postprocessing class for TDR (Track-Decay-Rate).
 
@@ -242,25 +246,24 @@ class TDR(RollandPP):
         Instance of the Deflection class containing the results.
     tdr : numpy.ndarray
         Track-Decay-Rate vector :math:`[dB/m]`.
-    ind_tdr : list of int
+    ind_tdr : list[int]
         Indices of the TDR points.
     x_tdr : numpy.ndarray
         Distances of the TDR points from the excitation point :math:`[m]`.
-    filter : str
+    filter : str | None
         Filter type (default is '1/3 Octave').
     freq : numpy.ndarray
         Frequency vector :math:`[Hz]`.
     """
 
-    tdr = Array()
-    filter = Unicode(default_value=None, allow_none=True)
-    freq = Array()
+    tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
+    filter: str | None = None
+    freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self):
+        """Initialize TDR and calculate TDR values."""
         self.find_tdr_points()
         self.calculate_tdr()
-        # self.observe(self._on_results_change, names='results')
 
     def find_tdr_points(self):
         """Find the corresponding measurement points depending on track type."""
@@ -307,7 +310,6 @@ class TDR(RollandPP):
             ind_tdr = rint(self.x_tdr / self.results.discr.dx) + ind_excit
             self.ind_tdr = list(ind_tdr.astype(int))
 
-
     def calculate_tdr(self):
         """Calculate the Track-Decay-Rate (TDR) based on the results."""
         # Calculation of mobilities
@@ -321,5 +323,3 @@ class TDR(RollandPP):
 
         self.tdr = 4.343 / sum_tdr
         self.freq = resp.freq[1:]
-
-

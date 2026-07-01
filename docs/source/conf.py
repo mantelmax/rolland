@@ -27,7 +27,6 @@ extensions = [
     'sphinx.ext.mathjax',             # For LaTeX math rendering
     'sphinxcontrib.bibtex',           # Citation support
     'sphinx.ext.autosummary',         # Generate autodoc summaries
-    'autodoc_traits',                 # Support for traitlets
     'sphinx_design',                  # Design extension
     'myst_parser',                    # Markdown support
     'sphinx_docsearch',                # Docsearch extension
@@ -118,3 +117,30 @@ theme_options = ThemeOptions(
 )
 
 html_theme_options = asdict(theme_options)
+
+# -- Custom Sphinx Extension to Replace <factory> in Signatures -----------------
+import dataclasses
+import re
+
+def replace_factory_defaults(app, what, name, obj, options, signature, return_annotation):
+    """Ersetzt <factory> in Sphinx-Signaturen durch den Wert aus field.metadata."""
+    if signature is None:
+        return
+    if not (what == "class" and dataclasses.is_dataclass(obj)):
+        return
+
+    new_sig = signature
+    for f in dataclasses.fields(obj):
+        if "<factory>" in new_sig and "default_repr" in f.metadata:
+            new_sig = new_sig.replace(
+                f"{f.name}=<factory>",
+                f"{f.name}={f.metadata['default_repr']}",
+                1
+            )
+
+    if new_sig != signature:
+        return new_sig, return_annotation
+
+
+def setup(app):
+    app.connect("autodoc-process-signature", replace_factory_defaults)

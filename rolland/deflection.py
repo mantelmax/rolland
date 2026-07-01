@@ -7,18 +7,20 @@
     DeflectionEBBVertic
 """
 
-import abc
+import inspect
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 
 from numpy import empty, linspace, zeros
 from scipy.sparse.linalg import splu
-from traitlets import Instance
 
-from .abstract_traits import ABCHasTraits
 from .discretization import Discretization
 from .excitation import Excitation
+from .track import Track
 
 
-class Deflection(ABCHasTraits):
+@dataclass(kw_only=True)
+class Deflection(ABC):
     r"""Abstract base class for deflection classes.
 
     Attributes
@@ -29,14 +31,15 @@ class Deflection(ABCHasTraits):
         Discretization instance.
     """
 
-    discr = Instance(Discretization)
-    excit = Instance(Excitation)
+    discr: Discretization
+    excit: Excitation
+    track: Track = field(init=False)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __post_init__(self, *args, **kwargs):
+        """post_init method to set track attribute after initialization."""
         self.track = self.discr.track
 
-    @abc.abstractmethod
+    @abstractmethod
     def validate_deflection(self):
         """Validate deflection."""
 
@@ -57,6 +60,31 @@ class DeflectionEBBVertic(Deflection):
     ind_excit : int
         Index of excitation point :math:`[-]`.
     """
+
+    def __init__(self, *args, **kwargs):
+        """
+        Initialize the DeflectionFDMStampka class.
+
+        Parameters
+        ----------
+        *args : tuple
+            Variable length argument list.
+        **kwargs : dict
+            Arbitrary keyword arguments.
+
+        Attributes
+        ----------
+        deflection : numpy.ndarray
+            Array of calculated deflections with shape (2 * nx, nt + 1).
+        """
+        super().__init__(*args, **kwargs)
+        # Initialize starting values
+        self.calc_force()
+        defl = self.initialize_start_values()
+        # Calculate deflection
+        self.deflection = self.calc_deflection(defl)
+
+    __init__.__signature__ = inspect.signature(Deflection.__init__)
 
     def validate_deflection(self):
         """Validate deflection."""
@@ -147,26 +175,5 @@ class DeflectionEBBVertic(Deflection):
         return defl
 
 
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the DeflectionFDMStampka class.
 
-        Parameters
-        ----------
-        *args : tuple
-            Variable length argument list.
-        **kwargs : dict
-            Arbitrary keyword arguments.
-
-        Attributes
-        ----------
-        deflection : numpy.ndarray
-            Array of calculated deflections with shape (2 * nx, nt + 1).
-        """
-        super().__init__(*args, **kwargs)
-        # Initialize starting values
-        self.calc_force()
-        defl = self.initialize_start_values()
-        # Calculate deflection
-        self.deflection = self.calc_deflection(defl)
 
