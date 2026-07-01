@@ -109,11 +109,6 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     pad: ContPad
     l_track: float = 100.0
 
-    def _on_critical_change(self, change):
-        """Invalidate cached results when critical parameters change."""
-        if hasattr(self, '_cache'):
-            self._cache.clear()
-
     def _abstract(self) -> None:
         pass
 

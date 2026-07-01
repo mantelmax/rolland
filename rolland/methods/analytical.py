@@ -29,14 +29,14 @@ class AnalyticalMethods(ABC):
 
     Attributes
     ----------
-    f : numpy.ndarray
-        Excitation frequencies :math:`[Hz]`.
     force : numpy.ndarray
         Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float | list, default = 0.0
-        Distances to the excitation point :math:`[m]`.
+    f : numpy.ndarray
+        Excitation frequencies :math:`[Hz]`.
     x_excit : float, default = 0.0
         Excitation point :math:`[m]`.
+    x : float | list, default = 0.0
+        Distances to the excitation point :math:`[m]`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/N]`.
     """
@@ -50,9 +50,6 @@ class AnalyticalMethods(ABC):
 
     def __post_init__(self):
         """Post-initialization to compute mobility."""
-        self.compute_mobility()
-
-    def _update_on_change(self, change):
         self.compute_mobility()
 
     def _set_default_x(self, change):
@@ -88,16 +85,16 @@ class EBBCont1LSupp(AnalyticalMethods):
 
     Attributes
     ----------
-    f : numpy.ndarray
-        Excitation frequencies :math:`[Hz]`.
-    force : numpy.ndarray
-        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float or list
-        Distances to the excitation point :math:`[m]`.
-    x_excit : numpy.ndarray
-        Excitation point :math:`[m]`.
     track : ContSlabSingleRailTrack
         Track instance.
+    force : numpy.ndarray
+        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
+    f : numpy.ndarray
+        Excitation frequencies :math:`[Hz]`.
+    x_excit : numpy.ndarray
+        Excitation point :math:`[m]`.
+    x : float or list
+        Distances to the excitation point :math:`[m]`.
     """
 
     track: ContSlabSingleRailTrack
@@ -164,16 +161,16 @@ class EBBCont2LSupp(AnalyticalMethods):
 
     Attributes
     ----------
-    f : numpy.ndarray
-        Excitation frequencies :math:`[Hz]`.
-    force : numpy.ndarray
-        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float or list
-        Distances to the excitation point :math:`[m]`.
-    x_excit : numpy.ndarray
-        Excitation point :math:`[m]`.
     track : ContBallastedSingleRailTrack
         Track instance.
+    force : numpy.ndarray
+        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
+    f : numpy.ndarray
+        Excitation frequencies :math:`[Hz]`.
+    x_excit : numpy.ndarray
+        Excitation point :math:`[m]`.
+    x : float or list
+        Distances to the excitation point :math:`[m]`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     mobility : numpy.ndarray
@@ -250,14 +247,14 @@ class TBDiscr(AnalyticalMethods):
 
     Attributes
     ----------
-    f : numpy.ndarray
-        Excitation frequencies :math:`[Hz]`.
     force : numpy.ndarray
         Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float or list
-        Distances to the excitation point :math:`[m]`.
+    f : numpy.ndarray
+        Excitation frequencies :math:`[Hz]`.
     x_excit : numpy.ndarray
         Excitation point :math:`[m]`.
+    x : float or list
+        Distances to the excitation point :math:`[m]`.
     """
 
     @abstractmethod
@@ -415,16 +412,16 @@ class TSDiscr1LSupp(TBDiscr):
 
     Attributes
     ----------
-    f : numpy.ndarray
-        Excitation frequencies :math:`[Hz]`.
-    force : numpy.ndarray
-        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float or list
-        Distances to the excitation point :math:`[m]`.
-    x_excit : numpy.ndarray
-        Excitation point :math:`[m]`.
     track : DiscrSlabSingleRailTrack
         Track instance.
+    force : numpy.ndarray
+        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
+    f : numpy.ndarray
+        Excitation frequencies :math:`[Hz]`.
+    x_excit : numpy.ndarray
+        Excitation point :math:`[m]`.
+    x : float or list
+        Distances to the excitation point :math:`[m]`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     """
@@ -467,16 +464,16 @@ class TSDiscr2LSupp(TBDiscr):
 
     Attributes
     ----------
-    f : numpy.ndarray
-        Excitation frequencies :math:`[Hz]`.
-    force : numpy.ndarray
-        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
-    x : float or list
-        Distances to the excitation point :math:`[m]`.
-    x_excit : numpy.ndarray
-        Excitation point :math:`[m]`.
     track : DiscrSlabSingleRailTrack
         Track instance.
+    force : numpy.ndarray
+        Force amplitude corresponding to the excitation frequencies :math:`[N]`.
+    f : numpy.ndarray
+        Excitation frequencies :math:`[Hz]`.
+    x_excit : numpy.ndarray
+        Excitation point :math:`[m]`.
+    x : float or list
+        Distances to the excitation point :math:`[m]`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     omega_1 : float

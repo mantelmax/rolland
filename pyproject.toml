@@ -4,6 +4,7 @@ version = "0.1"
 description = "Time-domain simulation of rolling noise for railway applications"
 authors = [
     { name = "Maximilian Mantel", email = "maximilian.mantel@tu-berlin.de" },
+    { name = "Benjamin Wagner", email = "b.wagner@tu-berlin.de"},
     { name = "Ennes Sarradj", email = "ennes.sarradj@tu-berlin.de" },
 ]
 license = { text = "BSD-3-Clause" }
