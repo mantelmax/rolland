@@ -146,11 +146,6 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
 
-    def _on_critical_change(self, change):
-        """Invalidate cached results when critical parameters change."""
-        if hasattr(self, '_cache'):
-            self._cache.clear()
-
 
 @dataclass(kw_only=True)
 class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
@@ -319,11 +314,6 @@ class BallastedSingleRailTrack(SingleRailTrack):
 
     ballast: Ballast
 
-    def _on_critical_change(self, change):
-        """Invalidate cached results when critical parameters change."""
-        if hasattr(self, '_cache'):
-            self._cache.clear()
-
 
 @dataclass(kw_only=True)
 class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
@@ -375,11 +365,6 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     slab: Slab
     l_track: float = 100.0
 
-    def _on_critical_change(self, change):
-        """Invalidate cached results when critical parameters change."""
-        if hasattr(self, '_cache'):
-            self._cache.clear()
-
     def _abstract(self) -> None:
         pass
 
@@ -410,11 +395,6 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
             p, s, b = self.mount_prop[x]
             st += f'{x}, {p.sp}, {s.ms}, {b.sb} \n'
         return st
-
-    def _on_critical_change(self, change):
-        """Invalidate cached results when critical parameters change."""
-        if hasattr(self, '_cache'):
-            self._cache.clear()
 
 
 @dataclass(kw_only=True)
@@ -478,8 +458,8 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     sleeper: Sleeper
     pad: DiscrPad
     ballast: Ballast
-    distance: float = field(default=0.6)
-    num_mount: int = field(default=100)
+    distance: float = 0.6
+    num_mount: int = 100
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
@@ -564,7 +544,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     pad: Arrangement
     ballast: Arrangement
     distance: Arrangement
-    num_mount: int = field(default=100)
+    num_mount: int = 100
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
@@ -580,11 +560,6 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             self.mount_prop[float(Decimal(str(x)))] = (p, s, b)
             x += Decimal(str(d))
         self.l_track = max(self.mount_prop.keys())
-
-    def _on_critical_change(self, change):
-        """Invalidate cached results when critical parameters change."""
-        if hasattr(self, '_cache'):
-            self._cache.clear()
 
     def _abstract(self) -> None:
         pass
