@@ -11,6 +11,7 @@ from .deflection import Deflection, DeflectionEBBVertic
 from .discretization import Discretization, DiscretizationEBBVerticConst
 from .excitation import Excitation, GaussianImpulse
 from .postprocessing import PostProcessing
+from .radiation import SimplifiedMonopoleRadiation
 from .track import (
                     ArrangedBallastedSingleRailTrack,
                     ArrangedSlabSingleRailTrack,
@@ -45,4 +46,5 @@ __all__ = ["Arrangement",
            "Discretization",
            "GaussianImpulse",
            "PostProcessing",
+           "SimplifiedMonopoleRadiation",
            ]

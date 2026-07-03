@@ -65,6 +65,8 @@ all = [
     "sphinx-rtd-theme>=1.0",
     "pandas>=2.0",
     "pyyaml>=6.0",
+    "gmsh",
+    "librosa",
 ]
 
 [build-system]
