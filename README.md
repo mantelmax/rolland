@@ -1,5 +1,5 @@
 <picture>
-  <source srcset="docs/source/images/logo_rolland_light.svg" media="(prefers-color-scheme: dark)">
+  <source srcset="docs/source/images/logo_rolland_light.svg" media="(prefers-color-scheme: light)">
   <img src="docs/source/images/logo_rolland_dark.svg" alt="Logo" width="160">
 </picture>
 
