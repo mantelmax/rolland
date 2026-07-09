@@ -4,15 +4,12 @@
     :toctree: components
 
     Rail
-    RailRoughness
     DiscrPad
     ContPad
     Sleeper
     Slab
     Ballast
     Wheel
-    WheelRoughness
-    WheelGreensfunc
 """
 
 from dataclasses import dataclass, field
