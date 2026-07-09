@@ -100,7 +100,8 @@ class Rail:
     ...     E=2.1e11,
     ...     G=8.1e10,
     ...     nu=0.3,
-    ...     kap=[0.4, 0.4],
+    ...     kapz=0.4,
+    ...     kapy=0.4,
     ...     mr=60.0,
     ...     # ... specify remaining parameters ...
     ... )
