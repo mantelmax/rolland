@@ -51,8 +51,6 @@ class Rail:
         Density of rail in :math:`[\mathrm{kg/m^3}]`.
     etar : float
         Rail loss factor :math:`[-]`.
-    fresr : float
-        Rail resonance frequency in :math:`[\mathrm{Hz}]`.
     dr : float
         Rail damping coefficient (viscous) in :math:`[\mathrm{Ns/m}]`.
     shearc : list[float]
@@ -60,19 +58,19 @@ class Rail:
     centr : list[float]
         Coordinates of centroid :math:`[m]`.
     ez : float
-        Vertical shear centre eccentricity :math:`[m]`.
+        Vertical shear center eccentricity :math:`[m]`.
     ey : float
-        Lateral shear centre eccentricity :math:`[m]`.
+        Lateral shear center eccentricity :math:`[m]`.
     Iyr : float
-        Area moment of inertia of rail around y-axis :math:`[m^4]`.
+        Second moment of area around y-axis :math:`[m^4]`.
     Izr : float
-        Area moment of inertia of rail around z-axis :math:`[m^4]`.
+        Second moment of area around z-axis :math:`[m^4]`.
     Iyz : float
         Product moment of area :math:`[m^4]`.
     Ipr : float
-        Polar moment of area of rail :math:`[m^4]`.
+        Polar moment of area :math:`[m^4]`.
     Ar : float
-        Cross-sectional area of rail :math:`[m^2]`.
+        Cross-section area :math:`[m^2]`.
     Asr : float
         Surface area per unit length of rail :math:`[m^2/m]`.
     Vr : float
@@ -88,13 +86,13 @@ class Rail:
     k_w : float
         Warping factor for rail foot :math:`[-]`.
     J : float
-        Torsional constant of rail :math:`[m^4]`.
+        Torsional constant :math:`[m^4]`.
     J_t : float
         Secondary torsional constant :math:`[m^4]`.
     J_rs : float
         Effective shear area :math:`[m^4]`.
-    chi_f : float
-        Warping function at rail foot [-].
+    chi : ndarray
+        Warping function of the cross-section :math:`[m^2]`.
 
     Examples
     --------
@@ -114,13 +112,12 @@ class Rail:
     rl_geo: list[tuple[float, float]]
     E: float
     G: float
-    nu: float
+    nu: float | None=None
     kapz: float
     kapy: float
     mr: float
     rho: float
     etar: float
-    fresr: float
     dr: float
     shearc: list[float]
     centr: list[float]
@@ -132,8 +129,8 @@ class Rail:
     Itr: float
     Ipr: float
     Ar: float
-    Asr: float
-    Vr: float
+    Asr: float | None=None
+    Vr: float | None=None
     kapp_s: float
     Iw: float
     Iwz: float
@@ -142,7 +139,7 @@ class Rail:
     J: float
     J_t: float = field(init=False)
     J_rs: float = field(init=False)
-    chi_f: float
+    chi: float | None=None
 
     def __post_init__(self):
         """Post-initialization to calculate derived attributes."""
@@ -150,21 +147,6 @@ class Rail:
         self.ey = self.shearc[0] - self.centr[0]
         self.J_rs = self.kapp_s * (self.Ipr - self.J)
         self.J_t = self.J_rs + self.Ar * self.kapy * self.ez**2 + self.Ar * self.kapz * self.ey**2
-
-@dataclass(kw_only=True)
-class RailRoughness:
-    r"""Rail Roughness Class.
-
-    Contains a rail roughness spectrum in frequency domain, which can later be used to calculate the
-    rail roughness along the track.
-
-    Attributes
-    ----------
-    r_rough : tuple[list[float], list[float]]
-        Rail roughness spectrum :math:`[f, m]`.
-    """
-
-    r_rough: tuple[list[float], list[float]]
 
 @dataclass(kw_only=True)
 class DiscrPad:
