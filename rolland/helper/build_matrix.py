@@ -181,8 +181,7 @@ def build_equ_sleeper_matrix(track, y_sc, equi_sm):
     track : Track
         The track object.
     y_sc : float
-        The lateral distance from the centroid of the equivalent sleeper to the centroid of the real
-        sleeper :math:`[m]`.
+        Lateral sleeper eccentricity :math:`[m]`.
     equi_sm : bool
         If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
         used.
