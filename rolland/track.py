@@ -53,36 +53,36 @@ class SingleRailTrack(Track):
         e_s = self.rail.shearc[1] - self.rail.z_f
         self.pad.sp_w = (self.rail.k_w * e_s) ** 2 * self.pad.wdthp**2 / 12 * self.pad.sp_y
 
-    def calc_pad_viscous_damp(self):
-        """Calculate viscous damping coefficients from loss factors."""
-        self.pad.fresp_z = sqrt(self.pad.sp_z / self.rail.mr) / (2 * pi)
-        self.pad.dp_z = self.pad.etap_z * self.pad.sp_z / (self.pad.fresp_z * (2 * pi))
+    # def calc_pad_viscous_damp(self):
+    #     """Calculate viscous damping coefficients from loss factors."""
+    #     self.pad.fresp_z = sqrt(self.pad.sp_z / self.rail.mr) / (2 * pi)
+    #     self.pad.dp_z = self.pad.etap_z * self.pad.sp_z / (self.pad.fresp_z * (2 * pi))
 
-        self.pad.fresp_y = sqrt(self.pad.sp_y / self.rail.mr) / (2 * pi)
-        self.pad.dp_y = self.pad.etap_y * self.pad.sp_y / (self.pad.fresp_y * 2 * pi)
+    #     self.pad.fresp_y = sqrt(self.pad.sp_y / self.rail.mr) / (2 * pi)
+    #     self.pad.dp_y = self.pad.etap_y * self.pad.sp_y / (self.pad.fresp_y * 2 * pi)
 
-        self.pad.fresp_x = sqrt(self.pad.sp_x / self.rail.mr) / (2 * pi)
-        self.pad.dp_x = self.pad.etap_x * self.pad.sp_x / (self.pad.fresp_x * 2 * pi)
+    #     self.pad.fresp_x = sqrt(self.pad.sp_x / self.rail.mr) / (2 * pi)
+    #     self.pad.dp_x = self.pad.etap_x * self.pad.sp_x / (self.pad.fresp_x * 2 * pi)
 
-        self.pad.fresp_r = sqrt(self.pad.sp_xr / (self.rail.rho * self.rail.Ipr)) / (2 * pi)
-        self.pad.dp_xr = self.pad.etap_r * self.pad.sp_xr / (self.pad.fresp_r * 2 * pi)
+    #     self.pad.fresp_r = sqrt(self.pad.sp_xr / (self.rail.rho * self.rail.Ipr)) / (2 * pi)
+    #     self.pad.dp_xr = self.pad.etap_r * self.pad.sp_xr / (self.pad.fresp_r * 2 * pi)
 
-    def calc_pad_viscous_damp_coupled(self, K, M):  # noqa: N803
-        """Calculate coupled viscous damping coefficients."""
-        eigval_y_xr, eigvec_y_xr = linalg.eigh(K, M)
-        # tudo: coupled longitudinal and vertical damping is not considered yet!!!!
+    # def calc_pad_viscous_damp_coupled(self, K, M):  # noqa: N803
+    #     """Calculate coupled viscous damping coefficients."""
+    #     eigval_y_xr, eigvec_y_xr = linalg.eigh(K, M)
+    #     # tudo: coupled longitudinal and vertical damping is not considered yet!!!!
 
-        self.pad.fresp_z = sqrt(self.pad.sp_z / self.rail.mr) / (2 * pi)
-        self.pad.dp_z = self.pad.etap_z * self.pad.sp_z / (self.pad.fresp_z * (2 * pi))
+    #     self.pad.fresp_z = sqrt(self.pad.sp_z / self.rail.mr) / (2 * pi)
+    #     self.pad.dp_z = self.pad.etap_z * self.pad.sp_z / (self.pad.fresp_z * (2 * pi))
 
-        self.pad.fresp_y = sqrt(real(eigval_y_xr[0])) / (2 * pi)
-        self.pad.dp_y = self.pad.etap_y * self.pad.fresp_y * 2 * pi * self.rail.mr
+    #     self.pad.fresp_y = sqrt(real(eigval_y_xr[0])) / (2 * pi)
+    #     self.pad.dp_y = self.pad.etap_y * self.pad.fresp_y * 2 * pi * self.rail.mr
 
-        self.pad.fresp_x = sqrt(self.pad.sp_x / self.rail.mr) / (2 * pi)
-        self.pad.dp_x = self.pad.etap_x * self.pad.sp_x / (self.pad.fresp_x * 2 * pi)
+    #     self.pad.fresp_x = sqrt(self.pad.sp_x / self.rail.mr) / (2 * pi)
+    #     self.pad.dp_x = self.pad.etap_x * self.pad.sp_x / (self.pad.fresp_x * 2 * pi)
 
-        self.pad.fresp_r = sqrt(real(eigval_y_xr[1])) / (2 * pi)
-        self.pad.dp_xr = self.pad.etap_r * self.pad.fresp_r * 2 * pi * self.rail.rho * self.rail.Ipr
+    #     self.pad.fresp_r = sqrt(real(eigval_y_xr[1])) / (2 * pi)
+    #     self.pad.dp_xr = self.pad.etap_r * self.pad.fresp_r * 2 * pi * self.rail.rho * self.rail.Ipr
 
     def calc_pad_viscous_damp_cuton(self, cof):
         """Calculate coupled viscous damping coefficients based on cut on frequencies."""
@@ -116,22 +116,22 @@ class SingleRailTrack(Track):
         # Sum normalized contributions from all mounting positions
         return sum(single_mount_pattern(pos) for pos in mp)
 
-    def calc_equiv_sleeper_factors(self, y_sc, equi_sim):
+    def calc_equiv_sleeper_factors(self):
         """Calculate equivalent sleeper factors according to Kostovasilis."""
-        if not equi_sim:
+        if not self.sleeper.equi_sm:
             pass
         else:
-            self.sleeper.f_z = 1 + 12 * y_sc**2 /(self.sleeper.lengs**2 + self.sleeper.hights**2)
-            self.sleeper.f_x = 1 + 12 * y_sc**2 / (self.sleeper.lengs**2 + self.sleeper.wdths**2)
+            self.sleeper.f_z = 1 + 12 * self.sleeper.y_sc**2 /(self.sleeper.lengs**2 + self.sleeper.hights**2)
+            self.sleeper.f_x = 1 + 12 * self.sleeper.y_sc**2 / (self.sleeper.lengs**2 + self.sleeper.wdths**2)
 
-    def calc_equiv_slab_factors(self, y_sc, equi_sim):
+    def calc_equiv_slab_factors(self):
         """Calculate equivalent slab factors according to Kostovasilis."""
-        if not equi_sim:
+        if not self.slab.equi_sm:
             pass
 
         else:
-            self.slab.f_z = 1 + 12 * y_sc ** 2 / (self.slab.lengs ** 2 + self.slab.heights ** 2)
-            self.slab.f_x = 1 + 12 * y_sc ** 2 / (self.slab.lengs ** 2 + self.slab.equ_wdths ** 2)
+            self.slab.f_z = 1 + 12 * self.slab.y_sc ** 2 / (self.slab.lengs ** 2 + self.slab.heights ** 2)
+            self.slab.f_x = 1 + 12 * self.slab.y_sc ** 2 / (self.slab.lengs ** 2 + self.slab.equ_wdths ** 2)
 
     def calc_ballast_rotational_stiffn(self):
         """Calculate rotational stiffnesses from ballast stiffnesses and sleeper/slab dimensions."""
@@ -146,32 +146,32 @@ class SingleRailTrack(Track):
         self.ballast.sb_yr = s_w**2 / 12 * self.ballast.sb_z
         self.ballast.sb_zr = s_l**2 / 12 * self.ballast.sb_x + s_w**2 / 12 * self.ballast.sb_y
 
-    def calc_ballast_viscous_damp(self):
-        """Calculate viscous damping coefficients from loss factors."""
-        if hasattr(self, 'sleeper'):
-            seclay = self.sleeper
-        if hasattr(self, 'slab'):
-            seclay = self.slab
+    # def calc_ballast_viscous_damp(self):
+    #     """Calculate viscous damping coefficients from loss factors."""
+    #     if hasattr(self, 'sleeper'):
+    #         seclay = self.sleeper
+    #     if hasattr(self, 'slab'):
+    #         seclay = self.slab
 
-        def _f_db(stiff, mass, eta):
-            if mass <= 0 or stiff <= 0:
-                return 0.0, 0.0
-            fres = sqrt(stiff / mass) / (2 * pi)
-            db = eta * stiff / (fres * 2 * pi)
-            return fres, db
+    #     def _f_db(stiff, mass, eta):
+    #         if mass <= 0 or stiff <= 0:
+    #             return 0.0, 0.0
+    #         fres = sqrt(stiff / mass) / (2 * pi)
+    #         db = eta * stiff / (fres * 2 * pi)
+    #         return fres, db
 
-        self.ballast.fresb_z, self.ballast.db_z = _f_db(self.ballast.sb_z, seclay.ms, self.ballast.etab_z)
-        self.ballast.fresb_y, self.ballast.db_y = _f_db(self.ballast.sb_y, seclay.ms, self.ballast.etab_y)
-        self.ballast.fresb_x, self.ballast.db_x = _f_db(self.ballast.sb_x, seclay.ms, self.ballast.etab_x)
-        self.ballast.fresb_xr, self.ballast.db_xr = _f_db(self.ballast.sb_xr,
-                                                          seclay.rhos * seclay.Is_x,
-                                                          self.ballast.etab_r)
-        self.ballast.fresb_zr, self.ballast.db_zr = _f_db(self.ballast.sb_zr,
-                                                          seclay.rhos * seclay.Is_z,
-                                                          self.ballast.etab_r)
-        self.ballast.fresb_yr, self.ballast.db_yr = _f_db(self.ballast.sb_yr,
-                                                          seclay.rhos * seclay.Is_y,
-                                                          self.ballast.etab_r)
+    #     self.ballast.fresb_z, self.ballast.db_z = _f_db(self.ballast.sb_z, seclay.ms, self.ballast.etab_z)
+    #     self.ballast.fresb_y, self.ballast.db_y = _f_db(self.ballast.sb_y, seclay.ms, self.ballast.etab_y)
+    #     self.ballast.fresb_x, self.ballast.db_x = _f_db(self.ballast.sb_x, seclay.ms, self.ballast.etab_x)
+    #     self.ballast.fresb_xr, self.ballast.db_xr = _f_db(self.ballast.sb_xr,
+    #                                                       seclay.rhos * seclay.Is_x,
+    #                                                       self.ballast.etab_r)
+    #     self.ballast.fresb_zr, self.ballast.db_zr = _f_db(self.ballast.sb_zr,
+    #                                                       seclay.rhos * seclay.Is_z,
+    #                                                       self.ballast.etab_r)
+    #     self.ballast.fresb_yr, self.ballast.db_yr = _f_db(self.ballast.sb_yr,
+    #                                                       seclay.rhos * seclay.Is_y,
+    #                                                       self.ballast.etab_r)
 
     def calc_ballast_viscous_damp_cuton(self, cof):
         """Calculate coupled viscous damping coefficients based on cut on frequencies."""
