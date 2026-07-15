@@ -373,6 +373,9 @@ class Sleeper:
         Equivalent sleeper factor (x-direction) :math:`[-]`.
     f_z : float
         Equivalent sleeper factor (z-direction) :math:`[-]`.
+    equi_sm : bool, default=True
+        If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
+        used.
     """
 
     ms: float
@@ -389,6 +392,7 @@ class Sleeper:
     y_sc: float = 0.7175
     f_z: float = 1.0
     f_x: float = 1.0
+    equi_sm: bool = True
 
 
 @dataclass(kw_only=True)
@@ -428,6 +432,9 @@ class Slab:
         Equivalent slab factor (x-direction) :math:`[-]`.
     f_z : float
         Equivalent slab factor (z-direction) :math:`[-]`.
+    equi_sm : bool, default=True
+        If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
+        used.
     """
 
     ms: float
@@ -444,6 +451,7 @@ class Slab:
     y_sc: float = 0.7175
     f_z: float = 1.0
     f_x: float = 1.0
+    equi_sm: bool = True
 
 
 @dataclass(kw_only=True)
