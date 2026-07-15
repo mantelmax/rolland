@@ -421,6 +421,9 @@ class Slab:
         Vertical distance from slab centroid to top of slab :math:`[m]`.
     z_sb : float
         Vertical distance from slab centroid to bottom of slab :math:`[m]`.
+    y_sc : float, default=0.7175
+        Lateral slab eccentricity :math:`[m]`.
+        It is half of the track gauge (0.7175 m for standard gauge).
     f_x : float
         Equivalent slab factor (x-direction) :math:`[-]`.
     f_z : float
@@ -438,6 +441,7 @@ class Slab:
     heights: float
     z_st: float
     z_sb: float
+    y_sc: float = 0.7175
     f_z: float = 1.0
     f_x: float = 1.0
 
