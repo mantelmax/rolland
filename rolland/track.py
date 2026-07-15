@@ -271,11 +271,6 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
 
     pad: DiscrPad
 
-    # Dictionary for discrete mounting positions (x-> (Pad)).
-    # May have nonuniform properties.
-    # None values are placeholders
-    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict, metadata={"default_repr": "{}"})
-
     def __repr__(self):
         """Represent mounting properties as string."""
         st = ""
