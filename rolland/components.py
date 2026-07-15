@@ -366,6 +366,9 @@ class Sleeper:
         Vertical distance from sleeper centroid to top of sleeper :math:`[m]`.
     z_sb : float
         Vertical distance from sleeper centroid to bottom of sleeper :math:`[m]`.
+    y_sc : float, default=0.7175
+        Lateral sleeper eccentricity :math:`[m]`.
+        It is half of the track gauge (0.7175 m for standard gauge).
     f_x : float
         Equivalent sleeper factor (x-direction) :math:`[-]`.
     f_z : float
@@ -383,6 +386,7 @@ class Sleeper:
     hights: float
     z_st: float
     z_sb: float
+    y_sc: float = 0.7175
     f_z: float = 1.0
     f_x: float = 1.0
 
