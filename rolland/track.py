@@ -21,9 +21,18 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from decimal import Decimal
 
-from numpy import pi, piecewise, real, sqrt
+from numpy import pi, piecewise
 from scipy.interpolate import interp1d
-from scipy.linalg import linalg
+
+from rolland.helper.build_matrix import (
+    build_equ_sleeper_matrix,
+    build_fnd_stiff_matrix,
+    build_pad_ballast_stiff_matrices,
+    build_rail_matrices,
+    build_sleep_mass_matrix,
+    build_transfm_matrices,
+    calc_cut_on_frequ,
+)
 
 from .arrangement import Arrangement
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper
@@ -175,12 +184,12 @@ class SingleRailTrack(Track):
 
     def calc_ballast_viscous_damp_cuton(self, cof):
         """Calculate coupled viscous damping coefficients based on cut on frequencies."""
-        self.db_x = self.etab_x * self.sb_x / (cof[7] * (2 * pi))
-        self.db_z = self.etab_z * self.sb_z / (cof[8] * (2 * pi))
-        self.db_y = self.etab_y * self.sb_y / (cof[9] * (2 * pi))
-        self.db_xr = self.etab_r * self.sb_xr / (cof[10] * (2 * pi))
-        self.db_yr = self.etab_r * self.sb_yr / (cof[11] * (2 * pi))
-        self.db_zr = self.etab_r * self.sb_zr / (cof[12] * (2 * pi))
+        self.ballast.db_x = self.ballast.etab_x * self.ballast.sb_x / (cof[7] * (2 * pi))
+        self.ballast.db_z = self.ballast.etab_z * self.ballast.sb_z / (cof[8] * (2 * pi))
+        self.ballast.db_y = self.ballast.etab_y * self.ballast.sb_y / (cof[9] * (2 * pi))
+        self.ballast.db_xr = self.ballast.etab_r * self.ballast.sb_xr / (cof[10] * (2 * pi))
+        self.ballast.db_yr = self.ballast.etab_r * self.ballast.sb_yr / (cof[11] * (2 * pi))
+        self.ballast.db_zr = self.ballast.etab_r * self.ballast.sb_zr / (cof[12] * (2 * pi))
 
 
 @dataclass(kw_only=True)
@@ -247,6 +256,21 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     pad: ContPad
     l_track: float = 100.0
 
+    def __post_init__(self):
+        """post_init method to calculate derived properties after initialization."""
+        self.calc_pad_warping_stiffn()
+        self.calc_equiv_slab_factors()
+
+        K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
+        Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
+        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+        cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+
+        self.calc_pad_viscous_damp_cuton(cof)
+
     def _abstract(self) -> None:
         pass
 
@@ -263,13 +287,9 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
         Rail instance.
     slab : Slab
         Slab instance.
-    pad : DiscrPad
-        Discrete pad instance.
     mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, None)).
     """
-
-    pad: DiscrPad
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -334,12 +354,26 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...
     """
 
+    pad: DiscrPad
     distance: float = 0.6
     num_mount: int = 100
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
+
+        self.calc_pad_warping_stiffn()
+        self.calc_equiv_slab_factors()
+
+        K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
+        Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
+        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+        cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+
+        self.calc_pad_viscous_damp_cuton(cof)
 
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
@@ -420,6 +454,19 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
 
+        self.calc_pad_warping_stiffn()
+        self.calc_equiv_slab_factors()
+
+        K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
+        Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
+        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+        cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+
+        self.calc_pad_viscous_damp_cuton(cof)
+
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         x = Decimal(str(0))
@@ -498,6 +545,21 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     slab: Slab
     l_track: float = 100.0
 
+    def __post_init__(self):
+        """post_init method to calculate mounting properties after initialization."""
+        self.calc_pad_warping_stiffn()
+        self.calc_equiv_slab_factors()
+
+        K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
+        Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
+        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+        cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+
+        self.calc_pad_viscous_damp_cuton(cof)
+
     def _abstract(self) -> None:
         pass
 
@@ -517,9 +579,6 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
     mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
     """
-
-    # Pads and sleepers may have nonuniform properties Dictionary (x-> (Pad, Sleeper))
-    mount_prop: dict[float, tuple[DiscrPad, None, None]] = field(default_factory=dict, metadata={"default_repr": "{}"})
 
     def __repr__(self):
         """Represent mounting properties as string."""
@@ -590,13 +649,27 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
     sleeper: Sleeper
     pad: DiscrPad
-    ballast: Ballast
     distance: float = 0.6
     num_mount: int = 100
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
+
+        self.calc_pad_warping_stiffn()
+        self.calc_equiv_sleeper_factors()
+        self.calc_ballast_rotational_stiffn()
+
+        K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
+        Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.sleeper.z_sb, self.rail.chi) # noqa: N806
+        E = build_equ_sleeper_matrix(self, self.sleeper.y_sc, self.sleeper.equi_sm) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+        cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+
+        self.calc_pad_viscous_damp_cuton(cof)
+        self.calc_ballast_viscous_damp_cuton(cof)
 
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
@@ -635,7 +708,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ----------
     rail : Rail
         Rail instance.
-    ballast : Ballast
+    ballast : Arrangement
         Ballast instance.
     pad : Arrangement
         Arrangement instance containing multiple pads.
@@ -682,6 +755,21 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
+
+        self.calc_pad_warping_stiffn()
+        self.calc_equiv_sleeper_factors()
+        self.calc_ballast_rotational_stiffn()
+
+        K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
+        Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.sleeper.z_sb, self.rail.chi) # noqa: N806
+        E = build_equ_sleeper_matrix(self, self.sleeper.y_sc, self.sleeper.equi_sm) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+        cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+
+        self.calc_pad_viscous_damp_cuton(cof)
+        self.calc_ballast_viscous_damp_cuton(cof)
 
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
