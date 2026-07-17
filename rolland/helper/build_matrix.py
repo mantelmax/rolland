@@ -187,7 +187,7 @@ def build_transfm_matrices(z_f, y_f, z_st=0, z_sb=0, chi_f=0):
 
 
 
-def build_equ_sleeper_matrix(track, y_sc, equi_sm):
+def build_equ_sleeper_matrix(track):
     """Build equivalent sleeper matrix.
 
     Attributes
@@ -207,10 +207,10 @@ def build_equ_sleeper_matrix(track, y_sc, equi_sm):
     """
     if hasattr(track, 'slab'):
         seclay = track.slab
-        seclay.calc_equiv_slab_factors(y_sc, equi_sm)
+        track.calc_equiv_slab_factors()
     if hasattr(track, 'sleeper'):
         seclay = track.sleeper
-        seclay.calc_equiv_sleeper_factors(y_sc, equi_sm)
+        track.calc_equiv_sleeper_factors()
 
     f_x = seclay.f_x
     f_z = seclay.f_z
@@ -223,7 +223,7 @@ def build_equ_sleeper_matrix(track, y_sc, equi_sm):
 
 
 
-def build_pad_ballast_stiff_matrices(track, z_f, damp_type="hysteretic", E=None):
+def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None):
     """Build pad and ballast stiffness matrices.
 
     Attributes
@@ -250,7 +250,7 @@ def build_pad_ballast_stiff_matrices(track, z_f, damp_type="hysteretic", E=None)
         E = ones(7)
 
     pad = track.pad
-    pad.calc_warping_stiffn(track.rail, z_f)  # Calculate warping stiffness
+    track.calc_pad_warping_stiffn()  # Calculate warping stiffness
     Kp = diag(
         [
             pad.sp_x,
@@ -281,10 +281,9 @@ def build_pad_ballast_stiff_matrices(track, z_f, damp_type="hysteretic", E=None)
         pass
 
     if hasattr(track, 'ballast'):
-        seclay = track.slab if hasattr(track, 'slab') else track.sleeper
 
         ballast = track.ballast
-        ballast.calc_rotational_stiffn(seclay)  # Calculate rotational stiffness
+        track.calc_ballast_rotational_stiffn()  # Calculate rotational stiffness
         Kb = diag(
             [
                 ballast.sb_x,
@@ -490,7 +489,7 @@ def build_pad_ballast_damp_matrices(track, cof, E=None):
         E = ones(7)
 
     pad = track.pad
-    pad.calc_viscous_damp_cuton(cof)
+    track.calc_pad_viscous_damp_cuton(cof)
 
     Dp = diag(
         [
@@ -506,7 +505,7 @@ def build_pad_ballast_damp_matrices(track, cof, E=None):
 
     if hasattr(track, 'ballast'):
         ballast = track.ballast
-        ballast.calc_viscous_damp_cuton(cof)
+        track.calc_ballast_viscous_damp_cuton(cof)
 
         Db = diag(
             [

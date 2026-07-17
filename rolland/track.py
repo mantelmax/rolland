@@ -263,9 +263,9 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
-        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "hysteretic", E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -367,9 +367,9 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
-        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "hysteretic", E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -459,9 +459,9 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
-        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "hysteretic", E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -470,6 +470,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         x = Decimal(str(0))
+        self.mount_prop = {}
         for p, d in zip(self.pad.generate(self.num_mount),
                         self.distance.generate(self.num_mount), strict=False):
             self.mount_prop[float(Decimal(str(x)))] = (p, None, None)
@@ -552,13 +553,14 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.slab.z_sb, self.rail.chi) # noqa: N806
-        E = build_equ_sleeper_matrix(self, self.slab.y_sc, self.slab.equi_sm) # noqa: N806
+        E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "hysteretic", E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
         self.calc_pad_viscous_damp_cuton(cof)
+        self.calc_ballast_viscous_damp_cuton(cof)
 
     def _abstract(self) -> None:
         pass
@@ -662,9 +664,9 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.sleeper.z_sb, self.rail.chi) # noqa: N806
-        E = build_equ_sleeper_matrix(self, self.sleeper.y_sc, self.sleeper.equi_sm) # noqa: N806
+        E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "hysteretic", E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -673,6 +675,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
+        self.mount_prop = {}
         for _i in range(self.num_mount):
             # Calculate the mounting position
             # Use Decimal to avoid floating-point representation errors
@@ -762,9 +765,9 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail)  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices(self.rail.z_f, self.rail.y_f, self.sleeper.z_sb, self.rail.chi) # noqa: N806
-        E = build_equ_sleeper_matrix(self, self.sleeper.y_sc, self.sleeper.equi_sm) # noqa: N806
+        E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, self.rail.z_f, "hysteretic", E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "hysteretic", E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -774,6 +777,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
         x = Decimal(str(0))
+        self.mount_prop = {}
         for s, p, b, d in zip(self.sleeper.generate(self.num_mount),
                            self.pad.generate(self.num_mount),
                            self.ballast.generate(self.num_mount),
