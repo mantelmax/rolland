@@ -18,12 +18,6 @@ autosummary::
 from numpy import argmax, array, block, diag, ones, pi, sqrt, zeros
 from scipy.linalg import eigh
 
-from rolland.track import (
-    ContBallastedSingleRailTrack,
-    ContSlabSingleRailTrack,
-    DiscrBallastedSingleRailTrack,
-)
-
 
 def build_rail_matrices(rail, damp_type="hysteretic"):
     """Build rail matrices.
@@ -211,10 +205,10 @@ def build_equ_sleeper_matrix(track, y_sc, equi_sm):
     E : ndarray
         The equivalent sleeper Matrix, which is used to scale the stiffness of the balast.
     """
-    if isinstance(track, ContBallastedSingleRailTrack):
+    if hasattr(track, 'slab'):
         seclay = track.slab
         seclay.calc_equiv_slab_factors(y_sc, equi_sm)
-    else:
+    if hasattr(track, 'sleeper'):
         seclay = track.sleeper
         seclay.calc_equiv_sleeper_factors(y_sc, equi_sm)
 
@@ -286,8 +280,8 @@ def build_pad_ballast_stiff_matrices(track, z_f, damp_type="hysteretic", E=None)
     else:
         pass
 
-    if isinstance(track, (ContBallastedSingleRailTrack, DiscrBallastedSingleRailTrack)):
-        seclay = track.slab if isinstance(track, ContBallastedSingleRailTrack) else track.sleeper
+    if hasattr(track, 'ballast'):
+        seclay = track.slab if hasattr(track, 'slab') else track.sleeper
 
         ballast = track.ballast
         ballast.calc_rotational_stiffn(seclay)  # Calculate rotational stiffness
@@ -345,7 +339,7 @@ def build_sleep_mass_matrix(track, E=None):
     if E is None:
         E = ones(7)
 
-    seclay = track.slab if isinstance(track, (ContBallastedSingleRailTrack, ContSlabSingleRailTrack)) else track.sleeper
+    seclay = track.slab if hasattr(track, 'slab') else track.sleeper
 
     Ms = diag(
         [
@@ -510,7 +504,7 @@ def build_pad_ballast_damp_matrices(track, cof, E=None):
         ],
     )
 
-    if isinstance(track, (ContBallastedSingleRailTrack, DiscrBallastedSingleRailTrack)):
+    if hasattr(track, 'ballast'):
         ballast = track.ballast
         ballast.calc_viscous_damp_cuton(cof)
 
