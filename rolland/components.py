@@ -315,18 +315,18 @@ class ContPad:
     sp_zr: float = field(init=False)
     sp_yr: float = field(init=False)
     sp_xr: float = field(init=False)
-    etap_z: float
-    etap_y: float
-    etap_x: float
-    etap_r: float
+    etap_z: float | None = None
+    etap_y: float | None = None
+    etap_x: float | None = None
+    etap_r: float | None = None
     fresp_z: float
     fresp_y: float
     fresp_x: float
     fresp_r: float
-    dp_z: float
-    dp_y: float
-    dp_x: float
-    dp_xr: float
+    dp_z: float | None = None
+    dp_y: float | None = None
+    dp_x: float | None = None
+    dp_xr: float | None = None
     wdthp: float
 
     def __post_init__(self):
@@ -334,6 +334,27 @@ class ContPad:
         self.sp_xr = self.sp_z * (self.wdthp**2) / 12.0
         self.sp_yr = self.sp_z * (self.wdthp**2) / 12.0
         self.sp_zr = (self.sp_y + self.sp_x) * (self.wdthp ** 2) / 12
+
+        eta = array([self.etap_z, self.etap_y, self.etap_x, self.etap_r], dtype=object)
+        d = array([self.dp_z, self.dp_y, self.dp_x, self.dp_xr], dtype=object)
+        missing_eta = np.sum(eta == None) # noqa: E711
+        missing_d = np.sum(d == None) # noqa: E711
+
+        if 0 < missing_eta < 4:
+            msg = f"Eta values are missing ({missing_eta} of 4 values are missing)."
+            raise ValueError(msg)
+
+        if 0 < missing_d < 4:
+            msg = f"viscous damping coefficients are missing ({missing_d} of 4 values are missing)."
+            raise ValueError(msg)
+
+        if missing_eta == 4 and missing_d == 4:
+            msg = "Both eta values and viscous damping coefficients are missing. Please provide one set of values."
+            raise ValueError(msg)
+
+        if missing_eta == 0 and missing_d == 0:
+            msg = "Both eta values and viscous damping coefficients are provided. Please provide one set of values."
+            raise ValueError(msg)
 
 
 @dataclass(kw_only=True)
@@ -360,7 +381,7 @@ class Sleeper:
         Sleeper length in y-direction :math:`[m]`.
     wdths : float
         Sleeper width in x-direction :math:`[m]`.
-    hights : float
+    heights : float
         Sleeper hight in z-direction :math:`[m]`.
     z_st : float
         Vertical distance from sleeper centroid to top of sleeper :math:`[m]`.
@@ -386,7 +407,7 @@ class Sleeper:
     Bs: float
     lengs: float
     wdths: float
-    hights: float
+    heights: float
     z_st: float
     z_sb: float
     y_sc: float = 0.7175
