@@ -35,6 +35,17 @@ def build_rail_matrices(rail, damp_type="hysteretic"):
     damp_type : str, default="hysteretic"
         The Type of the used damping Model for components. "viscous" uses the viscous damping model
         and "hysteretic" uses the hysteretic damping model.
+
+    Return
+    ----------
+    K0 : ndarray
+        Rail stiffness matrix.
+    K1 : ndarray
+        Rail stiffness matrix.
+    K2 : ndarray
+        Rail stiffness matrix.
+    Mr : ndarray
+        Rail mass matrix.
     """
     # Rail properties
     G = rail.G
@@ -128,6 +139,15 @@ def build_transfm_matrices(z_f, y_f, z_st=0, z_sb=0, chi_f=0):
         The vertical distance from the sleeper bottom surface to the sleeper centroid :math:`[m]`.
     chi_f : float, default=0
         The warping function of the cross-section at the rail foot :math:`[m^2]`.
+
+    Return
+    ----------
+    Tf: ndarray
+        The transformation matrix from the rail centroid to the rail foot.
+    Tst: ndarray
+        The transformation matrix from the sleeper centroid to the rail foot.
+    Tsb: ndarray
+        The transformation matrix from the sleeper centroid to the sleeper bottom.
     """
     # Foot transform
     Tf = array(
@@ -185,6 +205,11 @@ def build_equ_sleeper_matrix(track, y_sc, equi_sm):
     equi_sm : bool
         If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
         used.
+
+    Return
+    ----------
+    E : ndarray
+        The equivalent sleeper Matrix, which is used to scale the stiffness of the balast.
     """
     if isinstance(track, ContBallastedSingleRailTrack):
         seclay = track.slab
@@ -219,6 +244,13 @@ def build_pad_ballast_stiff_matrices(track, z_f, damp_type="hysteretic", E=None)
     E : ndarray, default=ones(7)
         The equivalent sleeper Matrix, which is used to scale the stiffness of the balast.
         If "None", a default value of ones(7) is used.
+
+    Return
+    ----------
+    Kp: ndarray
+        The railpad stiffness matrix.
+    Kb: ndarray
+        The ballast stiffness matrix.
     """
     if E is None:
         E = ones(7)
@@ -304,6 +336,11 @@ def build_sleep_mass_matrix(track, E=None):
     E : ndarray, default=ones(7)
         The equivalent sleeper Matrix, which is used to scale the mass of the balast.
         If "None", a default value of ones(7) is used.
+
+    Return
+    ----------
+    Ms : ndarray
+        Sleeper mass matrix.
     """
     if E is None:
         E = ones(7)
@@ -341,6 +378,11 @@ def build_fnd_stiff_matrix(Kp, Tf, Kb=None, Tst=None, Tsb=None):
         The transformation matrix from the sleeper centroid to the rail foot.
     Tsb: ndarray, default=zeros((7, 7))
         The transformation matrix from the sleeper centroid to the sleeper bottom.
+
+    Return
+    ----------
+    K_fnd : ndarray
+        Foundation stiffness matrix.
     """
     if Kb is None:
         Kb = zeros((7, 7))
@@ -371,6 +413,11 @@ def build_fnd_damp_matrix(Dp, Tf, Db=None, Tst=None, Tsb=None):
         The transformation matrix from the sleeper centroid to the rail foot.
     Tsb : ndarray, default=zeros((7, 7))
         The transformation matrix from the sleeper centroid to the sleeper bottom.
+
+    Return
+    ----------
+    D_fnd : ndarray
+        Foundation damping matrix.
     """
     if Db is None:
         Db = zeros((7, 7))
@@ -399,6 +446,11 @@ def calc_cut_on_frequ(K0, K_fnd, Mr, Ms=None):
         Rail mass matrix.
     Ms : ndarray, default=diag(ones(7) * 1e-20)
         Sleeper mass matrix.
+
+    Return
+    ----------
+    cof : ndarray
+        Cuton frequencies of the track system.
     """
     if Ms is None:
         Ms = diag(ones(7) * 1e-20)
@@ -432,6 +484,13 @@ def build_pad_ballast_damp_matrices(track, cof, E=None):
     E : ndarray, default=ones(7)
         The equivalent sleeper Matrix, which is used to scale the mass of the balast.
         If "None", a default value of ones(7) is used.
+
+    Return
+    ----------
+    Dp : ndarray
+        The railpad damping matrix.
+    Db: ndarray
+        The ballast damping matrix.
     """
     if E is None:
         E = ones(7)
