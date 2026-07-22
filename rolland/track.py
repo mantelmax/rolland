@@ -269,6 +269,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
+        self.pad.cof = cof
         self.calc_pad_viscous_damp_cuton(cof)
 
     def _abstract(self) -> None:
@@ -373,6 +374,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
+        self.pad.cof = cof
         self.calc_pad_viscous_damp_cuton(cof)
 
     def calc_mount_prop(self, change=None):
@@ -465,6 +467,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
+        self.pad.cof = cof
         self.calc_pad_viscous_damp_cuton(cof)
 
     def calc_mount_prop(self, change=None):
@@ -559,6 +562,8 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
+        self.pad.cof = cof
+        self.ballast.cof = cof
         self.calc_pad_viscous_damp_cuton(cof)
         self.calc_ballast_viscous_damp_cuton(cof)
 
@@ -670,6 +675,8 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
+        self.pad.cof = cof
+        self.ballast.cof = cof
         self.calc_pad_viscous_damp_cuton(cof)
         self.calc_ballast_viscous_damp_cuton(cof)
 
@@ -771,6 +778,8 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
+        self.pad.cof = cof
+        self.ballast.cof = cof
         self.calc_pad_viscous_damp_cuton(cof)
         self.calc_ballast_viscous_damp_cuton(cof)
 

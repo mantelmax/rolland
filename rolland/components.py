@@ -181,18 +181,8 @@ class DiscrPad:
         Longitudinal pad loss factor :math:`[-]`.
     etap_r : float
         Rotational pad loss factor :math:`[-]`.
-    fresp_x : float
-        Vertical resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresp_y : float
-        Lateral resonance frequency [Hz]. This frequency is needed for calculating the corresponding
-        viscous damping coefficient if not provided.
-    fresp_z : float
-        Longitudinal resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresp_r : float
-        Rotational resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
+    cof : ndarray
+        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
     dp_z : float | None
         Vertical pad damping coefficient (viscous) :math:`[Ns/m]`.
     dp_y : float | None
@@ -216,10 +206,7 @@ class DiscrPad:
     etap_y: float | None = None
     etap_x: float | None = None
     etap_r: float | None = None
-    fresp_z: float
-    fresp_y: float
-    fresp_x: float
-    fresp_r: float
+    cof: ndarray = field(init=False)
     dp_z: float | None = None
     dp_y: float | None = None
     dp_x: float | None = None
@@ -284,18 +271,8 @@ class ContPad:
         Longitudinal pad loss factor :math:`[-]`.
     etap_r : float
         Rotational pad loss factor :math:`[-]`.
-    fresp_z : float
-        Longitudinal resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresp_y : float
-        Lateral resonance frequency [Hz]. This frequency is needed for calculating the corresponding
-        viscous damping coefficient if not provided.
-    fresp_x : float
-        Vertical resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresp_r : float
-        Rotational resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
+    cof : ndarray
+        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
     dp_z : float
         Vertical pad damping coefficient (viscous) :math:`[Ns/m^2]`.
     dp_y : float
@@ -319,10 +296,7 @@ class ContPad:
     etap_y: float | None = None
     etap_x: float | None = None
     etap_r: float | None = None
-    fresp_z: float
-    fresp_y: float
-    fresp_x: float
-    fresp_r: float
+    cof: ndarray = field(init=False)
     dp_z: float | None = None
     dp_y: float | None = None
     dp_x: float | None = None
@@ -511,24 +485,8 @@ class Ballast:
         Longitudinal ballast loss factor :math:`[-]`.
     etab_r : float
         Rotational ballast loss factor :math:`[-]`.
-    fresb_z : float
-        Longitudinal ballast resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresb_y : float
-        Lateral ballast resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresb_x : float
-        Vertical ballast resonance frequency [Hz]. This frequency is needed for calculating the
-        corresponding viscous damping coefficient if not provided.
-    fresb_zr : float
-        Rotational ballast resonance frequency for z-axis [Hz]. This frequency is needed for
-        calculating the corresponding viscous damping coefficient if not provided.
-    fresb_yr : float
-        Rotational ballast resonance frequency for y-axis [Hz]. This frequency is needed for
-        calculating the corresponding viscous damping coefficient if not provided.
-    fresb_xr : float
-        Rotational ballast resonance frequency for x-axis [Hz]. This frequency is needed for
-        calculating the corresponding viscous damping coefficient if not provided.
+    cof : ndarray
+        Matrix containing the cut on frequencies for the ballast loss factors :math:`[Hz]`.
     db_z : float
         Vertical ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
     db_y : float
@@ -553,12 +511,7 @@ class Ballast:
     etab_y: float
     etab_x: float
     etab_r: float
-    fresb_x: float
-    fresb_y: float
-    fresb_z: float
-    fresb_xr: float
-    fresb_zr: float
-    fresb_yr: float
+    cof: ndarray = field(init=False)
     db_z: float | None = None
     db_y: float | None = None
     db_x: float | None = None
