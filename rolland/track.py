@@ -59,7 +59,7 @@ class SingleRailTrack(Track):
 
     def calc_pad_warping_stiffn(self):
         """Calculate warping stiffness."""
-        e_s = self.rail.shearc[1] - self.rail.z_f
+        e_s = self.rail.shearc[1] - self.z_f
         self.pad.sp_w = (self.rail.k_w * e_s) ** 2 * self.pad.wdthp**2 / 12 * self.pad.sp_y
 
     def calc_pad_viscous_damp_cuton(self):
@@ -211,8 +211,8 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.rail.z_f,
-            self.rail.y_f,
+            self.z_f,
+            self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
             self.rail.chi,
@@ -328,8 +328,8 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.rail.z_f,
-            self.rail.y_f,
+            self.z_f,
+            self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
             self.rail.chi,
@@ -433,8 +433,8 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.rail.z_f,
-            self.rail.y_f,
+            self.z_f,
+            self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
             self.rail.chi,
@@ -540,8 +540,8 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.rail.z_f,
-            self.rail.y_f,
+            self.z_f,
+            self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
             self.rail.chi,
@@ -665,8 +665,8 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.rail.z_f,
-            self.rail.y_f,
+            self.z_f,
+            self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
             self.rail.chi,
@@ -780,8 +780,8 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.rail.z_f,
-            self.rail.y_f,
+            self.z_f,
+            self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
             self.rail.chi,
