@@ -53,10 +53,6 @@ class Rail:
         Coordinates of rail shear center :math:`[m]`.
     centr : list[float]
         Coordinates of centroid :math:`[m]`.
-    z_f: float
-        Vertical distance from rail foot to centroid :math:`[m]`.
-    y_f: float
-        Lateral distance from rail foot to centroid :math:`[m]`.
     ez : float
         Vertical shear center eccentricity :math:`[m]`.
     ey : float
@@ -122,8 +118,6 @@ class Rail:
     dr: float
     shearc: list[float]
     centr: list[float]
-    z_f: float
-    y_f: float
     ez: float = field(init=False)
     ey: float = field(init=False)
     Iyr: float
@@ -198,7 +192,7 @@ class DiscrPad:
     sp_z: float
     sp_y: float
     sp_x: float
-    sp_w: float
+    sp_w: float = field(init=False)
     sp_xr: float = field(init=False)
     sp_yr: float = field(init=False)
     sp_zr: float = field(init=False)
@@ -288,7 +282,7 @@ class ContPad:
     sp_z: float
     sp_y: float
     sp_x: float
-    sp_w: float
+    sp_w: float = field(init=False)
     sp_zr: float = field(init=False)
     sp_yr: float = field(init=False)
     sp_xr: float = field(init=False)
@@ -504,9 +498,9 @@ class Ballast:
     sb_z: float
     sb_y: float
     sb_x: float
-    sb_xr: float
-    sb_yr: float
-    sb_zr: float
+    sb_xr: float = field(init=False)
+    sb_yr: float = field(init=False)
+    sb_zr: float = field(init=False)
     etab_z: float
     etab_y: float
     etab_x: float
