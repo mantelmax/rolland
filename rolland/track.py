@@ -217,9 +217,9 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
             self.slab.z_sb,
             self.rail.chi,
             )
-        E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", E) # noqa: N806
+        self.E = build_equ_sleeper_matrix(self) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -334,9 +334,9 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
             self.slab.z_sb,
             self.rail.chi,
             )
-        E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", E) # noqa: N806
+        self.E = build_equ_sleeper_matrix(self) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -439,9 +439,9 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
             self.slab.z_sb,
             self.rail.chi,
             )
-        E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", E) # noqa: N806
+        self.E = build_equ_sleeper_matrix(self) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -546,9 +546,9 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
             self.slab.z_sb,
             self.rail.chi,
             )
-        E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", E) # noqa: N806
+        self.E = build_equ_sleeper_matrix(self) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -671,9 +671,9 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             self.slab.z_sb,
             self.rail.chi,
             )
-        E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", E) # noqa: N806
+        self.E = build_equ_sleeper_matrix(self) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
@@ -786,9 +786,9 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             self.slab.z_sb,
             self.rail.chi,
             )
-        E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", E) # noqa: N806
+        self.E = build_equ_sleeper_matrix(self) # noqa: N806
+        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
+        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
         K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
         cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
 
