@@ -645,14 +645,6 @@ class DiscretizeDEVITO(Discretization):
 
         return op, u_z, u_y, phi_x
 
-    def check_stability(self):
-        """Check stability."""
-        # Courant number
-        c_ql = sqrt(self.track.rail.E / self.track.rail.rho)
-        C = c_ql * self.dt / self.dx
-        cfl_status = "stable" if C < 1 else "unstable"
-        print(f"Courant number: {C:.2f} ({cfl_status})")
-
     def _abstract(self) -> None:
         pass
 
