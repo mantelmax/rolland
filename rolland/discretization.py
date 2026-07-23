@@ -531,7 +531,7 @@ class DiscretizeDEVITO(Discretization):
 
         else:
             mount_pos = list(track.mount_prop.keys())
-            mount_pos_interp = track.pad.interpol_pad_width(
+            mount_pos_interp = track.interpol_pad_width(
                 linspace(0, track.l_track, self.nx), self.dx, mount_pos)
 
             seclay = track.slab if isinstance(track, SimplePeriodicSlabSingleRailTrack) else track.sleeper

@@ -33,6 +33,7 @@ class PMLRailDampVertic:
         """Exponential increasing rail damping, added to dr."""
         return drbc * xbc ** self.alpha / self.l_bound ** self.alpha
 
+@dataclass
 class DevitoPMLDamp:
     r"""Devito PML.
 
@@ -54,7 +55,6 @@ class DevitoPMLDamp:
     alpha: float = 10000
     m: float = 7
     l_bound: float = 10
-    sigma: ndarray
 
     def calc_damping_function(self, dx):
         """Calculate the damping profile for the PML boundary domain."""

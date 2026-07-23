@@ -99,7 +99,7 @@ class SingleRailTrack(Track):
         if not self.sleeper.equi_sm:
             pass
         else:
-            self.sleeper.f_z = 1 + 12 * self.sleeper.y_sc**2 /(self.sleeper.lengs**2 + self.sleeper.hights**2)
+            self.sleeper.f_z = 1 + 12 * self.sleeper.y_sc**2 /(self.sleeper.lengs**2 + self.sleeper.heights**2)
             self.sleeper.f_x = 1 + 12 * self.sleeper.y_sc**2 / (self.sleeper.lengs**2 + self.sleeper.wdths**2)
 
     def calc_equiv_slab_factors(self):
@@ -667,8 +667,8 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
             self.z_f,
             self.y_f,
-            self.slab.z_st,
-            self.slab.z_sb,
+            self.sleeper.z_st,
+            self.sleeper.z_sb,
             self.rail.chi,
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
