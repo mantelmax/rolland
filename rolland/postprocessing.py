@@ -10,18 +10,10 @@
     TDR
 """
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
-from numpy import array, convolve, ndarray, ones, pi, rint, round, squeeze, where, zeros  # noqa: A004
+from numpy import ones, pi  # noqa: A004
 from numpy.fft import fft, fftfreq
-
-from .deflection import Deflection
-from .methods import AnalyticalMethods
-from .track import (
-    ArrangedBallastedSingleRailTrack,
-    ArrangedSlabSingleRailTrack,
-)
 
 
 class PostProcessing(ABC):
