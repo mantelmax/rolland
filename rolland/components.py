@@ -13,9 +13,36 @@
 """
 
 from dataclasses import dataclass, field
+from typing import Literal
 
 import numpy as np
 from numpy import array, ndarray
+
+
+def _damping_mode(eta_values, viscous_values, eta_name, viscous_name):
+    missing_eta = np.sum(array([value is None for value in eta_values]))
+    missing_d = np.sum(array([value is None for value in viscous_values]))
+
+    if 0 < missing_eta < len(eta_values):
+        msg = f"{eta_name} values are missing ({missing_eta} of {len(eta_values)} values are missing)."
+        raise ValueError(msg)
+
+    if 0 < missing_d < len(viscous_values):
+        msg = f"{viscous_name} are missing ({missing_d} of {len(viscous_values)} values are missing)."
+        raise ValueError(msg)
+
+    if missing_eta == len(eta_values) and missing_d == len(viscous_values):
+        msg = f"Both {eta_name} and {viscous_name} are missing. Please provide one set of values."
+        raise ValueError(msg)
+
+    if missing_eta == 0 and missing_d == 0:
+        msg = f"Both {eta_name} and {viscous_name} are provided. Please provide one set of values."
+        raise ValueError(msg)
+
+    if missing_eta == 0:
+        return "hysteretic"
+
+    return "viscous"
 
 
 @dataclass(kw_only=True)
@@ -175,8 +202,6 @@ class DiscrPad:
         Longitudinal pad loss factor :math:`[-]`.
     etap_r : float
         Rotational pad loss factor :math:`[-]`.
-    cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
     dp_z : float | None
         Vertical pad damping coefficient (viscous) :math:`[Ns/m]`.
     dp_y : float | None
@@ -200,7 +225,7 @@ class DiscrPad:
     etap_y: float | None = None
     etap_x: float | None = None
     etap_r: float | None = None
-    cof: ndarray = field(init=False)
+    damping_mode: Literal["viscous", "hysteretic"] = field(init=False)
     dp_z: float | None = None
     dp_y: float | None = None
     dp_x: float | None = None
@@ -213,26 +238,12 @@ class DiscrPad:
         self.sp_yr = self.sp_z * (self.wdthp**2) / 12.0
         self.sp_zr = (self.sp_y + self.sp_x) * (self.wdthp ** 2) / 12
 
-        eta = array([self.etap_z, self.etap_y, self.etap_x, self.etap_r], dtype=object)
-        d = array([self.dp_z, self.dp_y, self.dp_x, self.dp_xr], dtype=object)
-        missing_eta = np.sum(eta == None) # noqa: E711
-        missing_d = np.sum(d == None) # noqa: E711
-
-        if 0 < missing_eta < 4:
-            msg = f"Eta values are missing ({missing_eta} of 4 values are missing)."
-            raise ValueError(msg)
-
-        if 0 < missing_d < 4:
-            msg = f"viscous damping coefficients are missing ({missing_d} of 4 values are missing)."
-            raise ValueError(msg)
-
-        if missing_eta == 4 and missing_d == 4:
-            msg = "Both eta values and viscous damping coefficients are missing. Please provide one set of values."
-            raise ValueError(msg)
-
-        if missing_eta == 0 and missing_d == 0:
-            msg = "Both eta values and viscous damping coefficients are provided. Please provide one set of values."
-            raise ValueError(msg)
+        self.damping_mode = _damping_mode(
+            (self.etap_z, self.etap_y, self.etap_x, self.etap_r),
+            (self.dp_z, self.dp_y, self.dp_x, self.dp_xr),
+            "Loss factors",
+            "viscous damping coefficients",
+        )
 
 
 @dataclass(kw_only=True)
@@ -265,8 +276,6 @@ class ContPad:
         Longitudinal pad loss factor :math:`[-]`.
     etap_r : float
         Rotational pad loss factor :math:`[-]`.
-    cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
     dp_z : float
         Vertical pad damping coefficient (viscous) :math:`[Ns/m^2]`.
     dp_y : float
@@ -290,7 +299,7 @@ class ContPad:
     etap_y: float | None = None
     etap_x: float | None = None
     etap_r: float | None = None
-    cof: ndarray = field(init=False)
+    damping_mode: Literal["viscous", "hysteretic"] = field(init=False)
     dp_z: float | None = None
     dp_y: float | None = None
     dp_x: float | None = None
@@ -302,27 +311,12 @@ class ContPad:
         self.sp_xr = self.sp_z * (self.wdthp**2) / 12.0
         self.sp_yr = self.sp_z * (self.wdthp**2) / 12.0
         self.sp_zr = (self.sp_y + self.sp_x) * (self.wdthp ** 2) / 12
-
-        eta = array([self.etap_z, self.etap_y, self.etap_x, self.etap_r], dtype=object)
-        d = array([self.dp_z, self.dp_y, self.dp_x, self.dp_xr], dtype=object)
-        missing_eta = np.sum(eta == None) # noqa: E711
-        missing_d = np.sum(d == None) # noqa: E711
-
-        if 0 < missing_eta < 4:
-            msg = f"Eta values are missing ({missing_eta} of 4 values are missing)."
-            raise ValueError(msg)
-
-        if 0 < missing_d < 4:
-            msg = f"viscous damping coefficients are missing ({missing_d} of 4 values are missing)."
-            raise ValueError(msg)
-
-        if missing_eta == 4 and missing_d == 4:
-            msg = "Both eta values and viscous damping coefficients are missing. Please provide one set of values."
-            raise ValueError(msg)
-
-        if missing_eta == 0 and missing_d == 0:
-            msg = "Both eta values and viscous damping coefficients are provided. Please provide one set of values."
-            raise ValueError(msg)
+        self.damping_mode = _damping_mode(
+            (self.etap_z, self.etap_y, self.etap_x, self.etap_r),
+            (self.dp_z, self.dp_y, self.dp_x, self.dp_xr),
+            "Loss factors",
+            "viscous damping coefficients",
+        )
 
 
 @dataclass(kw_only=True)
@@ -479,8 +473,6 @@ class Ballast:
         Longitudinal ballast loss factor :math:`[-]`.
     etab_r : float
         Rotational ballast loss factor :math:`[-]`.
-    cof : ndarray
-        Matrix containing the cut on frequencies for the ballast loss factors :math:`[Hz]`.
     db_z : float
         Vertical ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
     db_y : float
@@ -501,17 +493,26 @@ class Ballast:
     sb_xr: float = field(init=False)
     sb_yr: float = field(init=False)
     sb_zr: float = field(init=False)
-    etab_z: float
-    etab_y: float
-    etab_x: float
-    etab_r: float
-    cof: ndarray = field(init=False)
+    etab_z: float | None = None
+    etab_y: float | None = None
+    etab_x: float | None = None
+    etab_r: float | None = None
+    damping_mode: Literal["viscous", "hysteretic"] = field(init=False)
     db_z: float | None = None
     db_y: float | None = None
     db_x: float | None = None
     db_xr: float | None = None
     db_yr: float | None = None
     db_zr: float | None = None
+
+    def __post_init__(self):
+        """Validate that one complete damping representation is provided."""
+        self.damping_mode = _damping_mode(
+            (self.etab_z, self.etab_y, self.etab_x, self.etab_r),
+            (self.db_z, self.db_y, self.db_x, self.db_xr, self.db_yr, self.db_zr),
+            "Loss factors",
+            "viscous damping coefficients",
+        )
 
 
 @dataclass(kw_only=True)
