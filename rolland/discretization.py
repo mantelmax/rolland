@@ -36,8 +36,8 @@ class Discretization(ABC):
     r"""Abstract base class for discretization classes."""
 
     @abstractmethod
-    def validate_discretization(self):
-        """Validate the discretization."""
+    def _abstract(self) -> None:
+        """Prevents instantiation of abstract classes."""
 
 
 @dataclass(kw_only=True)
@@ -457,13 +457,10 @@ class DiscretizeDEVITO(Discretization):
     bound: DevitoPMLDamp
     dt: float = 0.5e-5
     req_simt: float = 0.1
-    nt: int
     dx: float = 0.05
-    grid: Grid
     z_f: float = 0.0
     y_f: float = 0.0
     store: str = "point"
-    exc: Excitation
     equi_sm: bool = True
     y_sc: float = 0.7175
 
@@ -535,19 +532,12 @@ class DiscretizeDEVITO(Discretization):
         else:
             mount_pos = list(track.mount_prop.keys())
             mount_pos_interp = track.pad.interpol_pad_width(
-                linspace(0, track.l_track, self.nx), self.dx, mount_pos,)
+                linspace(0, track.l_track, self.nx), self.dx, mount_pos)
 
             seclay = track.slab if isinstance(track, SimplePeriodicSlabSingleRailTrack) else track.sleeper
 
 
         if isinstance(track, (ContSlabSingleRailTrack, DiscrSlabSingleRailTrack)):
-            K0r, K1r, K2r, Mr = build_rail_matrices(track.rail, 'viscous')  # noqa: N806
-            Tf, _, _ = build_transfm_matrices(self.z_f, self.y_f, 0, 0, 0)
-            Kp, _ = build_pad_ballast_stiff_matrices(track, self.z_f, 'viscous')
-            K_fnd = build_fnd_stiff_matrix(Kp, Tf)
-            cof = calc_cut_on_frequ(K0r, K_fnd, Mr)
-            Dp, _ = build_pad_ballast_damp_matrices(track, cof)
-
             sb_x.data[:] = 0
             sb_z.data[:] = 0
             sb_y.data[:] = 0
@@ -574,16 +564,6 @@ class DiscretizeDEVITO(Discretization):
 
 
         else:
-            K0r, K1r, K2r, Mr = build_rail_matrices(track.rail, 'viscous')
-            Tf, Tst, Tsb = build_transfm_matrices(self.z_f, self.y_f, seclay.z_st, seclay.z_sb, 0)
-            E = build_equ_sleeper_matrix(track, self.y_sc, self.equi_sm)
-            Kp, Kb = build_pad_ballast_stiff_matrices(track, self.z_f, 'viscous', E)
-            Ms = build_sleep_mass_matrix(track, E)
-            K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb)
-            cof = calc_cut_on_frequ(K0r, K_fnd, Mr, Ms)
-            Dp, Db = build_pad_ballast_damp_matrices(track, cof, E)
-            # D_fnd = build_fnd_damp_matrix(Dp, Tf, Db, Tst, Tsb)
-
             ballast = track.ballast
             sb_x.data[:] = ballast.sb_x * mount_pos_interp
             sb_z.data[:] = ballast.sb_z * mount_pos_interp
@@ -599,14 +579,14 @@ class DiscretizeDEVITO(Discretization):
             db_yr.data[:] = ballast.db_yr * mount_pos_interp
 
             ms.data[:] = (seclay.ms * mount_pos_interp) + 1e-20
-            moinnert_s_x.data[:] = seclay.is_x * mount_pos_interp + 1e-20
-            moinnert_s_y.data[:] = seclay.is_y * mount_pos_interp + 1e-20
-            moinnert_s_z.data[:] = seclay.is_z * mount_pos_interp + 1e-20
+            moinnert_s_x.data[:] = seclay.Is_x * mount_pos_interp + 1e-20
+            moinnert_s_y.data[:] = seclay.Is_y * mount_pos_interp + 1e-20
+            moinnert_s_z.data[:] = seclay.Is_z * mount_pos_interp + 1e-20
             rho_s = seclay.rhos
             z_st = seclay.z_st
             z_sb = seclay.z_sb
-            Ex = Constant(name="Ex", value=E[0])
-            Ez = Constant(name="Ez", value=E[1])
+            Ex = Constant(name="Ex", value=track.E[0])
+            Ez = Constant(name="Ez", value=track.E[1])
 
         sp_z.data[:] = track.pad.sp_z * mount_pos_interp
         sp_y.data[:] = track.pad.sp_y * mount_pos_interp
@@ -767,7 +747,7 @@ class DiscretizeDEVITO(Discretization):
             + sp_z * u_z
             - y_f * dp_z * phi_x.backward.dt
             + (-dp_z) * u_sz.backward.dt
-            + (dp_z + rail.dr) * u_z.dt
+            + (dp_z + rail.dr) * u_z.dt,
         )
 
         # Timoshenko Beam Wave - Sum of Lateral Forces
@@ -784,7 +764,7 @@ class DiscretizeDEVITO(Discretization):
             + z_f * dp_y * phi_x.backward.dt
             + z_st * (-dp_y) * phi_sx.backward.dt
             + (-dp_y) * u_sy.backward.dt
-            + (dp_y + rail.dr) * u_y.dt
+            + (dp_y + rail.dr) * u_y.dt,
         )
 
         # Torsional Beam Wave (Rotation about x-axis)
@@ -807,7 +787,7 @@ class DiscretizeDEVITO(Discretization):
             + (-dp_xr - z_f * z_st * dp_y) * phi_sx.backward.dt
             + (-sp_xr - sp_y * z_f * z_st) * phi_sx
             + (dp_xr + y_f**2 * dp_z + z_f**2 * dp_y) * phi_x.dt
-            + (sp_xr + sp_y * z_f**2 + sp_z * y_f**2) * phi_x
+            + (sp_xr + sp_y * z_f**2 + sp_z * y_f**2) * phi_x,
         )
 
         # Timoshenko Beam Wave - Sum of Lateral Moments
@@ -876,7 +856,7 @@ class DiscretizeDEVITO(Discretization):
             + chi_f * sp_x * u_x
             + (A * G * e_y * kap_z - chi_f * sp_x * z_f) * phi_y
             + (A * G * e_z * kap_y + chi_f * sp_x * y_f) * phi_z
-            + (G * Jt + chi_f**2 * sp_x + sp_w) * u_w
+            + (G * Jt + chi_f**2 * sp_x + sp_w) * u_w,
         )
 
         # Translational Sleeper Equation (x-direction)
@@ -891,7 +871,7 @@ class DiscretizeDEVITO(Discretization):
             - sp_x * u_x
             + (sp_x + sb_x * Ex) * u_sx
             + (db_x * Ex + dp_x) * u_sx.dt
-            + ms * u_sx.dt2 * Ex
+            + ms * u_sx.dt2 * Ex,
         )
 
         # Translational Sleeper Equation (z-direction)
@@ -902,7 +882,7 @@ class DiscretizeDEVITO(Discretization):
             + (-dp_z) * u_z.dt
             + (sp_z + sb_z * Ez) * u_sz
             + (db_z * Ez + dp_z) * u_sz.dt
-            + ms * u_sz.dt2 * Ez
+            + ms * u_sz.dt2 * Ez,
         )
 
         # Translational Sleeper Equation (y-direction)
@@ -915,7 +895,7 @@ class DiscretizeDEVITO(Discretization):
             + (sb_y + sp_y) * u_sy
             + (db_y * z_sb + z_st * dp_y) * phi_sx.dt
             + (sb_y * z_sb + sp_y * z_st) * phi_sx
-            + (db_y + dp_y) * u_sy.dt
+            + (db_y + dp_y) * u_sy.dt,
         )
 
         # Rotational Sleeper Equation (x-axis)
@@ -928,7 +908,7 @@ class DiscretizeDEVITO(Discretization):
             + (db_y * z_sb + z_st * dp_y) * u_sy.dt
             + (sb_y * z_sb + sp_y * z_st) * u_sy
             + (db_xr + db_y * z_sb**2 + dp_xr + z_st**2 * dp_y) * phi_sx.dt
-            + (sb_xr + sb_y * z_sb**2 + sp_xr + sp_y * z_st**2) * phi_sx
+            + (sb_xr + sb_y * z_sb**2 + sp_xr + sp_y * z_st**2) * phi_sx,
         )
 
         # Rotational Sleeper Equation (z-axis)
@@ -1042,7 +1022,6 @@ class DiscretizeDEVITO(Discretization):
 
         return op, u_z, u_y, phi_x
 
-
     def check_stability(self):
         """Check stability."""
         # Courant number
@@ -1050,4 +1029,7 @@ class DiscretizeDEVITO(Discretization):
         C = c_ql * self.dt / self.dx
         cfl_status = "stable" if C < 1 else "unstable"
         print(f"Courant number: {C:.2f} ({cfl_status})")
+
+    def _abstract(self) -> None:
+        pass
 

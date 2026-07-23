@@ -323,3 +323,95 @@ class TDR(RollandPP):
 
         self.tdr = 4.343 / sum_tdr
         self.freq = resp.freq[1:]
+
+class DEVITO_PP(PostProcessing):
+    r"""Postprocessing class for DEVITO results.
+    """
+
+    def validate_postprocessing(self):
+        """Validate the postprocessing methods."""
+
+    @staticmethod
+    def calculate_mobility(u, excit, pd):
+        displ_exc = u.data[:, 0]
+
+        # Extract excitation force data
+        exc = excit.data[:, 0]
+
+        # Perform FFT on displacement and excitation force
+        displ_fft = fft(displ_exc)
+        exc_fft = fft(exc)
+        frequ = fftfreq(pd.nt, pd.dt)
+
+        # Calculate mobility (velocity/displacement)
+        recep = displ_fft / exc_fft
+        mob = abs((1j * 2 * pi * frequ) * recep)
+
+        return frequ, mob
+
+    @staticmethod
+    def calculate_recep(u, excit, pd):
+        displ_exc = u.data[:, 0]
+
+        # Extract excitation force data
+        exc = excit.data[:, 0]
+
+        # Perform FFT on displacement and excitation force
+        displ_fft = fft(displ_exc)
+        exc_fft = fft(exc)
+        frequ = fftfreq(pd.nt, pd.dt)
+
+        # Calculate mobility (velocity/displacement)
+        recep = displ_fft / exc_fft
+
+        return frequ, recep
+
+    @staticmethod
+    def calc_coupled_mobility(u, phi, offset, excit, pd):
+        displ_exc = u.data[:, 0] + phi.data[:, 0] * offset
+        # TODO: Implement tranformation Matrix, for leteral excentricity
+
+        exc = excit.data[:, 0]
+        displ_fft = fft(displ_exc)
+        exc_fft = fft(exc)
+        frequ = fftfreq(pd.nt, pd.dt)
+
+        # Calculate mobility (velocity/displacement)
+        recep = displ_fft / exc_fft
+        mob = abs((1j * 2 * pi * frequ) * recep)
+        return frequ, mob
+
+    @staticmethod
+    def calc_coupled_recep(u, phi, offset, excit, pd):
+        displ_exc = u.data[:, 0] + phi.data[:, 0] * offset
+
+        exc = excit.data[:, 0]
+        displ_fft = fft(displ_exc)
+        exc_fft = fft(exc)
+        frequ = fftfreq(displ_fft.shape[0], pd.dt)
+
+        recep = displ_fft / exc_fft
+        return frequ, recep
+
+    @staticmethod
+    def calculate_mov_recep(u, excit, pd, skip):
+        # Perform FFT on displacement and excitation force
+        displ_fft = fft(u.data[skip:])
+        exc_fft = fft(excit.data[skip:])
+        frequ = fftfreq(displ_fft.shape[0], pd.dt)
+
+        # Calculate mobility (velocity/displacement)
+        recep = displ_fft / exc_fft
+        return frequ, recep
+
+    @staticmethod
+    def calc_coupled_mov_recep(u, phi, offset, excit, pd, skip):
+        displ_exc = u.data[skip:] + phi.data[skip:] * offset
+
+        exc = excit.data[skip:]
+        displ_fft = fft(displ_exc)
+        exc_fft = fft(exc)
+        frequ = fftfreq(displ_fft.shape[0], pd.dt)
+
+        recep = displ_fft / exc_fft
+        return frequ, recep

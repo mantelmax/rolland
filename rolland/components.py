@@ -343,7 +343,7 @@ class Sleeper:
         Sleeper moment of inertia around z-axis :math:`[m^4]`.
     rhos : float
         Density of sleeper :math:`[kg/m^3]`.
-    Bs : float
+    Bs : float | None
         Sleeper bending stiffness :math:`[Nm^2]`.
     lengs : float
         Sleeper length in y-direction :math:`[m]`.
@@ -372,7 +372,7 @@ class Sleeper:
     Is_y: float
     Is_z: float
     rhos: float
-    Bs: float
+    Bs: float | None = None
     lengs: float
     wdths: float
     heights: float
@@ -402,7 +402,7 @@ class Slab:
         Slab moment of inertia around x-axis :math:`[m^4/m]`.
     rhos : float
         Density of slab :math:`[kg/m^3]`.
-    Bs : float
+    Bs : float | None
         Slab bending stiffness :math:`[Nm^2]`.
     lengs : float
         Slab length in y-direction :math:`[m]`.
@@ -431,7 +431,7 @@ class Slab:
     Is_y: float
     Is_x: float
     rhos: float
-    Bs: float
+    Bs: float | None = None
     lengs: float
     equ_wdths: float
     heights: float

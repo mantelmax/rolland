@@ -11,12 +11,24 @@ import inspect
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
-from numpy import empty, linspace, zeros
+from devito import (
+    Operator,
+    SparseTimeFunction,
+)
+from examples.seismic.source import TimeAxis
+from numpy import (
+    empty,
+    linspace,
+    zeros,
+)
 from scipy.sparse.linalg import splu
+from traitlets import Float, Instance, default
 
-from .discretization import Discretization
-from .excitation import Excitation
-from .track import Track
+from .discretization import Discretization, DiscretizeDEVITO
+from .excitation import Excitation, GaussPulse_DEVITO
+from .track import (
+    Track,
+)
 
 
 @dataclass(kw_only=True)
@@ -40,8 +52,8 @@ class Deflection(ABC):
         self.track = self.discr.track
 
     @abstractmethod
-    def validate_deflection(self):
-        """Validate deflection."""
+    def _abstract(self) -> None:
+        """Prevents instantiation of abstract classes."""
 
 
 class DeflectionEBBVertic(Deflection):
@@ -86,9 +98,6 @@ class DeflectionEBBVertic(Deflection):
 
     __init__.__signature__ = inspect.signature(Deflection.__init__)
 
-    def validate_deflection(self):
-        """Validate deflection."""
-
     def initialize_start_values(self):
         """Set starting values of deflections to zero.
 
@@ -107,7 +116,6 @@ class DeflectionEBBVertic(Deflection):
         """Calculate force array."""
         t = linspace(0, self.discr.sim_t, self.discr.nt)
         self.force = self.excit.force(t)
-
 
     def calc_rightside_crank_nicolson(self, u1, u0, ind_excit, t):
         """Calculate the right-hand side of the equation according to :cite:t:`stampka2022a`.
@@ -137,9 +145,7 @@ class DeflectionEBBVertic(Deflection):
         else:
             f[ind_excit] = self.force[t]
 
-        return (self.discr.B.dot(u1) + self.discr.C.dot(u0) + self.discr.dt ** 2 /
-                (self.track.rail.mr * self.discr.dx) * f)
-
+        return self.discr.B.dot(u1) + self.discr.C.dot(u0) + self.discr.dt**2 / (self.track.rail.mr * self.discr.dx) * f
 
     def calc_deflection(self, defl):
         """
@@ -171,9 +177,90 @@ class DeflectionEBBVertic(Deflection):
             # Calculate deflection for time step t
             u = factoriz.solve(b)
 
-            defl[:, t + 1] = u[0:2 * self.discr.nx]
+            defl[:, t + 1] = u[0 : 2 * self.discr.nx]
         return defl
 
+    def _abstract(self) -> None:
+        pass
 
 
+class RunDEVITO(Deflection):
+    r"""Run DEVITO.
 
+    Attributes
+    ----------
+    x_obs : float
+        Response positions.
+    """
+
+    x_obs: float
+
+    def __init__(self, *args, **kwargs):
+        x_obs = kwargs.pop('x_obs', None)
+        super().__init__(*args, **kwargs)
+        self.x_obs = self.excit.x_excit if x_obs is None else x_obs
+        self.run_devito()
+
+    def run_devito(self):
+        """Run DEVITO simulation."""
+        # Calculate derived parameters
+
+        op, u_z, u_y, phi_x = self.discr.build_operator()
+
+        # Excitation
+        time_range = TimeAxis(start=0, num=self.discr.nt, step=self.discr.dt)
+        F = GaussPulse_DEVITO(
+            name='F', grid=self.discr.grid, time_range=time_range, a=self.excit.a, t0=self.excit.sigma, npoint=1
+        )
+        F.coordinates.data[:] = self.excit.x_excit
+
+        rail = self.discr.track.rail
+        track = self.discr.track
+        dx = self.discr.dx
+        dt = self.discr.dt
+
+        rhs_bw1 = 1 / (rail.dr / dt + track.pad.dp_z / dt + rail.mr / dt**2)
+        rhs_bw2 = 1 / (rail.dr / dt + track.pad.dp_y / dt + rail.mr / dt**2)
+        rhs_tw = 1 / (track.pad.dp_xr / dt + rail.rho * track.rail.Ipr / dt**2)
+
+        # The excitation injection term
+        if self.excit.force_dir == 'vertical':
+            exc_z = F.inject(field=u_z.forward, expr=F * rhs_bw1 * 1 / dx)
+            exc_y = F.inject(field=u_y.forward, expr=0)
+            exc_x = F.inject(field=phi_x.forward, expr=(-F * self.excit.y_e) * rhs_tw * 1 / dx)
+
+        elif self.excit.force_dir == 'lateral':
+            exc_z = F.inject(field=u_z.forward, expr=0)
+            exc_y = F.inject(field=u_y.forward, expr=F * rhs_bw2 * 1 / dx)
+            exc_x = F.inject(field=phi_x.forward, expr=(F * self.excit.z_e) * rhs_tw * 1 / dx)
+
+        # TODO: Add longitudinal excitation
+
+        # Define observation points at x_excit
+        u_z_obs = SparseTimeFunction(
+            name='u_z_obs', grid=self.discr.grid, npoint=1, nt=self.discr.nt, coordinates=[[self.x_obs]]
+        )
+        u_y_obs = SparseTimeFunction(
+            name='u_y_obs', grid=self.discr.grid, npoint=1, nt=self.discr.nt, coordinates=[[self.x_obs]]
+        )
+        phi_x_obs = SparseTimeFunction(
+            name='phi_x_obs', grid=self.discr.grid, npoint=1, nt=self.discr.nt, coordinates=[[self.x_obs]]
+        )
+        obs_term_uz = u_z_obs.interpolate(expr=u_z)
+        obs_term_uy = u_y_obs.interpolate(expr=u_y)
+        obs_term_phix = phi_x_obs.interpolate(expr=phi_x)
+
+        op_exc = Operator(op + exc_z + exc_y + exc_x + obs_term_uz + obs_term_uy + obs_term_phix)
+
+        op_exc.apply(dt=self.discr.dt)
+
+        self.u_z = u_z
+        self.u_y = u_y
+        self.phi_x = phi_x
+        self.u_z_obs = u_z_obs
+        self.u_y_obs = u_y_obs
+        self.phi_x_obs = phi_x_obs
+        self.F = F
+
+    def _abstract(self) -> None:
+        pass
