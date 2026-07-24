@@ -23,7 +23,7 @@ class Excitation(ABC):
     def inject_in_track(self, discr) -> tuple:
         """Build injection expressions for the excitation."""
 
-
+@dataclass(kw_only=True)
 class StationaryExcitation(Excitation, ABC):
     """Abstract base class for stationary excitation.
 
@@ -61,6 +61,8 @@ class GaussianImpulse(StationaryExcitation):
         Excitation z-coordinate :math:`[m]`.
     y_e : float, default=0.0
         Excitation y-coordinate :math:`[m]`.
+    force: SparseTimeFunction
+        The Devito SparseTimeFunction representing the excitation force.
     """
 
     sigma: float = 0.7e-4
@@ -77,17 +79,18 @@ class GaussianImpulse(StationaryExcitation):
         """Build the Devito SparseTimeFunction for the excitation."""
         time = dt * np.arange(nt)
 
-        force_field = SparseTimeFunction(
+        force_func = SparseTimeFunction(
             name='F',
             grid=grid,
             nt=nt,
             npoint=1,
         )
 
-        force_field.coordinates.data[0, 0] = self.x_excit
-        force_field.data[:, 0] = self.evaluate_wavelet(time)
+        force_func.coordinates.data[0, 0] = self.x_excit
+        force_func.data[:, 0] = self.evaluate_wavelet(time)
 
-        return force_field
+        self.force = force_func
+        return force_func
 
     def inject_in_track(self, discr) -> tuple:
         """Build injection expressions for the excitation."""

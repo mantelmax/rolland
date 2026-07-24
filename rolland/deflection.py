@@ -6,7 +6,7 @@
     Deflection
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from devito import (
     ConditionalDimension,
@@ -16,11 +16,8 @@ from devito import (
     TimeFunction,
 )
 
-from .discretization import Discretization
+from .discretization import DiscretizeTrack
 from .excitation import Excitation
-from .track import (
-    Track,
-)
 
 
 @dataclass(kw_only=True)
@@ -33,7 +30,7 @@ class Deflection:
 
     Attributes
     ----------
-    discr : Discretization
+    discr : DiscretizeTrack
         The discretization object containing track operator.
     excit : Excitation
         The excitation source injected into the simulation.
@@ -42,7 +39,8 @@ class Deflection:
     skip : int
         The subsampling factor; saves every `skip` time step to reduce output array size.
     obs_pos : list | None
-        Coordinates of the response positions to observe. Defaults to the excitation position if None.
+        Coordinates of the response positions to observe. Defaults to the excitation position
+        if None.
     track : Track
         The track model properties (automatically set from `discr`).
     u_z_obs : devito.TimeFunction or devito.SparseTimeFunction
@@ -53,19 +51,14 @@ class Deflection:
         The observed torsional rotation resulting from the simulation.
     """
 
-    discr: 'Discretization'
-    excit: 'Excitation'
+    discr: DiscretizeTrack
+    excit: Excitation
     store: str = 'observe'
     skip: int = 1
     obs_pos: list | None = None
 
-    # Fields set post-initialization (excluded from init, excluded from repr to avoid console spam)
-    track: 'Track' = field(init=False)
-    u_z_obs: object = field(init=False, repr=False, default=None)
-    u_y_obs: object = field(init=False, repr=False, default=None)
-    phi_x_obs: object = field(init=False, repr=False, default=None)
-
     def __post_init__(self):
+        """Initialize derived attributes and run the simulation."""
         self.track = self.discr.track
         self.obs_pos = self._setup_obs_pos(self.obs_pos)
         self.run_devito()

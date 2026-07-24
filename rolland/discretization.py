@@ -37,7 +37,7 @@ class Discretization(ABC):
 
 @dataclass(kw_only=True)
 class DiscretizeTrack(Discretization):
-    r"""Discretizes the track model for DEVITO simulations.
+    r"""Discretizes the computational domain.
 
     This class manages the translation of physical track properties into a finite-difference
     computational grid. It builds the DEVITO grids, applies Perfectly Matched Layer (PML)
@@ -75,8 +75,8 @@ class DiscretizeTrack(Discretization):
         The continuous time function representing torsional rotation.
     """
 
-    track: 'Track'
-    bound: 'CFSPML'
+    track: Track
+    bound: CFSPML
     dt: float = 0.5e-5
     req_simt: float = 0.1
     dx: float = 0.05
