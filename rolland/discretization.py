@@ -135,7 +135,7 @@ class DiscretizeDEVITO(Discretization):
         return dx_pml, dx2_pml, [upd_psi, upd_theta]
 
     def build_operator(self):
-        """Build the Devito operator for the simulation."""
+        """Build the track operator for the simulation."""
         # --- 1. Dynamic Spatial Function Initialization ---
         func_names = [
             'sp_z', 'sp_y', 'sp_x', 'sp_w', 'sp_zr', 'sp_yr', 'sp_xr',
