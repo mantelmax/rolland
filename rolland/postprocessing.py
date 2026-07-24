@@ -157,7 +157,7 @@ class DEVITO_PP(PostProcessing):
     @staticmethod
     def calculate_mov_recep(u, excit, pd, skip):
         # Perform FFT on displacement and excitation force
-        displ_fft = fft(u.data[skip:])
+        displ_fft = fft(u[skip:])
         exc_fft = fft(excit.data[skip:])
         frequ = fftfreq(displ_fft.shape[0], pd.dt)
 

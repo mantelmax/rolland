@@ -201,6 +201,8 @@ class RandomForce(MovingExcitation):
         # Superimpose noise on the static force and apply the ramp
         force_z = self.F_stat_z * (1 + rnd) * ramp_factor
         force_y = self.F_stat_y * (1 + rnd) * ramp_factor
+        self.force_z = force_z
+        self.force_y = force_y
 
         return np.stack([force_z, force_y], axis=0)
 
