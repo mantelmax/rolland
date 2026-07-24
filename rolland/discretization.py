@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from devito import Border, Constant, Eq, Function, Grid, TimeFunction, solve
 from numpy import float64, linspace
 
-from .boundary import DevitoPMLDamp
+from .boundary import CFSPML
 from .track import (
     ContBallastedSingleRailTrack,
     ContSlabSingleRailTrack,
@@ -47,7 +47,7 @@ class DiscretizeTrack(Discretization):
     ----------
     track : Track
         The track instance containing physical parameters.
-    bound : DevitoPMLDamp
+    bound : CFSPML
         The boundary damping instance handling wave absorption at the edges.
     dt : float, default=0.5e-5
         Step size in time :math:`[s]`.
@@ -76,7 +76,7 @@ class DiscretizeTrack(Discretization):
     """
 
     track: 'Track'
-    bound: 'DevitoPMLDamp'
+    bound: 'CFSPML'
     dt: float = 0.5e-5
     req_simt: float = 0.1
     dx: float = 0.05
@@ -111,29 +111,6 @@ class DiscretizeTrack(Discretization):
         # Assuming Border is imported or available in scope
         self.bound_dom = Border(grid=self.bd_grid, border=_nx_bound, dims=x)
 
-    def _apply_pml(self, base_var, name_suffix, sigm, alph):
-        """Generate ADE-PML boundary auxiliary variables and equations."""
-        psi = TimeFunction(
-            name=f'psi_{name_suffix}', grid=self.grid, time_order=2, space_order=3, dtype=float64, save=None,
-        )
-        theta = TimeFunction(
-            name=f'theta_{name_suffix}', grid=self.grid, time_order=2, space_order=3, dtype=float64, save=None,
-        )
-
-        # Calculate modified spatial derivatives
-        dx_pml = base_var.dx - psi * sigm
-        dx2_pml = base_var.dx2 - (sigm.dx * psi + sigm * psi.dx) - sigm * theta
-
-        # Auxiliary equations
-        ade_psi = Eq(psi.dt, dx_pml - psi * alph)
-        ade_theta = Eq(theta.dt, dx2_pml - theta * alph)
-
-        # Forward update stencils
-        upd_psi = Eq(psi.forward, solve(ade_psi, psi.forward), subdomain=self.bound_dom)
-        upd_theta = Eq(theta.forward, solve(ade_theta, theta.forward), subdomain=self.bound_dom)
-
-        return dx_pml, dx2_pml, [upd_psi, upd_theta]
-
     def build_operator(self):
         """Build the track operator for the simulation."""
         # --- 1. Dynamic Spatial Function Initialization ---
@@ -147,11 +124,7 @@ class DiscretizeTrack(Discretization):
         f = {name: Function(name=name, grid=self.grid, dtype=float64) for name in func_names}
 
         # Damping initialization
-        sigm = Function(name='sigma', grid=self.grid)
-        alph = Function(name='alpha', grid=self.grid)
-        self.bound.calc_damping_profile(dx=self.dx, nx=self.nx)
-        sigm.data[:] = self.bound.sigma
-        alph.data[:] = self.bound.alpha
+        sigm, alph = self.bound.initialize_on_grid(self.grid, self.dx, self.nx)
 
         # --- 2. Track & Interpolation Logic ---
         track = self.track
@@ -233,7 +206,9 @@ class DiscretizeTrack(Discretization):
         pml_updates = []
 
         for var, suffix in pml_vars:
-            dx, dx2, updates = self._apply_pml(var, suffix, sigm, alph)
+            # Call the new method on self.bound
+            dx, dx2, updates = self.bound.apply_pml(var, suffix, self.grid,
+                                                    self.bound_dom, sigm, alph)
             pml_dx[suffix] = dx
             pml_dx2[suffix] = dx2
             pml_updates.extend(updates)

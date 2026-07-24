@@ -5,7 +5,7 @@
 """The Rolland library: several classes for the implementation of rolling noise calculation."""
 
 from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
-from .boundary import DevitoPMLDamp
+from .boundary import CFSPML
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, WheelGreensfunc
 from .deflection import Deflection
 from .discretization import Discretization
@@ -38,9 +38,8 @@ __all__ = ["Arrangement",
            "ContSlabSingleRailTrack",
            "SimplePeriodicBallastedSingleRailTrack",
            "SimplePeriodicSlabSingleRailTrack",
-           "PMLRailDampVertic",
            "Deflection",
-           "DeflectionEBBVertic",
+           "CFSPML",
            "Discretization",
            "GaussianImpulse",
            "PostProcessing",
