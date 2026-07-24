@@ -121,6 +121,40 @@ class GaussianImpulse(StationaryExcitation):
 
         return tuple(injections)
 
+    def observe_excitation(self, discr):
+        """Observes deflections exactly at the excitation position.
+
+        Returns
+        -------
+        tuple
+            A tuple containing (obs_funcs, obs_terms), where obs_funcs is a dictionary
+            of SparseTimeFunctions and obs_terms is a list of interpolation equations.
+        """
+        obs_funcs = {}
+        obs_terms = []
+
+        npoint = 1
+        coordinates = [[self.x_excit]]
+
+        fields_map = {
+            'u_z_obs': discr.u_z,
+            'u_y_obs': discr.u_y,
+            'phi_x_obs': discr.phi_x,
+        }
+
+        for name, field_expr in fields_map.items():
+            obs = SparseTimeFunction(
+                name=name,
+                grid=discr.grid,
+                npoint=npoint,
+                nt=discr.nt,
+                coordinates=coordinates,
+            )
+            obs_funcs[name] = obs
+            obs_terms.append(obs.interpolate(expr=field_expr))
+
+        return obs_funcs, obs_terms
+
 
 class MovingExcitation(Excitation):
     """Moving excitation class."""
