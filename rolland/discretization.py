@@ -202,16 +202,13 @@ class DiscretizeDEVITO(Discretization):
             Ez = Constant(name='Ez', value=track.E[1])
 
         # --- 3. Primary State Time Functions ---
-        save_nt = self.nt if self.store == 'full' else None
-        so1 = 6
-
-        u_x = TimeFunction(name='u_x', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=None)
-        u_y = TimeFunction(name='u_y', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=save_nt)
-        u_z = TimeFunction(name='u_z', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=save_nt)
-        phi_x = TimeFunction(name='phi_x', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=save_nt)
-        phi_y = TimeFunction(name='phi_y', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=None)
-        phi_z = TimeFunction(name='phi_z', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=None)
-        u_w = TimeFunction(name='u_w', grid=self.grid, time_order=2, space_order=so1, dtype=float64, save=None)
+        u_x = TimeFunction(name='u_x', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
+        u_y = TimeFunction(name='u_y', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
+        u_z = TimeFunction(name='u_z', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
+        phi_x = TimeFunction(name='phi_x', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
+        phi_y = TimeFunction(name='phi_y', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
+        phi_z = TimeFunction(name='phi_z', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
+        u_w = TimeFunction(name='u_w', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)
 
         # Sleeper variables
         u_sx = TimeFunction(name='u_sx', grid=self.grid, time_order=2, dtype=float64, save=None)
