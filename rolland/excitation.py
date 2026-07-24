@@ -8,12 +8,13 @@
     GaussianImpulse
     MovingExcitation
 """
-
+import random
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
-from devito import SparseTimeFunction
+from devito import SparseTimeFunction, Function, Eq
+from numpy import arange, concatenate, stack
 
 
 class Excitation(ABC):
@@ -155,7 +156,178 @@ class GaussianImpulse(StationaryExcitation):
 
         return obs_funcs, obs_terms
 
+    def _abstract(self) -> None:
+        pass
 
-class MovingExcitation(Excitation):
-    """Moving excitation class."""
 
+class MovingExcitation(Excitation, ABC):
+    """Abstract base class for moving excitation.
+
+    Attributes
+    ----------
+    z_e : float, default=0.0
+        Contact point z-coordinate :math:`[m]`.
+    y_e : float, default=0.0
+        Contact point y-coordinate :math:`[m]`.
+    """
+
+    z_e: float = 0.0
+    y_e: float = 0.0
+
+
+@dataclass(kw_only=True)
+class RandomForce:
+    """A moving random excitation source for finite-difference track simulations.
+
+    Applies a moving force along the track with a random dynamic component
+    superimposed on a static load. The force ramps up smoothly over the first
+    40% of the simulation to prevent shock artifacts.
+
+    Attributes
+    ----------
+    v : float
+        Velocity of the moving excitation [m/s].
+    F_stat_z : float
+        Static force in the vertical (z) direction [N].
+    F_stat_y : float
+        Static force in the lateral (y) direction [N].
+    z_e : float
+        Excitation vertical offset coordinate [m].
+    y_e : float
+        Excitation lateral offset coordinate [m].
+    """
+
+    v: float
+    F_stat_z: float
+    F_stat_y: float
+    z_e: float
+    y_e: float
+
+    def calc_rnd_forcearray(self, nt: int) -> np.ndarray:
+        """Calculate the time-series arrays for the randomized forces.
+
+        Applies a linear ramp over the first 40% of the time steps.
+        """
+        ramp_len = int(0.4 * nt)
+
+        # Create a linear ramp from ~0 to 1, padded with ones for the remaining time
+        ramp = np.linspace(1 / ramp_len, 1.0, ramp_len)
+        ramp_factor = np.concatenate([ramp, np.ones(nt - ramp_len)])
+
+        # Generate Gaussian noise (mean=0, std=1)
+        rnd = np.random.normal(loc=0.0, scale=1.0, size=nt)
+
+        # Superimpose noise on the static force and apply the ramp
+        force_z = self.F_stat_z * (1 + rnd) * ramp_factor
+        force_y = self.F_stat_y * (1 + rnd) * ramp_factor
+
+        return np.stack([force_z, force_y], axis=0)
+
+    def inject_in_track(self, discr) -> list[Eq]:
+        """Build Devito equations to inject the moving random force into the track.
+
+        Uses a 4-point cosine bell window to smoothly distribute the moving
+        point load across the nearest grid nodes.
+        """
+        grid = discr.grid
+        t = grid.time_dim
+        x = grid.dimensions[0]
+        nt, nx = discr.nt, discr.nx
+        dt, dx = discr.dt, discr.dx
+
+        # 1. Calculate moving trajectory indices and fractional offsets (alpha)
+        traj_pos = np.clip((discr.bound.l_bound + self.v * np.arange(nt) * dt) / dx, 2, nx - 3)
+        traj_i = traj_pos.astype(np.int32)
+        alpha = traj_pos - traj_i
+
+        # 2. Calculate 4-point cosine bell interpolation weights
+        k_offsets = np.array([-1, 0, 1, 2])
+        dists = k_offsets[:, np.newaxis] - alpha[np.newaxis, :]
+        raw_weights = 0.5 + 0.5 * np.cos(np.pi * dists / 2.0)
+        weights_norm = raw_weights / np.sum(raw_weights, axis=0)
+
+        # 3. Store interpolation logic as Devito functions for later use by observations
+        self._indices, self._weights = [], []
+        for k in range(4):
+            idx_f = Function(name=f'idx{k}', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.int32)
+            w_f = Function(name=f'w{k}', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+
+            idx_f.data[:] = traj_i + k_offsets[k]
+            w_f.data[:] = weights_norm[k]
+
+            self._indices.append(idx_f)
+            self._weights.append(w_f)
+
+        # 4. Initialize force fields
+        self._F_z = Function(name='Fz', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+        self._F_y = Function(name='Fy', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+
+        force_z, force_y = self.calc_rnd_forcearray(nt)
+        self._F_z.data[:] = force_z
+        self._F_y.data[:] = force_y
+
+        # 5. Extract track parameters and precompute structural RHS multipliers
+        rail, track = discr.track.rail, discr.track
+        rhs_bw1 = 1.0 / (rail.dr / dt + track.pad.dp_z / dt + rail.mr / dt**2)
+        rhs_bw2 = 1.0 / (rail.dr / dt + track.pad.dp_y / dt + rail.mr / dt**2)
+        rhs_tw = 1.0 / (track.pad.dp_xr / dt + rail.rho * rail.Ipr / dt**2)
+        inv_dx = 1.0 / dx
+
+        torque = -self._F_y * self.z_e + self._F_z * self.y_e
+
+        # 6. Build injection equations mapping the forces onto the grid
+        injections = []
+        for k in range(4):
+            idx, w = self._indices[k], self._weights[k]
+
+            injections.extend(
+                [
+                    Eq(
+                        discr.u_z.forward.subs(x, idx),
+                        discr.u_z.forward.subs(x, idx) - w * self._F_z * rhs_bw1 * inv_dx,
+                    ),
+                    Eq(
+                        discr.u_y.forward.subs(x, idx),
+                        discr.u_y.forward.subs(x, idx) - w * self._F_y * rhs_bw2 * inv_dx,
+                    ),
+                    Eq(
+                        discr.phi_x.forward.subs(x, idx),
+                        discr.phi_x.forward.subs(x, idx) + w * torque * rhs_tw * inv_dx,
+                    ),
+                ]
+            )
+
+        return injections
+
+    def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
+        """Observes deflections dynamically tracking the moving excitation position."""
+        if not hasattr(self, '_indices'):
+            raise RuntimeError('inject_in_track must be called before observe_excitation.')
+
+        grid = discr.grid
+        t = grid.time_dim
+        x = grid.dimensions[0]
+        nt = discr.nt
+
+        # Define 1D TimeFunctions to store the observations along the time dimension
+        u_z_obs = Function(name='uzobs_moving', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+        u_y_obs = Function(name='uyobs_moving', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+        phi_x_obs = Function(name='phixobs_moving', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+
+        uz_sum, uy_sum, phix_sum = 0, 0, 0
+
+        # Accumulate the interpolated wavefield exactly at the moving load position
+        for k in range(4):
+            idx, w = self._indices[k], self._weights[k]
+            uz_sum += w * discr.u_z.forward.subs(x, idx)
+            uy_sum += w * discr.u_y.forward.subs(x, idx)
+            phix_sum += w * discr.phi_x.forward.subs(x, idx)
+
+        obs_eqs = [Eq(u_z_obs, uz_sum), Eq(u_y_obs, uy_sum), Eq(phi_x_obs, phix_sum)]
+
+        obs_funcs = {'u_z_obs': u_z_obs, 'u_y_obs': u_y_obs, 'phi_x_obs': phi_x_obs}
+
+        return obs_funcs, obs_eqs
+
+    def _abstract(self) -> None:
+        pass

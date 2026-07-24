@@ -77,10 +77,10 @@ class Deflection:
         if self.store in ['full', 'observe']:
             self.obs_pos = self._setup_obs_pos(self.obs_pos)
 
-        self.run_devito()
+        self.run()
 
-    def run_devito(self):
-        """Build and execute the DEVITO operator."""
+    def run(self):
+        """Build and execute the operator."""
         exc_terms = self.excit.inject_in_track(discr=self.discr)
 
         time_dim = self.discr.grid.time_dim
