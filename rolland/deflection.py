@@ -16,7 +16,7 @@ from devito import (
     TimeFunction,
 )
 
-from .discretization import DiscretizeTrack
+from .discretization import DiscretizeCompDom
 from .excitation import Excitation
 
 
@@ -30,7 +30,7 @@ class Deflection:
 
     Attributes
     ----------
-    discr : DiscretizeTrack
+    discr : DiscretizeCompDom
         The discretization object containing track operator.
     excit : Excitation
         The excitation source injected into the simulation.
@@ -54,7 +54,7 @@ class Deflection:
         The observed torsional rotation at defined positions.
     """
 
-    discr: DiscretizeTrack
+    discr: DiscretizeCompDom
     excit: Excitation
     store: str
     skip: int = 1

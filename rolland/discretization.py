@@ -9,7 +9,6 @@
     DiscretizationEBBVertic
 """
 
-from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 from devito import Border, Constant, Eq, Function, Grid, TimeFunction, solve
@@ -27,16 +26,8 @@ from .track import (
 RIGID_PENALTY = 1e20
 EPSILON = 1e-20
 
-class Discretization(ABC):
-    r"""Abstract base class for discretization classes."""
-
-    @abstractmethod
-    def _abstract(self) -> None:
-        """Prevents instantiation of abstract classes."""
-
-
 @dataclass(kw_only=True)
-class DiscretizeTrack(Discretization):
+class DiscretizeCompDom:
     r"""Discretizes the computational domain.
 
     This class manages the translation of physical track properties into a finite-difference
@@ -486,7 +477,3 @@ class DiscretizeTrack(Discretization):
         self.u_z = u_z
         self.u_y = u_y
         self.phi_x = phi_x
-
-    def _abstract(self) -> None:
-        pass
-

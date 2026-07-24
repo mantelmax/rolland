@@ -7,22 +7,27 @@
     StationaryExcitation
     GaussianImpulse
     MovingExcitation
+    RandomForce
 """
-import random
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
 import numpy as np
-from devito import SparseTimeFunction, Function, Eq
-from numpy import arange, concatenate, stack
+from devito import Eq, Function, SparseTimeFunction
 
 
 class Excitation(ABC):
     """Abstract base class for excitation."""
 
     @abstractmethod
-    def inject_in_track(self, discr) -> tuple:
+    def inject_in_track(self, discr) -> list[Eq]:
         """Build injection expressions for the excitation."""
+
+    @abstractmethod
+    def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
+        """Build expressions to observe deflections at the excitation position."""
+
 
 @dataclass(kw_only=True)
 class StationaryExcitation(Excitation, ABC):
@@ -38,7 +43,6 @@ class StationaryExcitation(Excitation, ABC):
 
     z_e: float = 0.0
     y_e: float = 0.0
-
 
 
 @dataclass(kw_only=True)
@@ -58,11 +62,7 @@ class GaussianImpulse(StationaryExcitation):
         Excitation position :math:`[m]`.
     force_dir : str, default='vertical'
         Force direction ('vertical' or 'lateral').
-    z_e : float, default=0.0
-        Excitation z-coordinate :math:`[m]`.
-    y_e : float, default=0.0
-        Excitation y-coordinate :math:`[m]`.
-    force: SparseTimeFunction
+    force : SparseTimeFunction
         The Devito SparseTimeFunction representing the excitation force.
     """
 
@@ -93,7 +93,7 @@ class GaussianImpulse(StationaryExcitation):
         self.force = force_func
         return force_func
 
-    def inject_in_track(self, discr) -> tuple:
+    def inject_in_track(self, discr) -> list[Eq]:
         """Build injection expressions for the excitation."""
         force = self.build_force_array(nt=discr.nt, dt=discr.dt, grid=discr.grid)
 
@@ -105,7 +105,6 @@ class GaussianImpulse(StationaryExcitation):
         rhs_tw = 1 / (track.pad.dp_xr / dt + rail.rho * rail.Ipr / dt**2)
         injections = []
 
-        # The excitation injection terms (omitting zero-value injections)
         if self.force_dir == 'vertical':
             rhs_bw1 = 1 / (rail.dr / dt + track.pad.dp_z / dt + rail.mr / dt**2)
             injections.append(force.inject(field=discr.u_z.forward, expr=force * rhs_bw1 / dx))
@@ -120,17 +119,10 @@ class GaussianImpulse(StationaryExcitation):
             if self.z_e != 0.0:
                 injections.append(force.inject(field=discr.phi_x.forward, expr=(force * self.z_e) * rhs_tw / dx))
 
-        return tuple(injections)
+        return injections
 
-    def observe_excitation(self, discr):
-        """Observes deflections exactly at the excitation position.
-
-        Returns
-        -------
-        tuple
-            A tuple containing (obs_funcs, obs_terms), where obs_funcs is a dictionary
-            of SparseTimeFunctions and obs_terms is a list of interpolation equations.
-        """
+    def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
+        """Observes deflections exactly at the stationary excitation position."""
         obs_funcs = {}
         obs_terms = []
 
@@ -156,10 +148,8 @@ class GaussianImpulse(StationaryExcitation):
 
         return obs_funcs, obs_terms
 
-    def _abstract(self) -> None:
-        pass
 
-
+@dataclass(kw_only=True)
 class MovingExcitation(Excitation, ABC):
     """Abstract base class for moving excitation.
 
@@ -176,7 +166,7 @@ class MovingExcitation(Excitation, ABC):
 
 
 @dataclass(kw_only=True)
-class RandomForce:
+class RandomForce(MovingExcitation):
     """A moving random excitation source for finite-difference track simulations.
 
     Applies a moving force along the track with a random dynamic component
@@ -191,23 +181,14 @@ class RandomForce:
         Static force in the vertical (z) direction [N].
     F_stat_y : float
         Static force in the lateral (y) direction [N].
-    z_e : float
-        Excitation vertical offset coordinate [m].
-    y_e : float
-        Excitation lateral offset coordinate [m].
     """
 
     v: float
     F_stat_z: float
     F_stat_y: float
-    z_e: float
-    y_e: float
 
     def calc_rnd_forcearray(self, nt: int) -> np.ndarray:
-        """Calculate the time-series arrays for the randomized forces.
-
-        Applies a linear ramp over the first 40% of the time steps.
-        """
+        """Calculate the time-series arrays for the randomized forces."""
         ramp_len = int(0.4 * nt)
 
         # Create a linear ramp from ~0 to 1, padded with ones for the remaining time
@@ -224,29 +205,22 @@ class RandomForce:
         return np.stack([force_z, force_y], axis=0)
 
     def inject_in_track(self, discr) -> list[Eq]:
-        """Build Devito equations to inject the moving random force into the track.
-
-        Uses a 4-point cosine bell window to smoothly distribute the moving
-        point load across the nearest grid nodes.
-        """
+        """Build Devito equations to inject the moving random force into the track."""
         grid = discr.grid
         t = grid.time_dim
         x = grid.dimensions[0]
         nt, nx = discr.nt, discr.nx
         dt, dx = discr.dt, discr.dx
 
-        # 1. Calculate moving trajectory indices and fractional offsets (alpha)
         traj_pos = np.clip((discr.bound.l_bound + self.v * np.arange(nt) * dt) / dx, 2, nx - 3)
         traj_i = traj_pos.astype(np.int32)
         alpha = traj_pos - traj_i
 
-        # 2. Calculate 4-point cosine bell interpolation weights
         k_offsets = np.array([-1, 0, 1, 2])
         dists = k_offsets[:, np.newaxis] - alpha[np.newaxis, :]
         raw_weights = 0.5 + 0.5 * np.cos(np.pi * dists / 2.0)
         weights_norm = raw_weights / np.sum(raw_weights, axis=0)
 
-        # 3. Store interpolation logic as Devito functions for later use by observations
         self._indices, self._weights = [], []
         for k in range(4):
             idx_f = Function(name=f'idx{k}', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.int32)
@@ -258,7 +232,6 @@ class RandomForce:
             self._indices.append(idx_f)
             self._weights.append(w_f)
 
-        # 4. Initialize force fields
         self._F_z = Function(name='Fz', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
         self._F_y = Function(name='Fy', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
 
@@ -266,16 +239,15 @@ class RandomForce:
         self._F_z.data[:] = force_z
         self._F_y.data[:] = force_y
 
-        # 5. Extract track parameters and precompute structural RHS multipliers
         rail, track = discr.track.rail, discr.track
         rhs_bw1 = 1.0 / (rail.dr / dt + track.pad.dp_z / dt + rail.mr / dt**2)
         rhs_bw2 = 1.0 / (rail.dr / dt + track.pad.dp_y / dt + rail.mr / dt**2)
         rhs_tw = 1.0 / (track.pad.dp_xr / dt + rail.rho * rail.Ipr / dt**2)
         inv_dx = 1.0 / dx
 
+        # Uses the inherited self.y_e and self.z_e
         torque = -self._F_y * self.z_e + self._F_z * self.y_e
 
-        # 6. Build injection equations mapping the forces onto the grid
         injections = []
         for k in range(4):
             idx, w = self._indices[k], self._weights[k]
@@ -294,7 +266,7 @@ class RandomForce:
                         discr.phi_x.forward.subs(x, idx),
                         discr.phi_x.forward.subs(x, idx) + w * torque * rhs_tw * inv_dx,
                     ),
-                ]
+                ],
             )
 
         return injections
@@ -302,21 +274,20 @@ class RandomForce:
     def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
         """Observes deflections dynamically tracking the moving excitation position."""
         if not hasattr(self, '_indices'):
-            raise RuntimeError('inject_in_track must be called before observe_excitation.')
+            msg = 'inject_in_track must be called before observe_excitation.'
+            raise RuntimeError(msg)
 
         grid = discr.grid
         t = grid.time_dim
         x = grid.dimensions[0]
         nt = discr.nt
 
-        # Define 1D TimeFunctions to store the observations along the time dimension
-        u_z_obs = Function(name='uzobs_moving', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
-        u_y_obs = Function(name='uyobs_moving', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
-        phi_x_obs = Function(name='phixobs_moving', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+        u_z_obs = Function(name='u_z_obs_mov', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+        u_y_obs = Function(name='u_y_obs_mov', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
+        phi_x_obs = Function(name='phi_x_obs_mov', grid=grid, shape=(nt,), dimensions=(t,), dtype=np.float64)
 
         uz_sum, uy_sum, phix_sum = 0, 0, 0
 
-        # Accumulate the interpolated wavefield exactly at the moving load position
         for k in range(4):
             idx, w = self._indices[k], self._weights[k]
             uz_sum += w * discr.u_z.forward.subs(x, idx)
@@ -328,6 +299,3 @@ class RandomForce:
         obs_funcs = {'u_z_obs': u_z_obs, 'u_y_obs': u_y_obs, 'phi_x_obs': phi_x_obs}
 
         return obs_funcs, obs_eqs
-
-    def _abstract(self) -> None:
-        pass
