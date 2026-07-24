@@ -7,7 +7,7 @@
 from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
 from .boundary import DevitoPMLDamp
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, WheelGreensfunc
-from .deflection import Deflection, DeflectionEBBVertic
+from .deflection import Deflection
 from .discretization import Discretization
 from .excitation import Excitation, GaussianImpulse
 from .postprocessing import PostProcessing
@@ -31,7 +31,6 @@ __all__ = ["Arrangement",
            "Sleeper",
            "Wheel",
            "WheelGreensfunc",
-           "DiscretizationEBBVerticConst",
            "Excitation",
            "ArrangedBallastedSingleRailTrack",
            "ArrangedSlabSingleRailTrack",

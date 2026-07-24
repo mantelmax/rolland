@@ -94,10 +94,10 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calculate_mobility(u, excit, pd):
-        displ_exc = u.data[:, 0]
+        displ_exc = u[:,0]
 
         # Extract excitation force data
-        exc = excit.data[:, 0]
+        exc = excit.data[:,0]
 
         # Perform FFT on displacement and excitation force
         displ_fft = fft(displ_exc)
@@ -129,8 +129,8 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calc_coupled_mobility(u, phi, offset, excit, pd):
-        displ_exc = u.data[:, 0] + phi.data[:, 0] * offset
-        # TODO: Implement tranformation Matrix, for leteral excentricity
+        displ_exc = u[:, 0] + phi[:, 0] * offset
+        # TODO: Implement tranformation Matrix, for lateral excentricity
 
         exc = excit.data[:, 0]
         displ_fft = fft(displ_exc)
@@ -144,7 +144,7 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calc_coupled_recep(u, phi, offset, excit, pd):
-        displ_exc = u.data[:, 0] + phi.data[:, 0] * offset
+        displ_exc = u[:, 0] + phi[:, 0] * offset
 
         exc = excit.data[:, 0]
         displ_fft = fft(displ_exc)

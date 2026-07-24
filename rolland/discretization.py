@@ -36,39 +36,43 @@ class Discretization(ABC):
 
 
 @dataclass(kw_only=True)
-class DiscretizeDEVITO(Discretization):
-    r"""Descritize DEVITO.
+class DiscretizeTrack(Discretization):
+    r"""Discretizes the track model for DEVITO simulations.
+
+    This class manages the translation of physical track properties into a finite-difference
+    computational grid. It builds the DEVITO grids, applies Perfectly Matched Layer (PML)
+    boundaries, and constructs the explicit update equations (operators) for the simulation.
 
     Attributes
     ----------
     track : Track
-        Track instance.
+        The track instance containing physical parameters.
+    bound : DevitoPMLDamp
+        The boundary damping instance handling wave absorption at the edges.
     dt : float, default=0.5e-5
         Step size in time :math:`[s]`.
     req_simt : float, default=0.1
         Requested simulation time :math:`[s]`.
-    nt : int
-        Number of time steps :math:`[-]`.
-    sim_t : float
-        Actual simulation time :math:`[s]`.
-    nx : int
-        Number of spatial steps :math:`[-]`.
     dx : float, default=0.05
         Spatial step size :math:`[m]`.
-    bound : PMLRailDampVertic
-        Boundary instance.
+    nt : int
+        Calculated number of time steps :math:`[-]`.
+    nx : int
+        Calculated number of spatial steps :math:`[-]`.
     grid : devito.Grid
-        Devito grid instance.
-    z_f : float, default=0.0
-        Excitation excentricity in z-direction :math:`[m]`.
-    y_f : float, default=0.0
-        Excitation excentricity in y-direction :math:`[m]`.
-    store : str, default="point"
-        Decides whether to store deflection only at the excitation position ('point') or not.
-    equi_sm : bool, default=True
-        If True, equivalent sleeper model is applied
-    y_sc : float, default=0.7175
-        Distance from excitation point to sleeper center :math:`[m]`.
+        The main DEVITO computational grid.
+    bd_grid : devito.Grid
+        Secondary DEVITO grid dedicated to the boundary domains.
+    bound_dom : Border
+        The domain definition used for applying boundary updates.
+    op_track : list of devito.Eq
+        The list of DEVITO update equations forming the core simulation operator.
+    u_z : devito.TimeFunction
+        The continuous time function representing vertical displacement.
+    u_y : devito.TimeFunction
+        The continuous time function representing lateral displacement.
+    phi_x : devito.TimeFunction
+        The continuous time function representing torsional rotation.
     """
 
     track: 'Track'
@@ -76,15 +80,11 @@ class DiscretizeDEVITO(Discretization):
     dt: float = 0.5e-5
     req_simt: float = 0.1
     dx: float = 0.05
-    z_f: float = 0.0
-    y_f: float = 0.0
-    store: str = 'point'
-    equi_sm: bool = True
-    y_sc: float = 0.7175
 
     def __post_init__(self, *args, **kwargs):
-        """Post-initialization method to build the Devito grid."""
+        """Initialize discretization internals by building the grid and operator."""
         self.build_grid()
+        self.build_operator()
 
     def build_grid(self):
         """Build the Devito computational grid."""
@@ -259,8 +259,8 @@ class DiscretizeDEVITO(Discretization):
         J = Constant(name='J', value=rail.J)
         Jt = Constant(name='J_t', value=rail.J_t)
         Ip = Constant(name='I_p', value=rail.Ipr)
-        z_f = Constant(name='z_f', value=self.z_f)
-        y_f = Constant(name='y_f', value=self.y_f)
+        z_f = Constant(name='z_f', value=track.z_f)
+        y_f = Constant(name='y_f', value=track.y_f)
         z_st = Constant(name='z_st', value=z_st_val)
         z_sb = Constant(name='z_sb', value=z_sb_val)
         rho_s = Constant(name='rho_s', value=rho_s_val)
@@ -415,7 +415,7 @@ class DiscretizeDEVITO(Discretization):
         upd_tbw_lat_rot = Eq(phi_z.forward, solve(tbw_lat_rot, phi_z.forward))
         upd_warp = Eq(u_w.forward, solve(warp, u_w.forward))
 
-        op = [
+        op_track = [
             upd_longw,
             upd_tbw_vert_trans,
             upd_tbw_lat_trans,
@@ -505,9 +505,12 @@ class DiscretizeDEVITO(Discretization):
                 upd_phi_sz,
                 upd_phi_sy,
             ]
-            op.extend(sleeper_updates)
+            op_track.extend(sleeper_updates)
 
-        return op, u_z, u_y, phi_x
+            self.op_track = op_track
+            self.u_z = u_z
+            self.u_y = u_y
+            self.phi_x = phi_x
 
     def _abstract(self) -> None:
         pass
