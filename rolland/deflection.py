@@ -39,8 +39,8 @@ class Deflection:
     skip : int
         The subsampling factor; saves every `skip` time step to reduce output array size.
     obs_pos : list | None
-        Coordinates of the response positions to observe. Defaults to the excitation position
-        if None.
+        Coordinates of the response positions to observe. Defaults to the excitation
+        position if None.
     track : Track
         The track model properties (automatically set from `discr`).
     u_z_obs : devito.TimeFunction or devito.SparseTimeFunction

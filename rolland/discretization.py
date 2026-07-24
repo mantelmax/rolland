@@ -482,10 +482,10 @@ class DiscretizeTrack(Discretization):
             ]
             op_track.extend(sleeper_updates)
 
-            self.op_track = op_track
-            self.u_z = u_z
-            self.u_y = u_y
-            self.phi_x = phi_x
+        self.op_track = op_track
+        self.u_z = u_z
+        self.u_y = u_y
+        self.phi_x = phi_x
 
     def _abstract(self) -> None:
         pass

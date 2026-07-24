@@ -167,11 +167,24 @@ class SlabSingleRailTrack(SingleRailTrack):
     rail : Rail
         Rail instance.
     slab : Slab, default=Slab(ms=1e20)
-        Slab instance.
+        Slab placeholder instance.
     """
 
-    slab: Slab = field(default_factory=lambda: Slab(ms=1e20), metadata={'default_repr': 'Slab(ms=1e20)'})
-
+    slab: Slab = field(
+        default_factory=lambda: Slab(
+            ms=1e20,
+            Is_z=1e20,
+            Is_y=1e20,
+            Is_x=1e20,
+            rhos=1e20,
+            lengs=1e20,
+            equ_wdths=1e20,
+            heights=1e20,
+            z_st=1e20,
+            z_sb=1e20,
+        ),
+        metadata={"default_repr": "Slab(ms=1e20)"},
+    )
 
 @dataclass(kw_only=True)
 class ContSlabSingleRailTrack(SlabSingleRailTrack):
@@ -197,14 +210,14 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     rail : Rail
         Rail instance.
     slab : Slab
-        Slab instance.
+        Slab placeholder instance.
     pad : ContPad
         Continuous pad instance.
     l_track : float, default=100.0
         Track length :math:`[m]`. (May change slightly after discretization.
         The inclusion of boundary and calculation domain is required).
     cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
+        Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
@@ -315,7 +328,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
     cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
+        Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
@@ -418,7 +431,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
     cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
+        Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
@@ -539,7 +552,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         Track length :math:`[m]`. (May change slightly after discretization.
         The inclusion of boundary and calculation domain is required).
     cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
+        Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
@@ -656,7 +669,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
     cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
+        Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
@@ -766,7 +779,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
     cof : ndarray
-        Matrix containing the cut on frequencies for the pad loss factors :math:`[Hz]`.
+        Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
