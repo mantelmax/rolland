@@ -1,12 +1,11 @@
 # ruff: noqa: N806
 
-"""Defines discretization classes for FDM simulation.
+"""Defines Domain setup classes for FDM simulation.
 
 .. autosummary::
-    :toctree: discretization
+    :toctree: Domain setup
 
-    Discretization
-    DiscretizationEBBVertic
+    DomSetup
 """
 
 from dataclasses import dataclass
@@ -27,8 +26,8 @@ RIGID_PENALTY = 1e20
 EPSILON = 1e-20
 
 @dataclass(kw_only=True)
-class DiscretizeCompDom:
-    r"""Discretizes the computational domain.
+class DomSetup:
+    r"""Set up the computational domain.
 
     This class manages the translation of physical track properties into a finite-difference
     computational grid. It builds the DEVITO grids, applies Perfectly Matched Layer (PML)

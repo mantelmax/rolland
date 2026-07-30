@@ -65,7 +65,7 @@ class PMLRailDampVertic:
         """Exponential increasing rail damping, added to dr."""
         return drbc * xbc ** self.alpha / self.l_bound ** self.alpha
 
-#---discretization.py---
+#---domainsetup.py---
 class Discretization(ABC):
     r"""Abstract base class for discretization classes."""
 

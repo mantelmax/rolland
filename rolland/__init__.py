@@ -8,7 +8,7 @@ from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
 from .boundary import CFSPML
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, WheelGreensfunc
 from .deflection import Deflection
-from .discretization import DiscretizeCompDom
+from .domainsetup import DomSetup
 from .excitation import Excitation, GaussianImpulse
 from .postprocessing import PostProcessing
 from .track import (
@@ -40,7 +40,7 @@ __all__ = ["Arrangement",
            "SimplePeriodicSlabSingleRailTrack",
            "Deflection",
            "CFSPML",
-           "DiscretizeCompDom",
+           "DomSetup",
            "GaussianImpulse",
            "PostProcessing",
            ]
