@@ -432,6 +432,8 @@ class Slab:
     z_st: float
     z_sb: float
     y_sc: float = 0.7175
+    f_z: float = 1.0
+    f_x: float = 1.0
     equi_sm: bool = True
 
 
