@@ -258,7 +258,7 @@ class DiscretizationEBBVertic(Discretization):
         self.C[self.nx:2 * self.nx, self.nx:2 * self.nx] = C22
 
     @abstractmethod
-    def validate_discretization_stampka(self):
+    def _abstract(self) -> None:
         """Validate the discretization according to Stampka."""
 
 
@@ -432,6 +432,8 @@ class DiscretizationEBBVerticConst(DiscretizationEBBVertic):
             self.vec_sb[x_ind] = self.track.mount_prop[i][2].sb_z / self.dx
             self.vec_db[x_ind] = self.track.mount_prop[i][2].db_z / self.dx
 
+    def _abstract(self) -> None:
+        """Prevents instantiation of abstract classes."""
 
 class DiscretizationEBBVerticTimeDepend(DiscretizationEBBVerticConst):
     """

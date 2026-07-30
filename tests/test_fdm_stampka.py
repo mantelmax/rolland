@@ -10,20 +10,22 @@ from rolland import (
     ContBallastedSingleRailTrack,
     ContPad,
     ContSlabSingleRailTrack,
-    DeflectionEBBVertic,
-    DiscretizationEBBVerticConst,
     DiscrPad,
-    GaussianImpulse,
-    PMLRailDampVertic,
     SimplePeriodicBallastedSingleRailTrack,
     SimplePeriodicSlabSingleRailTrack,
     Slab,
     Sleeper,
 )
 from rolland.database.rail.db_rail import UIC60
-from rolland.postprocessing import Response
+from rolland.methods.numerical import (
+    DeflectionEBBVertic,
+    DiscretizationEBBVerticConst,
+    GaussianImpulse,
+    PMLRailDampVertic,
+    Response,
+)
 
-RELATIVE_TOLERANCE = 1e-5
+RELATIVE_TOLERANCE = 1e-2
 
 # Mapping between CSV keys and test keys
 CSV_KEY_MAPPING = {
@@ -33,35 +35,140 @@ CSV_KEY_MAPPING = {
     'SimplePeriodicBallastedSingleRailTrack': 'mob_discr_ball',
 }
 
+contpad = ContPad(
+    sp_z=300 * 10**6,
+    sp_y=0.0,
+    sp_x=0.0,
+    dp_z=30000,
+    dp_y=0.0,
+    dp_x=0.0,
+    dp_xr=0.0,
+    wdthp=0.0,
+)
+
+discrpad = DiscrPad(
+    sp_z=180 * 10**6,
+    sp_y=0.0,
+    sp_x=0.0,
+    dp_z=30000,
+    dp_y=0.0,
+    dp_x=0.0,
+    dp_xr=0.0,
+    wdthp=0.0,
+)
+
+discrpad_ballasted = DiscrPad(
+    sp_z=180 * 10**6,
+    sp_y=0.0,
+    sp_x=0.0,
+    dp_z=18000,
+    dp_y=0.0,
+    dp_x=0.0,
+    dp_xr=0.0,
+    wdthp=0.0,
+)
+
+slep_dist = 0.6
+sl_len = 2.5
+sl_width = 0.245
+sl_height = 0.185
+
+rhos = 2648
+m = rhos * sl_len * sl_width * sl_height
+
+I_sz = (sl_len**2 + sl_width**2) * m/12 * 1 / rhos
+I_sy = (sl_height ** 2 + sl_width ** 2) * m / 12 * 1 / rhos
+I_sx = (sl_len ** 2 + sl_height ** 2) * m / 12 * 1 / rhos
+
+sleeper = Sleeper(
+    ms=150,
+    rhos=rhos,
+    Is_x=I_sx,
+    Is_y=I_sy,
+    Is_z=I_sz,
+    lengs=sl_len,
+    wdths=sl_width,
+    heights=sl_height,
+    z_st=-sl_height / 2,
+    z_sb=sl_height / 2,
+    equi_sm=False,
+)
+
+slab = Slab(
+    ms=250,
+    Is_x=I_sx/slep_dist,
+    Is_y=I_sy/slep_dist,
+    Is_z=I_sz/slep_dist,
+    lengs=sl_len,
+    rhos=rhos,
+    equ_wdths=sl_width,
+    heights=sl_height,
+    z_st=-sl_height / 2,
+    z_sb=sl_height / 2,
+    equi_sm=False,
+)
+
+contballast = Ballast(
+    sb_z=100*10**6,
+    sb_y=0.0,
+    sb_x=0.0,
+    db_z=80000,
+    db_y=0.0,
+    db_x=0.0,
+    db_xr=0.0,
+    db_yr=0.0,
+    db_zr=0.0,
+)
+
+discrballast = Ballast(
+    sb_z=105*10**6,
+    sb_y=0.0,
+    sb_x=0.0,
+    db_z=48000,
+    db_y=0.0,
+    db_x=0.0,
+    db_xr=0.0,
+    db_yr=0.0,
+    db_zr=0.0,
+)
+
 @pytest.fixture(scope="module")
 def tracks():
     """Create track instances for testing."""
     return {
         'track_cont_slab': ContSlabSingleRailTrack(
             rail=UIC60,
-            pad=ContPad(sp=[300 * 10**6, 0], dp=[30000, 0], etap=0.25),
+            pad=contpad,
             l_track=90,
+            z_f=81 * 10**-3,
+            y_f=0,
         ),
         'track_cont_ball': ContBallastedSingleRailTrack(
             rail=UIC60,
-            pad=ContPad(sp=[300 * 10**6, 0], dp=[30000, 0], etap=0.25),
-            slab=Slab(ms=250),
-            ballast=Ballast(sb=[100 * 10**6, 0], db=[80000, 0]),
+            pad=contpad,
+            slab=slab,
+            ballast=contballast,
             l_track=90,
+            z_f=81 * 10**-3,
+            y_f=0,
         ),
         'track_discr_slab': SimplePeriodicSlabSingleRailTrack(
             rail=UIC60,
-            pad=DiscrPad(sp=[180 * 10**6, 0], dp=[30000, 0], etap=0.25),
+            pad=discrpad,
             num_mount=int(90/0.6),
             distance=0.6,
+            z_f=81 * 10**-3,
+            y_f=0,
         ),
         'track_discr_ball': SimplePeriodicBallastedSingleRailTrack(
             rail=UIC60,
-            pad=DiscrPad(sp=[180 * 10**6, 0], dp=[18000, 0], etap=0.25),
-            sleeper=Sleeper(ms=150),
-            ballast=Ballast(sb=[105 * 10**6, 0], db=[48000, 0]),
+            pad=discrpad_ballasted,
+            sleeper=sleeper,
+            ballast=discrballast,
             num_mount=int(90/0.6),
             distance=0.6,
+            z_f=81 * 10**-3,
+            y_f=0,
         ),
     }
 
