@@ -194,11 +194,6 @@ def build_equ_sleeper_matrix(track):
     ----------
     track : Track
         The track object.
-    y_sc : float
-        Lateral sleeper eccentricity :math:`[m]`.
-    equi_sm : bool
-        If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
-        used.
 
     Return
     ----------
