@@ -187,25 +187,28 @@ def build_transfm_matrices(z_f, y_f, z_st=0, z_sb=0, chi_f=0):
 
 
 
-def build_equ_sleeper_matrix(track):
+def build_equ_sleeper_matrix(track, seclay=None):
     """Build equivalent sleeper matrix.
 
     Attributes
     ----------
     track : Track
         The track object.
+    seclay : Sleeper/Slab, optional
+        The specific secondary layer instance.
 
     Return
     ----------
     E : ndarray
         The equivalent sleeper Matrix, which is used to scale the stiffness of the balast.
     """
-    if hasattr(track, 'slab'):
-        seclay = track.slab
-        track.calc_equiv_slab_factors()
-    if hasattr(track, 'sleeper'):
-        seclay = track.sleeper
-        track.calc_equiv_sleeper_factors()
+    if seclay is None:
+        if hasattr(track, 'slab'):
+            seclay = track.slab
+            track.calc_equiv_slab_factors(slab=seclay)
+        elif hasattr(track, 'sleeper'):
+            seclay = track.sleeper
+            track.calc_equiv_sleeper_factors(sleeper=seclay)
 
     f_x = seclay.f_x
     f_z = seclay.f_z
@@ -218,21 +221,25 @@ def build_equ_sleeper_matrix(track):
 
 
 
-def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None):
+def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None, pad=None, ballast=None, seclay=None):
     """Build pad and ballast stiffness matrices.
 
     Attributes
     ----------
     track : Track
         The track object.
-    z_f : float
-        The vertical distance from the rail foot to the rail centroid :math:`[m]`.
     damp_type : str, default="hysteretic"
         The Type of the used damping Model for components. "viscous" uses the viscous damping model
         and "hysteretic" uses the hysteretic damping model.
     E : ndarray, default=ones(7)
         The equivalent sleeper Matrix, which is used to scale the stiffness of the balast.
         If "None", a default value of ones(7) is used.
+    pad : Pad, optional
+        The specific pad instance.
+    ballast : Ballast, optional
+        The specific ballast instance.
+    seclay : Sleeper/Slab, optional
+        The specific secondary layer instance.
 
     Return
     ----------
@@ -244,27 +251,28 @@ def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None):
     if E is None:
         E = ones(7)
 
-    pad = track.pad
-    track.calc_pad_warping_stiffn()  # Calculate warping stiffness
+    p = pad if pad is not None else track.pad
+    if pad is None:
+        track.calc_pad_warping_stiffn(pad=p)  # Calculate warping stiffness if pad was not explicitly provided
     Kp = diag(
         [
-            pad.sp_x,
-            pad.sp_z,
-            pad.sp_y,
-            pad.sp_xr,
-            pad.sp_zr,
-            pad.sp_yr,
-            pad.sp_w,
+            p.sp_x,
+            p.sp_z,
+            p.sp_y,
+            p.sp_xr,
+            p.sp_zr,
+            p.sp_yr,
+            p.sp_w,
         ],
     )
 
     if damp_type == "hysteretic":
         eta_p = diag(
             [
-                pad.etap_x,
-                pad.etap_z,
-                pad.etap_y,
-                pad.etap_r,
+                p.etap_x,
+                p.etap_z,
+                p.etap_y,
+                p.etap_r,
                 0,
                 0,
                 0,
@@ -275,18 +283,22 @@ def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None):
     else:
         pass
 
-    if hasattr(track, 'ballast'):
+    b = ballast if ballast is not None else getattr(track, 'ballast', None)
+    if b is not None:
+        if ballast is None: # Only recalculate rotational stiffness if ballast was not explicitly provided
+            if hasattr(track, 'sleeper'):
+                track.calc_ballast_rotational_stiffn(ballast=b)
+            elif hasattr(track, 'slab'):
+                track.calc_ballast_rotational_stiffn(ballast=b)
 
-        ballast = track.ballast
-        track.calc_ballast_rotational_stiffn()  # Calculate rotational stiffness
         Kb = diag(
             [
-                ballast.sb_x,
-                ballast.sb_z,
-                ballast.sb_y,
-                ballast.sb_xr,
-                ballast.sb_zr,
-                ballast.sb_yr,
+                b.sb_x,
+                b.sb_z,
+                b.sb_y,
+                b.sb_xr,
+                b.sb_zr,
+                b.sb_yr,
                 0,
             ],
         )
@@ -294,12 +306,12 @@ def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None):
         if damp_type == "hysteretic":
             eta_b = diag(
                 [
-                    ballast.etab_x,
-                    ballast.etab_z,
-                    ballast.etab_y,
-                    ballast.etab_r,
-                    ballast.etab_r,
-                    ballast.etab_r,
+                    b.etab_x,
+                    b.etab_z,
+                    b.etab_y,
+                    b.etab_r,
+                    b.etab_r,
+                    b.etab_r,
                     1e-20,
                 ],
             )
@@ -314,7 +326,7 @@ def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None):
 
 
 
-def build_sleep_mass_matrix(track, E=None):
+def build_sleep_mass_matrix(track, E=None, seclay=None):
     """Build sleeper mass matrix.
 
     Attributes
@@ -324,6 +336,8 @@ def build_sleep_mass_matrix(track, E=None):
     E : ndarray, default=ones(7)
         The equivalent sleeper Matrix, which is used to scale the mass of the balast.
         If "None", a default value of ones(7) is used.
+    seclay : Sleeper/Slab, optional
+        The specific secondary layer instance.
 
     Return
     ----------
@@ -333,7 +347,8 @@ def build_sleep_mass_matrix(track, E=None):
     if E is None:
         E = ones(7)
 
-    seclay = track.slab if hasattr(track, 'slab') else track.sleeper
+    if seclay is None:
+        seclay = track.slab if hasattr(track, 'slab') else track.sleeper
 
     Ms = diag(
         [
@@ -460,7 +475,7 @@ def calc_cut_on_frequ(K0, K_fnd, Mr, Ms=None):
 
 
 
-def build_pad_ballast_damp_matrices(track, cof, E=None):
+def build_pad_ballast_damp_matrices(track, cof, E=None, pad=None, ballast=None):
     """Build pad and ballast damping matrices.
 
     Attributes
@@ -472,6 +487,10 @@ def build_pad_ballast_damp_matrices(track, cof, E=None):
     E : ndarray, default=ones(7)
         The equivalent sleeper Matrix, which is used to scale the mass of the balast.
         If "None", a default value of ones(7) is used.
+    pad : Pad, optional
+        The specific pad instance.
+    ballast : Ballast, optional
+        The specific ballast instance.
 
     Return
     ----------
@@ -483,33 +502,35 @@ def build_pad_ballast_damp_matrices(track, cof, E=None):
     if E is None:
         E = ones(7)
 
-    pad = track.pad
-    track.calc_pad_viscous_damp_cuton(cof)
+    p = pad if pad is not None else track.pad
+    if pad is None:
+        track.calc_pad_viscous_damp_cuton(pad=p, cof=cof)
 
     Dp = diag(
         [
-            pad.dp_x,
-            pad.dp_z,
-            pad.dp_y,
-            pad.dp_xr,
+            p.dp_x,
+            p.dp_z,
+            p.dp_y,
+            p.dp_xr,
             0,
             0,
             0,
         ],
     )
 
-    if hasattr(track, 'ballast'):
-        ballast = track.ballast
-        track.calc_ballast_viscous_damp_cuton(cof)
+    b = ballast if ballast is not None else getattr(track, 'ballast', None)
+    if b is not None:
+        if ballast is None:
+            track.calc_ballast_viscous_damp_cuton(ballast=b, cof=cof)
 
         Db = diag(
             [
-                ballast.db_x,
-                ballast.db_z,
-                ballast.db_y,
-                ballast.db_xr,
-                ballast.db_zr,
-                ballast.db_yr,
+                b.db_x,
+                b.db_z,
+                b.db_y,
+                b.db_xr,
+                b.db_zr,
+                b.db_yr,
                 0,
             ],
         )

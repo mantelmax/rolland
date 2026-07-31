@@ -57,32 +57,35 @@ class SingleRailTrack(Track):
 
     rail: Rail
 
-    def _needs_viscous_damping(self) -> bool:
+    def _needs_viscous_damping(self, pad=None, ballast=None) -> bool:
         """Return True when any damping component still needs eta-to-viscous conversion."""
-        pad = getattr(self, "pad", None)
-        ballast = getattr(self, "ballast", None)
+        p = pad if pad is not None else getattr(self, "pad", None)
+        b = ballast if ballast is not None else getattr(self, "ballast", None)
 
-        components = [c for c in (pad, ballast) if c is not None]
+        components = [c for c in (p, b) if c is not None]
         return any(c.damping_mode == "hysteretic" for c in components)
 
-    def calc_pad_warping_stiffn(self):
+    def calc_pad_warping_stiffn(self, pad=None):
         """Calculate warping stiffness."""
+        p = pad if pad is not None else self.pad
         e_s = self.rail.shearc[1] - self.z_f
-        self.pad.sp_w = (self.rail.k_w * e_s) ** 2 * self.pad.wdthp**2 / 12 * self.pad.sp_y
+        p.sp_w = (self.rail.k_w * e_s) ** 2 * p.wdthp**2 / 12 * p.sp_y
 
-    def calc_pad_viscous_damp_cuton(self):
+    def calc_pad_viscous_damp_cuton(self, pad=None, cof=None):
         """Calculate coupled viscous damping coefficients from cut-on frequencies when needed."""
-        if self.pad.damping_mode != "hysteretic":
+        p = pad if pad is not None else self.pad
+        c = cof if cof is not None else self.cof
+        if p.damping_mode != "hysteretic":
             return
 
-        if self.cof is None:
+        if c is None:
             msg = "Cut-on frequencies are required to derive viscous pad damping from loss factors."
             raise ValueError(msg)
 
-        self.pad.dp_x = self.pad.etap_x * self.pad.sp_x / (self.cof[0] * (2 * pi))
-        self.pad.dp_z = self.pad.etap_z * self.pad.sp_z / (self.cof[1] * (2 * pi))
-        self.pad.dp_y = self.pad.etap_y * self.pad.sp_y / (self.cof[3] * (2 * pi))
-        self.pad.dp_xr = self.pad.etap_r * self.pad.sp_xr / (self.cof[2] * (2 * pi))
+        p.dp_x = p.etap_x * p.sp_x / (c[0] * (2 * pi))
+        p.dp_z = p.etap_z * p.sp_z / (c[1] * (2 * pi))
+        p.dp_y = p.etap_y * p.sp_y / (c[3] * (2 * pi))
+        p.dp_xr = p.etap_r * p.sp_xr / (c[2] * (2 * pi))
 
     def interpol_pad_width(self, x, dx, mp):
         """Interpolated pad width distribution along track."""
@@ -109,51 +112,58 @@ class SingleRailTrack(Track):
         # Sum normalized contributions from all mounting positions
         return sum(single_mount_pattern(pos) for pos in mp)
 
-    def calc_equiv_sleeper_factors(self):
+    def calc_equiv_sleeper_factors(self, sleeper=None):
         """Calculate equivalent sleeper factors according to Kostovasilis."""
-        if not self.sleeper.equi_sm:
+        s = sleeper if sleeper is not None else self.sleeper
+        if not s.equi_sm:
             pass
         else:
-            self.sleeper.f_z = 1 + 12 * self.sleeper.y_sc**2 /(self.sleeper.lengs**2 + self.sleeper.heights**2)
-            self.sleeper.f_x = 1 + 12 * self.sleeper.y_sc**2 / (self.sleeper.lengs**2 + self.sleeper.wdths**2)
+            s.f_z = 1 + 12 * s.y_sc**2 /(s.lengs**2 + s.heights**2)
+            s.f_x = 1 + 12 * s.y_sc**2 / (s.lengs**2 + s.wdths**2)
 
-    def calc_equiv_slab_factors(self):
+    def calc_equiv_slab_factors(self, slab=None):
         """Calculate equivalent slab factors according to Kostovasilis."""
-        if not self.slab.equi_sm:
+        s = slab if slab is not None else self.slab
+        if not s.equi_sm:
             pass
 
         else:
-            self.slab.f_z = 1 + 12 * self.slab.y_sc ** 2 / (self.slab.lengs ** 2 + self.slab.heights ** 2)
-            self.slab.f_x = 1 + 12 * self.slab.y_sc ** 2 / (self.slab.lengs ** 2 + self.slab.equ_wdths ** 2)
+            s.f_z = 1 + 12 * s.y_sc ** 2 / (s.lengs ** 2 + s.heights ** 2)
+            s.f_x = 1 + 12 * s.y_sc ** 2 / (s.lengs ** 2 + s.equ_wdths ** 2)
 
-    def calc_ballast_rotational_stiffn(self):
+    def calc_ballast_rotational_stiffn(self, sleeper=None, slab=None, ballast=None):
         """Calculate rotational stiffnesses from ballast stiffnesses and sleeper/slab dimensions."""
-        if hasattr(self, 'sleeper'):
-            s_l = self.sleeper.lengs
-            s_w = self.sleeper.wdths
-        if hasattr(self, 'slab'):
-            s_l = self.slab.lengs
-            s_w = self.slab.equ_wdths
+        b = ballast if ballast is not None else self.ballast
+        if sleeper is not None or hasattr(self, 'sleeper'):
+            s = sleeper if sleeper is not None else self.sleeper
+            s_l = s.lengs
+            s_w = s.wdths
+        if slab is not None or hasattr(self, 'slab'):
+            s = slab if slab is not None else self.slab
+            s_l = s.lengs
+            s_w = s.equ_wdths
 
-        self.ballast.sb_xr = s_l**2 / 12 * self.ballast.sb_z
-        self.ballast.sb_yr = s_w**2 / 12 * self.ballast.sb_z
-        self.ballast.sb_zr = s_l**2 / 12 * self.ballast.sb_x + s_w**2 / 12 * self.ballast.sb_y
+        b.sb_xr = s_l**2 / 12 * b.sb_z
+        b.sb_yr = s_w**2 / 12 * b.sb_z
+        b.sb_zr = s_l**2 / 12 * b.sb_x + s_w**2 / 12 * b.sb_y
 
-    def calc_ballast_viscous_damp_cuton(self):
+    def calc_ballast_viscous_damp_cuton(self, ballast=None, cof=None):
         """Calculate coupled viscous damping coefficients from cut-on frequencies when needed."""
-        if self.ballast.damping_mode != "hysteretic":
+        b = ballast if ballast is not None else self.ballast
+        c = cof if cof is not None else self.cof
+        if b.damping_mode != "hysteretic":
             return
 
-        if self.cof is None:
+        if c is None:
             msg = "Cut-on frequencies are required to derive viscous ballast damping from loss factors."
             raise ValueError(msg)
 
-        self.ballast.db_x = self.ballast.etab_x * self.ballast.sb_x / (self.cof[7] * (2 * pi))
-        self.ballast.db_z = self.ballast.etab_z * self.ballast.sb_z / (self.cof[8] * (2 * pi))
-        self.ballast.db_y = self.ballast.etab_y * self.ballast.sb_y / (self.cof[9] * (2 * pi))
-        self.ballast.db_xr = self.ballast.etab_r * self.ballast.sb_xr / (self.cof[10] * (2 * pi))
-        self.ballast.db_yr = self.ballast.etab_r * self.ballast.sb_yr / (self.cof[11] * (2 * pi))
-        self.ballast.db_zr = self.ballast.etab_r * self.ballast.sb_zr / (self.cof[12] * (2 * pi))
+        b.db_x = b.etab_x * b.sb_x / (c[7] * (2 * pi))
+        b.db_z = b.etab_z * b.sb_z / (c[8] * (2 * pi))
+        b.db_y = b.etab_y * b.sb_y / (c[9] * (2 * pi))
+        b.db_xr = b.etab_r * b.sb_xr / (c[10] * (2 * pi))
+        b.db_yr = b.etab_r * b.sb_yr / (c[11] * (2 * pi))
+        b.db_zr = b.etab_r * b.sb_zr / (c[12] * (2 * pi))
 
 
 @dataclass(kw_only=True)
@@ -469,25 +479,29 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
-
-        self.calc_pad_warping_stiffn()
-        self.calc_equiv_slab_factors()
+        self.cof = {}
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
-        Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.z_f,
-            self.y_f,
-            self.slab.z_st,
-            self.slab.z_sb,
-            self.rail.chi,
-            )
-        self.E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
-        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
-        self.cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
-        if self._needs_viscous_damping():
-            self.calc_pad_viscous_damp_cuton()
+
+        for x, (pad, slab_unused, ballast_unused) in self.mount_prop.items():
+            self.calc_pad_warping_stiffn(pad=pad)
+            self.calc_equiv_slab_factors(slab=self.slab)
+
+            Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
+                self.z_f,
+                self.y_f,
+                self.slab.z_st,
+                self.slab.z_sb,
+                self.rail.chi,
+                )
+            self.E = build_equ_sleeper_matrix(self, seclay=self.slab) # noqa: N806
+            Ms = build_sleep_mass_matrix(self, self.E, seclay=self.slab) # noqa: N806
+            Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E, pad=pad) # noqa: N806
+            K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+            cof_x = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+            self.cof[x] = cof_x
+            if self._needs_viscous_damping(pad=pad):
+                self.calc_pad_viscous_damp_cuton(pad=pad, cof=cof_x)
 
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
@@ -819,27 +833,32 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
         self.calc_mount_prop()
-
-        self.calc_pad_warping_stiffn()
-        self.calc_equiv_sleeper_factors()
-        self.calc_ballast_rotational_stiffn()
+        self.cof = {}
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
-        Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
-            self.z_f,
-            self.y_f,
-            self.slab.z_st,
-            self.slab.z_sb,
-            self.rail.chi,
-            )
-        self.E = build_equ_sleeper_matrix(self) # noqa: N806
-        Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
-        Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E) # noqa: N806
-        K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
-        self.cof = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
-        if self._needs_viscous_damping():
-            self.calc_pad_viscous_damp_cuton()
-            self.calc_ballast_viscous_damp_cuton()
+
+        for x, (pad, sleeper, ballast) in self.mount_prop.items():
+            self.calc_pad_warping_stiffn(pad=pad)
+            self.calc_equiv_sleeper_factors(sleeper=sleeper)
+            self.calc_ballast_rotational_stiffn(sleeper=sleeper, ballast=ballast)
+
+            Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
+                self.z_f,
+                self.y_f,
+                sleeper.z_st,
+                sleeper.z_sb,
+                self.rail.chi,
+                )
+            self.E = build_equ_sleeper_matrix(self, seclay=sleeper) # noqa: N806
+            Ms = build_sleep_mass_matrix(self, self.E, seclay=sleeper) # noqa: N806
+            Kp, Kb = build_pad_ballast_stiff_matrices(self, "viscous", self.E, pad=pad, ballast=ballast) # noqa: N806
+            K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
+            cof_x = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
+            self.cof[x] = cof_x
+            
+            if self._needs_viscous_damping(pad=pad, ballast=ballast):
+                self.calc_pad_viscous_damp_cuton(pad=pad, cof=cof_x)
+                self.calc_ballast_viscous_damp_cuton(ballast=ballast, cof=cof_x)
 
     def calc_mount_prop(self, change=None):
         """Calculate the mounting properties."""
