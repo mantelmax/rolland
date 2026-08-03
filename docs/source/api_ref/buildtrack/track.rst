@@ -5,6 +5,8 @@ Track
 
 The ``track`` module provides classes for defining railway track superstructures.
 
+.. currentmodule:: rolland.track
+
 Abstract Base Classes
 ---------------------
 Classes used for subclassing and type hints.
@@ -12,10 +14,10 @@ Classes used for subclassing and type hints.
 .. autosummary::
    :toctree: track
 
-   rolland.track.Track
-   rolland.track.SingleRailTrack
-   rolland.track.SlabSingleRailTrack
-   rolland.track.BallastedSingleRailTrack
+   Track
+   SingleRailTrack
+   SlabSingleRailTrack
+   BallastedSingleRailTrack
 
 Slab Track Models
 -----------------
@@ -24,10 +26,10 @@ Concrete models for slab track structures.
 .. autosummary::
    :toctree: track
 
-   rolland.track.ContSlabSingleRailTrack
-   rolland.track.DiscrSlabSingleRailTrack
-   rolland.track.SimplePeriodicSlabSingleRailTrack
-   rolland.track.ArrangedSlabSingleRailTrack
+   ContSlabSingleRailTrack
+   DiscrSlabSingleRailTrack
+   SimplePeriodicSlabSingleRailTrack
+   ArrangedSlabSingleRailTrack
 
 Ballasted Track Models
 ----------------------
@@ -36,8 +38,9 @@ Concrete models for ballasted track structures.
 .. autosummary::
    :toctree: track
 
-   rolland.track.ContBallastedSingleRailTrack
-   rolland.track.DiscrBallastedSingleRailTrack
-   rolland.track.SimplePeriodicBallastedSingleRailTrack
-   rolland.track.ArrangedBallastedSingleRailTrack
+   ContBallastedSingleRailTrack
+   DiscrBallastedSingleRailTrack
+   SimplePeriodicBallastedSingleRailTrack
+   ArrangedBallastedSingleRailTrack
+
 

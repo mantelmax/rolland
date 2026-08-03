@@ -5,13 +5,15 @@ Analytical Models
 
 The ``methods.analytical`` module provides frequency-domain reference track models for benchmarking and validation.
 
+.. currentmodule:: rolland.methods.analytical
+
 Abstract Base Classes
 ---------------------
 
 .. autosummary::
    :toctree: analytical
 
-   rolland.methods.analytical.AnalyticalMethods
+   AnalyticalMethods
 
 Continuous Support Models
 -------------------------
@@ -19,8 +21,8 @@ Continuous Support Models
 .. autosummary::
    :toctree: analytical
 
-   rolland.methods.analytical.EBBCont1LSupp
-   rolland.methods.analytical.EBBCont2LSupp
+   EBBCont1LSupp
+   EBBCont2LSupp
 
 Discrete Support Models
 -----------------------
@@ -28,9 +30,10 @@ Discrete Support Models
 .. autosummary::
    :toctree: analytical
 
-   rolland.methods.analytical.TSDiscr1LSupp
-   rolland.methods.analytical.TSDiscr2LSupp
-   rolland.methods.analytical.TBDiscr
+   TSDiscr1LSupp
+   TSDiscr2LSupp
+   TBDiscr
+
 
 
 

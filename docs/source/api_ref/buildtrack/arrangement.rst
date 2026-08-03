@@ -5,13 +5,15 @@ Arrangement
 
 The ``arrangement`` module defines spatial distributions and variations of track mounting properties.
 
+.. currentmodule:: rolland.arrangement
+
 Abstract Base Classes
 ---------------------
 
 .. autosummary::
    :toctree: arrangement
 
-   rolland.arrangement.Arrangement
+   Arrangement
 
 Concrete Arrangement Models
 ---------------------------
@@ -19,6 +21,7 @@ Concrete Arrangement Models
 .. autosummary::
    :toctree: arrangement
 
-   rolland.arrangement.PeriodicArrangement
-   rolland.arrangement.RandomArrangement
+   PeriodicArrangement
+   RandomArrangement
+
 

@@ -5,13 +5,15 @@ Excitation
 
 The ``excitation`` module defines time-domain excitation sources injected into Devito grid equations.
 
+.. currentmodule:: rolland.excitation
+
 Abstract Base Classes
 ---------------------
 
 .. autosummary::
    :toctree: excitation
 
-   rolland.excitation.Excitation
+   Excitation
 
 Excitation Impulse Models
 -------------------------
@@ -19,5 +21,6 @@ Excitation Impulse Models
 .. autosummary::
    :toctree: excitation
 
-   rolland.excitation.GaussianImpulse
+   GaussianImpulse
+
 
