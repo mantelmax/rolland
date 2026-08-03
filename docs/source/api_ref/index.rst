@@ -4,7 +4,7 @@ API Reference
 .. toctree::
    :hidden:
    :caption: Build Track
-   :maxdepth: 1
+   :maxdepth: 2
    :titlesonly:
 
    buildtrack/components
@@ -14,7 +14,7 @@ API Reference
 .. toctree::
    :hidden:
    :caption: Rolland
-   :maxdepth: 1
+   :maxdepth: 2
    :titlesonly:
 
    rolland/domainsetup
@@ -25,7 +25,7 @@ API Reference
 .. toctree::
    :hidden:
    :caption: Other Models
-   :maxdepth: 1
+   :maxdepth: 2
    :titlesonly:
 
    other_models/analyticalmethods
@@ -33,10 +33,12 @@ API Reference
 .. toctree::
    :hidden:
    :caption: Postprocessing
-   :maxdepth: 1
+   :maxdepth: 2
    :titlesonly:
 
    postprocessing
+
+
 
 
 

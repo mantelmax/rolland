@@ -98,9 +98,13 @@ napoleon_numpy_docstring = True
 
 
 # Select a color scheme for light mode
-pygments_style = "default"
+pygments_style = "friendly"
 # Select a different color scheme for dark mode
-pygments_style_dark = "github-dark"
+pygments_style_dark = "one-dark"
+
+
+
+
 
 # docsearch settings
 docsearch_app_id = "TFRLLVQ6L2"
