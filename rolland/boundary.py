@@ -3,72 +3,88 @@
 .. autosummary::
     :toctree: boundary
 
-    PMLRailDampVertic
+    CFSPML
 """
 
 from dataclasses import dataclass
 
-from numpy import linspace, ndarray, ones, zeros
+import numpy as np
+from devito import Eq, Function, TimeFunction, solve
+from devito.types.equation import Eq as DevitoEq
+from devito.types.grid import Grid
+from numpy import float64, linspace, zeros
 
 
 @dataclass
-class PMLRailDampVertic:
-    r"""Calculate the boundary domain properties according to :cite:t:`stampka2022a`.
+class CFSPML:
+    r"""Complex Frequency Shifted Perfectly Matched Layer (CFS-PML).
 
-    A perfectly matched layer (PML) method is used which increases the rail damping
-    coefficient in the boundary domain for the vertical rail deflection.
-
-    Attributes
-    ----------
-    alpha : float, default=7.0
-        Damping exponent :math:`[-]`.
-    l_bound : float, default=33.0
-        Length of the boundary domain (single sided) :math:`[m]`.
-    """
-
-    alpha: float = 7.0
-    l_bound: float = 33.0
-
-    def pml(self, drbc, xbc):
-        """Exponential increasing rail damping, added to dr."""
-        return drbc * xbc ** self.alpha / self.l_bound ** self.alpha
-
-class DevitoPMLDamp:
-    r"""Devito PML.
+    Generates spatial damping profiles to absorb outgoing waves at computational
+    grid boundaries, minimizing artificial reflections.
 
     Attributes
     ----------
-    a : float
-        Damping coefficient :math:`[s^{-1}]`.
-    alpha : float
-        CFS - coefficient :math:`[-]`.
-    m : float
-        Damping exponent :math:`[-]`.
-    l_bound : float
-        Length of the boundary domain (single sided) :math:`[m]`.
-    sigma : ndarray
-        Spatial damping profile :math:`[s^{-1}]`.
+    a : float, default=1e5
+        Maximum damping coefficient :math:`[s^{-1}]`.
+    alpha : float, default=10000
+        Complex Frequency Shift (CFS) coefficient :math:`[-]`.
+    m : float, default=7
+        Polynomial damping exponent :math:`[-]`.
+    l_bound : float, default=10
+        Length of the boundary domain (single-sided) :math:`[m]`.
     """
 
     a: float = 1e5
-    alpha: float = 10000
-    m: float = 7
-    l_bound: float = 10
-    sigma: ndarray
+    alpha: float = 10000.0
+    m: float = 7.0
+    l_bound: float = 10.0
 
-    def calc_damping_function(self, dx):
-        """Calculate the damping profile for the PML boundary domain."""
-        x_pml = linspace(0, self.l_bound, int(self.l_bound / dx))
-        return self.a * ((x_pml / self.l_bound) ** self.m)
+    def _generate_damping_profile(self, dx: float, nx: int) -> np.ndarray:
+        """Calculate the 1D spatial damping array across the entire grid."""
+        n_pml = int(self.l_bound / dx)
+        x_pml = linspace(0, self.l_bound, n_pml)
 
-    def calc_damping_profile(self, dx, nx):
-        """Apply the damping profile to the grid."""
-        pml = self.calc_damping_function(dx)
-        self.sigma = zeros(nx)
-        self.sigma[: pml.size] = pml[::-1]
-        self.sigma[-pml.size :] += pml
+        # Polynomial damping curve
+        pml_curve = self.a * ((x_pml / self.l_bound) ** self.m)
 
-        alpha_pml = ones(len(pml)) * self.alpha
-        self.alpha_tot = zeros(nx)
-        self.alpha_tot[: pml.size] = alpha_pml[::-1]
-        self.alpha_tot[-pml.size :] += alpha_pml
+        # Apply to both boundaries
+        sigma = zeros(nx)
+        sigma[:n_pml] = pml_curve[::-1]  # Left boundary (reversed)
+        sigma[-n_pml:] += pml_curve      # Right boundary
+
+        return sigma
+
+    def initialize_on_grid(self, grid: Grid, dx: float, nx: int) -> tuple[Function, Function]:
+        """Create Devito Functions for damping and populate them with data."""
+        sigm = Function(name='sigma', grid=grid)
+        alph = Function(name='alpha', grid=grid)
+
+        sigm.data[:] = self._generate_damping_profile(dx, nx)
+        alph.data[:] = self.alpha
+
+        return sigm, alph
+
+    def apply_pml(self, base_var: TimeFunction, name_suffix: str, grid: Grid, bound_dom, sigm: Function,
+                  alph: Function) -> tuple[DevitoEq, DevitoEq, list[DevitoEq]]:
+        """Generate ADE-PML boundary auxiliary variables and DEVITO equations."""
+        # Auxiliary fields
+        psi = TimeFunction(
+            name=f'psi_{name_suffix}', grid=grid, time_order=2, space_order=3, dtype=float64, save=None,
+        )
+        theta = TimeFunction(
+            name=f'theta_{name_suffix}', grid=grid, time_order=2, space_order=3, dtype=float64, save=None,
+        )
+
+        # Calculate modified spatial derivatives
+        dx_pml = base_var.dx - psi * sigm
+        dx2_pml = base_var.dx2 - (sigm.dx * psi + sigm * psi.dx) - sigm * theta
+
+        # Auxiliary equations
+        ade_psi = Eq(psi.dt, dx_pml - psi * alph)
+        ade_theta = Eq(theta.dt, dx2_pml - theta * alph)
+
+        # Forward update stencils
+        upd_psi = Eq(psi.forward, solve(ade_psi, psi.forward), subdomain=bound_dom)
+        upd_theta = Eq(theta.forward, solve(ade_theta, theta.forward), subdomain=bound_dom)
+
+        return dx_pml, dx2_pml, [upd_psi, upd_theta]

@@ -25,6 +25,7 @@ dependencies = [
     "numpy>=1.24.0",
     "scipy>=1.10.0",
     "matplotlib>=3.5.0",
+    "devito>=4.8.22"
 ]
 
 # Optional dependencies (pip install rolland[dev,docs,io])

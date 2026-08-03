@@ -30,30 +30,57 @@ def rail():
     """Provide a pre-defined rail instance."""
     return UIC60
 
+
 @pytest.fixture
 def cont_pad():
     """Provide a pre-defined continuous pad instance."""
-    return ContPad(sp=[300e6, 0], dp=[30000, 0], etap=0.25)
+    return ContPad(sp_z=300e6, sp_y=0, sp_x=0, dp_z=30000, dp_y=0, dp_x=0, dp_xr=0, wdthp=0.5)
+
 
 @pytest.fixture
 def discr_pad():
     """Provide a pre-defined discrete pad instance."""
-    return DiscrPad(sp=[300e6, 0], etap=0.25)
+    return DiscrPad(sp_z=300e6, sp_y=0, sp_x=0, etap_z=0.25, etap_y=0.25, etap_x=0.25, etap_r=0.25, wdthp=0.5)
+
 
 @pytest.fixture
 def slab():
     """Provide a pre-defined slab instance."""
-    return Slab(ms=250)
+    return Slab(
+        ms=250,
+        Is_z=1.0,
+        Is_y=1.0,
+        Is_x=1.0,
+        rhos=2500,
+        lengs=1.0,
+        equ_wdths=1.0,
+        heights=0.5,
+        z_st=0.25,
+        z_sb=0.25,
+    )
+
 
 @pytest.fixture
 def sleeper():
     """Provide a pre-defined sleeper instance."""
-    return Sleeper(ms=162)
+    return Sleeper(
+        ms=162,
+        Is_x=1.0,
+        Is_y=1.0,
+        Is_z=1.0,
+        rhos=2500,
+        lengs=2.5,
+        wdths=0.26,
+        heights=0.2,
+        z_st=0.1,
+        z_sb=0.1,
+    )
+
 
 @pytest.fixture
 def ballast():
     """Provide a pre-defined ballast instance."""
-    return Ballast(sb=[50e6, 0], etab=1)
+    return Ballast(sb_z=50e6, sb_y=0, sb_x=0, etab_z=1.0, etab_y=1.0, etab_x=1.0, etab_r=1.0)
 
 
 class TestAbstractTrackClasses:
@@ -100,6 +127,8 @@ class TestConcreteSlabTrackClasses:
             pad=cont_pad,
             slab=slab,
             l_track=100.0,
+            z_f=0.0,
+            y_f=0.0,
         )
         assert isinstance(track, ContSlabSingleRailTrack)
 
@@ -111,6 +140,8 @@ class TestConcreteSlabTrackClasses:
             slab=slab,
             distance=0.6,
             num_mount=10,
+            z_f=0.0,
+            y_f=0.0,
         )
         assert isinstance(track, SimplePeriodicSlabSingleRailTrack)
 
@@ -127,6 +158,8 @@ class TestConcreteSlabTrackClasses:
             slab=slab,
             distance=distance,
             num_mount=10,
+            z_f=0.0,
+            y_f=0.0,
         )
         assert isinstance(track, ArrangedSlabSingleRailTrack)
 
@@ -142,6 +175,8 @@ class TestConcreteBallastedTrackClasses:
             slab=slab,
             ballast=ballast,
             l_track=100.0,
+            z_f=0.0,
+            y_f=0.0,
         )
         assert isinstance(track, ContBallastedSingleRailTrack)
 
@@ -154,6 +189,8 @@ class TestConcreteBallastedTrackClasses:
             ballast=ballast,
             distance=0.6,
             num_mount=10,
+            z_f=0.0,
+            y_f=0.0,
         )
         assert isinstance(track, SimplePeriodicBallastedSingleRailTrack)
 
@@ -173,5 +210,7 @@ class TestConcreteBallastedTrackClasses:
             ballast=ballast_arr,
             distance=distance,
             num_mount=10,
+            z_f=0.0,
+            y_f=0.0,
         )
         assert isinstance(track, ArrangedBallastedSingleRailTrack)

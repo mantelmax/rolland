@@ -5,10 +5,10 @@
 """The Rolland library: several classes for the implementation of rolling noise calculation."""
 
 from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
-from .boundary import PMLRailDampVertic
+from .boundary import CFSPML
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, WheelGreensfunc
-from .deflection import Deflection, DeflectionEBBVertic
-from .discretization import Discretization, DiscretizationEBBVerticConst
+from .deflection import Deflection
+from .domainsetup import DomSetup
 from .excitation import Excitation, GaussianImpulse
 from .postprocessing import PostProcessing
 from .track import (
@@ -31,7 +31,6 @@ __all__ = ["Arrangement",
            "Sleeper",
            "Wheel",
            "WheelGreensfunc",
-           "DiscretizationEBBVerticConst",
            "Excitation",
            "ArrangedBallastedSingleRailTrack",
            "ArrangedSlabSingleRailTrack",
@@ -39,10 +38,9 @@ __all__ = ["Arrangement",
            "ContSlabSingleRailTrack",
            "SimplePeriodicBallastedSingleRailTrack",
            "SimplePeriodicSlabSingleRailTrack",
-           "PMLRailDampVertic",
            "Deflection",
-           "DeflectionEBBVertic",
-           "Discretization",
+           "CFSPML",
+           "DomSetup",
            "GaussianImpulse",
            "PostProcessing",
            ]
