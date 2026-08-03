@@ -190,8 +190,8 @@ class SlabSingleRailTrack(SingleRailTrack):
             lengs=1e20,
             equ_wdths=1e20,
             heights=1e20,
-            z_st=1e20,
-            z_sb=1e20,
+            z_st=0,
+            z_sb=0,
         ),
         metadata={"default_repr": "Slab(ms=1e20)"},
     )
