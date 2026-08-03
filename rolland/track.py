@@ -88,13 +88,10 @@ class SingleRailTrack(Track):
         p.dp_xr = p.etap_r * p.sp_xr / (c[2] * (2 * pi))
 
     def get_mount_patterns(self, x, dx, mp):
-        """Returns the mounting patterns for each position in a dictionary."""
+        """Return the mounting patterns for each position in a dictionary."""
         patterns = {}
         for pos in mp:
-            if hasattr(self, 'mount_prop') and pos in self.mount_prop:
-                pad = self.mount_prop[pos][0]
-            else:
-                pad = self.pad
+            pad = self.mount_prop[pos][0] if hasattr(self, 'mount_prop') and pos in self.mount_prop else self.pad
             start, end = pos - pad.wdthp / 2, pos + pad.wdthp / 2
             f_left = interp1d([start - dx, start - dx / 2, start], [0, 0.25, 1], "quadratic")
             f_right = interp1d([end, end + dx / 2, end + dx], [1, 0.25, 0], "quadratic")
@@ -490,7 +487,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
 
-        for x, (pad, slab_unused, ballast_unused) in self.mount_prop.items():
+        for x, (pad, _slab_unused, _ballast_unused) in self.mount_prop.items():
             self.calc_pad_warping_stiffn(pad=pad)
             self.calc_equiv_slab_factors(slab=self.slab)
 
@@ -862,7 +859,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             K_fnd = build_fnd_stiff_matrix(Kp, Tf, Kb, Tst, Tsb) # noqa: N806
             cof_x = calc_cut_on_frequ(K0, K_fnd, Mr, Ms) # noqa: N806
             self.cof[x] = cof_x
-            
+
             if self._needs_viscous_damping(pad=pad, ballast=ballast):
                 self.calc_pad_viscous_damp_cuton(pad=pad, cof=cof_x)
                 self.calc_ballast_viscous_damp_cuton(ballast=ballast, cof=cof_x)

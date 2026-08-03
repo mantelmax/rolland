@@ -221,7 +221,7 @@ def build_equ_sleeper_matrix(track, seclay=None):
 
 
 
-def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None, pad=None, ballast=None, seclay=None):
+def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None, pad=None, ballast=None):
     """Build pad and ballast stiffness matrices.
 
     Attributes
@@ -285,11 +285,9 @@ def build_pad_ballast_stiff_matrices(track, damp_type="hysteretic", E=None, pad=
 
     b = ballast if ballast is not None else getattr(track, 'ballast', None)
     if b is not None:
-        if ballast is None: # Only recalculate rotational stiffness if ballast was not explicitly provided
-            if hasattr(track, 'sleeper'):
-                track.calc_ballast_rotational_stiffn(ballast=b)
-            elif hasattr(track, 'slab'):
-                track.calc_ballast_rotational_stiffn(ballast=b)
+        if ballast is None and (hasattr(track, 'sleeper') or hasattr(track, 'slab')):
+            # Only recalculate rotational stiffness if ballast was not explicitly provided
+            track.calc_ballast_rotational_stiffn(ballast=b)
 
         Kb = diag(
             [

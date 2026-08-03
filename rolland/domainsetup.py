@@ -18,7 +18,6 @@ from .track import (
     ContBallastedSingleRailTrack,
     ContSlabSingleRailTrack,
     DiscrSlabSingleRailTrack,
-    SimplePeriodicSlabSingleRailTrack,
     Track,
 )
 
@@ -101,29 +100,12 @@ class DomSetup:
         # Assuming Border is imported or available in scope
         self.bound_dom = Border(grid=self.bd_grid, border=_nx_bound, dims=x)
 
-    def build_operator(self):
-        """Build the track operator for the simulation."""
-        # --- 1. Dynamic Spatial Function Initialization ---
-        func_names = [
-            'sp_z', 'sp_y', 'sp_x', 'sp_w', 'sp_zr', 'sp_yr', 'sp_xr',
-            'sb_x', 'sb_z', 'sb_y', 'sb_xr', 'sb_zr', 'sb_yr',
-            'dp_z', 'dp_y', 'dp_x', 'dp_xr',
-            'db_x', 'db_z', 'db_y', 'db_xr', 'db_zr', 'db_yr',
-            'ms', 'Is_x', 'Is_y', 'Is_z',
-        ]
-        f = {name: Function(name=name, grid=self.grid, dtype=float64) for name in func_names}
-        self.f = f
-
-        # Damping initialization
-        sigm, alph = self.bound.initialize_on_grid(self.grid, self.dx, self.nx)
-
-        # --- 2. Track & Interpolation Logic ---
-        track = self.track
+    def _setup_track_interpolation(self, f, track):
+        """Set up spatial functions with track properties and handle interpolation."""
         is_cont_slab_or_ballast = isinstance(track, (ContSlabSingleRailTrack, ContBallastedSingleRailTrack))
         is_slab = isinstance(track, (ContSlabSingleRailTrack, DiscrSlabSingleRailTrack))
 
         if is_cont_slab_or_ballast:
-            mount_pos_interp = 1
             seclay = track.slab
         else:
             mount_pos = list(track.mount_prop.keys())
@@ -172,13 +154,35 @@ class DomSetup:
                 f['Is_x'].data[:] = sum(track.mount_prop[pos][1].Is_x * patterns[pos] for pos in mount_pos) + EPSILON
                 f['Is_y'].data[:] = sum(track.mount_prop[pos][1].Is_y * patterns[pos] for pos in mount_pos) + EPSILON
                 f['Is_z'].data[:] = sum(track.mount_prop[pos][1].Is_z * patterns[pos] for pos in mount_pos) + EPSILON
-                # Take these scalar values from the first sleeper since they are constants per equation for now
-                # Or assume they are uniform
+                # Take these scalar values from the first sleeper since they are constants per
+                # equation for now or assume they are uniform
                 first_sleeper = track.mount_prop[mount_pos[0]][1]
                 rho_s_val, z_st_val, z_sb_val = first_sleeper.rhos, first_sleeper.z_st, first_sleeper.z_sb
 
             Ex = Constant(name='Ex', value=track.E[0])
             Ez = Constant(name='Ez', value=track.E[1])
+
+        return is_slab, rho_s_val, z_st_val, z_sb_val, Ex, Ez
+
+    def build_operator(self):
+        """Build the track operator for the simulation."""
+        # --- 1. Dynamic Spatial Function Initialization ---
+        func_names = [
+            'sp_z', 'sp_y', 'sp_x', 'sp_w', 'sp_zr', 'sp_yr', 'sp_xr',
+            'sb_x', 'sb_z', 'sb_y', 'sb_xr', 'sb_zr', 'sb_yr',
+            'dp_z', 'dp_y', 'dp_x', 'dp_xr',
+            'db_x', 'db_z', 'db_y', 'db_xr', 'db_zr', 'db_yr',
+            'ms', 'Is_x', 'Is_y', 'Is_z',
+        ]
+        f = {name: Function(name=name, grid=self.grid, dtype=float64) for name in func_names}
+        self.f = f
+
+        # Damping initialization
+        sigm, alph = self.bound.initialize_on_grid(self.grid, self.dx, self.nx)
+
+        # --- 2. Track & Interpolation Logic ---
+        track = self.track
+        is_slab, rho_s_val, z_st_val, z_sb_val, Ex, Ez = self._setup_track_interpolation(f, track)
 
         # --- 3. Primary State Time Functions ---
         u_x = TimeFunction(name='u_x', grid=self.grid, time_order=2, space_order=6, dtype=float64, save=None)

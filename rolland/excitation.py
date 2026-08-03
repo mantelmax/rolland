@@ -98,7 +98,6 @@ class GaussianImpulse(StationaryExcitation):
         force = self.build_force_array(nt=discr.nt, dt=discr.dt, grid=discr.grid)
 
         rail = discr.track.rail
-        track = discr.track
         dx = discr.dx
         dt = discr.dt
 
@@ -241,7 +240,7 @@ class RandomForce(MovingExcitation):
         self._F_z.data[:] = force_z
         self._F_y.data[:] = force_y
 
-        rail, track = discr.track.rail, discr.track
+        rail = discr.track.rail
         rhs_bw1 = 1.0 / (rail.dr / dt + discr.f['dp_z'] / dt + rail.mr / dt**2)
         rhs_bw2 = 1.0 / (rail.dr / dt + discr.f['dp_y'] / dt + rail.mr / dt**2)
         rhs_tw = 1.0 / (discr.f['dp_xr'] / dt + rail.rho * rail.Ipr / dt**2)
