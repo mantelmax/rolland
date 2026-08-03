@@ -3,7 +3,7 @@
 """Defines Domain setup classes for FDM simulation.
 
 .. autosummary::
-    :toctree: Domain setup
+    :toctree: domainsetup
 
     DomSetup
 """

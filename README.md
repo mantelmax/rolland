@@ -15,26 +15,12 @@ By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solv
 
 # Key Features
 
-- **Multi-DOF Coupled Track Wave Modeling:**
-  - Full multi-degree-of-freedom formulation solving **27 coupled differential equations**, accounting for 3D rail dynamics (longitudinal, vertical, lateral, torsional, warping) together with sleeper and support movement.
-  - Explicit inclusion of mechanical eccentricities: rail head contact excitation eccentricity ($y_{\text{e}}, z_{\text{e}}$), rail foot support eccentricity ($z_{\text{f}}$), and cross-sectional shear center/centroid offsets.
-- **High-Performance Time-Domain Solver:**
-  - Automated symbolic finite-difference operator compilation.
-  - High-order numerical schemes (6th-order central spatial stencils for primary fields, 2nd-order for PML auxiliary fields).
-  - Highly computationally efficient: a 0.5 s time-domain simulation completes in ~7 seconds on standard desktop hardware (16 threads).
-- **Infinite Track Boundary Modeling (CFS-PML):**
-  - Time-domain Auxiliary Differential Equation (ADE) formulation of Complex Frequency-Shifted Perfectly Matched Layers.
-  - Eliminates artificial boundary wave reflections across a broad frequency spectrum ($50\text{ Hz} - 6000\text{ Hz}$).
-- **Damping Formulations:**
-  - Hysteretic-to-viscous damping conversion tuned to wave cut-on frequencies ($\Omega_{\text{d}}$) for explicit time-domain integration.
-- **Flexible Track Architectures:**
-  - Continuous and discrete single-rail models for both ballasted and slab tracks.
-  - Arbitrary spatial track property variations (periodic or stochastic, e.g., sleeper spacing, pad/ballast stiffness).
-- **Excitation & Post-Processing:**
-  - Stationary (Gaussian impulse) and moving excitation modes (moving random force for wheel-rail interaction).
-  - Point and transfer mobility analysis, coupled cross-mobility calculations, and Track Decay Rate (TDR) in dB/m.
-- **Reference Models:**
-  - Built-in analytical, semi-analytical and numerical reference models for instant validation.
+- **Full Track Dynamics:** Solves 27 coupled differential equations to capture vertical, lateral, torsional, and warping rail behavior together with sleeper movement and eccentric support reactions.
+- **Fast Time-Domain Solver:** Uses explicit Finite Difference Method (FDM) schemes with high-order stencils for fast simulations (~7s compute time for 0.5s simulation).
+- **Infinite Track Boundary (CFS-PML):** Uses absorbing boundary layers to eliminate artificial wave reflections.
+- **Flexible Track Structures:** Supports ballasted and slab tracks with continuous or discrete supports, including spatial (periodic/stochastic) track property variations.
+- **Excitation:** Includes stationary excitation (Gaussian impulse) and moving sources (e.g. moving random force).
+- **Post-Processing & Validation:** Computes point/transfer mobility, Track Decay Rate (TDR), and provides built-in reference models for easy validation.
 
 **Planned Features:**
 

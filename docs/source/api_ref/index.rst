@@ -17,9 +17,9 @@ Explore
    :maxdepth: 1
    :titlesonly:
 
+   rolland/domainsetup
    rolland/boundary
    rolland/excitation
-   rolland/discretization
    rolland/deflection
 
 .. toctree::
@@ -54,9 +54,9 @@ Explore
 
       The **Rolland** section contains all classes and functions corresponding to the Rolland model.
 
+      * :doc:`Domain Setup <rolland/domainsetup>`
       * :doc:`Boundary <rolland/boundary>`
       * :doc:`Excitation <rolland/excitation>`
-      * :doc:`Discretization <rolland/discretization>`
       * :doc:`Deflection <rolland/deflection>`
 
    .. tab-item:: Other Models
