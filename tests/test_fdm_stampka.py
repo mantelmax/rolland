@@ -1,6 +1,7 @@
 """Tests for FDM Stampka methods."""
 
 import csv
+import os
 
 import numpy as np
 import pytest
@@ -76,9 +77,9 @@ sl_height = 0.185
 rhos = 2648
 m = rhos * sl_len * sl_width * sl_height
 
-I_sz = (sl_len**2 + sl_width**2) * m/12 * 1 / rhos
-I_sy = (sl_height ** 2 + sl_width ** 2) * m / 12 * 1 / rhos
-I_sx = (sl_len ** 2 + sl_height ** 2) * m / 12 * 1 / rhos
+I_sz = (sl_len**2 + sl_width**2) * m / 12 * 1 / rhos
+I_sy = (sl_height**2 + sl_width**2) * m / 12 * 1 / rhos
+I_sx = (sl_len**2 + sl_height**2) * m / 12 * 1 / rhos
 
 sleeper = Sleeper(
     ms=150,
@@ -96,9 +97,9 @@ sleeper = Sleeper(
 
 slab = Slab(
     ms=250,
-    Is_x=I_sx/slep_dist,
-    Is_y=I_sy/slep_dist,
-    Is_z=I_sz/slep_dist,
+    Is_x=I_sx / slep_dist,
+    Is_y=I_sy / slep_dist,
+    Is_z=I_sz / slep_dist,
     lengs=sl_len,
     rhos=rhos,
     equ_wdths=sl_width,
@@ -109,7 +110,7 @@ slab = Slab(
 )
 
 contballast = Ballast(
-    sb_z=100*10**6,
+    sb_z=100 * 10**6,
     sb_y=0.0,
     sb_x=0.0,
     db_z=80000,
@@ -121,7 +122,7 @@ contballast = Ballast(
 )
 
 discrballast = Ballast(
-    sb_z=105*10**6,
+    sb_z=105 * 10**6,
     sb_y=0.0,
     sb_x=0.0,
     db_z=48000,
@@ -132,7 +133,8 @@ discrballast = Ballast(
     db_zr=0.0,
 )
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope='module')
 def tracks():
     """Create track instances for testing."""
     return {
@@ -155,7 +157,7 @@ def tracks():
         'track_discr_slab': SimplePeriodicSlabSingleRailTrack(
             rail=UIC60,
             pad=discrpad,
-            num_mount=int(90/0.6),
+            num_mount=int(90 / 0.6),
             distance=0.6,
             z_f=81 * 10**-3,
             y_f=0,
@@ -165,14 +167,15 @@ def tracks():
             pad=discrpad_ballasted,
             sleeper=sleeper,
             ballast=discrballast,
-            num_mount=int(90/0.6),
+            num_mount=int(90 / 0.6),
             distance=0.6,
             z_f=81 * 10**-3,
             y_f=0,
         ),
     }
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope='module')
 def deflections(tracks):
     """Create deflection instances for testing."""
     bounds = {
@@ -239,7 +242,8 @@ def deflections(tracks):
         ),
     }
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope='module')
 def mobility_results(deflections):
     """Compute mobility results for testing."""
     results = {}
@@ -250,29 +254,31 @@ def mobility_results(deflections):
         results[key] = (fftfre, mob)
     return results
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope='module')
 def csv_data():
     """Load precomputed mobility data from CSV."""
     data = {}
-    with open('tests/data/data_fdm_stampka.csv') as csvfile:
+    csv_path = os.path.join(os.path.dirname(__file__), 'data', 'data_fdm_stampka.csv')
+    with open(csv_path) as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             freq = float(row['Frequency'])
             # Map CSV keys to test keys
-            mapped_row = {
-                CSV_KEY_MAPPING[key]: float(value)
-                for key, value in row.items()
-                if key != 'Frequency'
-            }
+            mapped_row = {CSV_KEY_MAPPING[key]: float(value) for key, value in row.items() if key != 'Frequency'}
             data[freq] = mapped_row
     return data
 
-@pytest.mark.parametrize("mobility_name", [
-    'mob_cont_slab',
-    'mob_cont_ball',
-    'mob_discr_slab',
-    'mob_discr_ball',
-])
+
+@pytest.mark.parametrize(
+    'mobility_name',
+    [
+        'mob_cont_slab',
+        'mob_cont_ball',
+        'mob_discr_slab',
+        'mob_discr_ball',
+    ],
+)
 def test_fdm_stampka_methods(mobility_name, mobility_results, csv_data):
     """Test FDM Stampka methods against precomputed mobility data."""
     fftfre, mob = mobility_results[mobility_name]
@@ -284,7 +290,4 @@ def test_fdm_stampka_methods(mobility_name, mobility_results, csv_data):
             actual_value,
             expected_value,
             rtol=RELATIVE_TOLERANCE,
-        ), (
-            f"Mismatch in {mobility_name} at frequency {freq}: "
-            f"expected {expected_value}, got {actual_value}"
-        )
+        ), f'Mismatch in {mobility_name} at frequency {freq}: expected {expected_value}, got {actual_value}'
