@@ -112,6 +112,7 @@ class DomSetup:
             'ms', 'Is_x', 'Is_y', 'Is_z',
         ]
         f = {name: Function(name=name, grid=self.grid, dtype=float64) for name in func_names}
+        self.f = f
 
         # Damping initialization
         sigm, alph = self.bound.initialize_on_grid(self.grid, self.dx, self.nx)
@@ -126,13 +127,15 @@ class DomSetup:
             seclay = track.slab
         else:
             mount_pos = list(track.mount_prop.keys())
-            mount_pos_interp = track.interpol_pad_width(linspace(0, track.l_track, self.nx), self.dx, mount_pos)
-            seclay = track.slab if isinstance(track, SimplePeriodicSlabSingleRailTrack) else track.sleeper
+            patterns = track.get_mount_patterns(linspace(0, track.l_track, self.nx), self.dx, mount_pos)
 
         # Vectorized property assignment
         pad_vars = ['sp_z', 'sp_y', 'sp_x', 'sp_w', 'sp_zr', 'sp_yr', 'sp_xr', 'dp_z', 'dp_y', 'dp_x', 'dp_xr']
         for var in pad_vars:
-            f[var].data[:] = getattr(track.pad, var) * mount_pos_interp
+            if is_cont_slab_or_ballast:
+                f[var].data[:] = getattr(track.pad, var)
+            else:
+                f[var].data[:] = sum(getattr(track.mount_prop[pos][0], var) * patterns[pos] for pos in mount_pos)
 
         ballast_vars = [
             'sb_x', 'sb_z', 'sb_y', 'sb_xr', 'sb_zr', 'sb_yr',
@@ -153,14 +156,27 @@ class DomSetup:
             Ez = Constant(name='Ez', value=1)
         else:
             for var in ballast_vars:
-                f[var].data[:] = getattr(track.ballast, var) * mount_pos_interp
+                if is_cont_slab_or_ballast:
+                    f[var].data[:] = getattr(track.ballast, var)
+                else:
+                    f[var].data[:] = sum(getattr(track.mount_prop[pos][2], var) * patterns[pos] for pos in mount_pos)
 
-            f['ms'].data[:] = (seclay.ms * mount_pos_interp) + EPSILON
-            f['Is_x'].data[:] = (seclay.Is_x * mount_pos_interp) + EPSILON
-            f['Is_y'].data[:] = (seclay.Is_y * mount_pos_interp) + EPSILON
-            f['Is_z'].data[:] = (seclay.Is_z * mount_pos_interp) + EPSILON
+            if is_cont_slab_or_ballast:
+                f['ms'].data[:] = seclay.ms + EPSILON
+                f['Is_x'].data[:] = seclay.Is_x + EPSILON
+                f['Is_y'].data[:] = seclay.Is_y + EPSILON
+                f['Is_z'].data[:] = seclay.Is_z + EPSILON
+                rho_s_val, z_st_val, z_sb_val = seclay.rhos, seclay.z_st, seclay.z_sb
+            else:
+                f['ms'].data[:] = sum(track.mount_prop[pos][1].ms * patterns[pos] for pos in mount_pos) + EPSILON
+                f['Is_x'].data[:] = sum(track.mount_prop[pos][1].Is_x * patterns[pos] for pos in mount_pos) + EPSILON
+                f['Is_y'].data[:] = sum(track.mount_prop[pos][1].Is_y * patterns[pos] for pos in mount_pos) + EPSILON
+                f['Is_z'].data[:] = sum(track.mount_prop[pos][1].Is_z * patterns[pos] for pos in mount_pos) + EPSILON
+                # Take these scalar values from the first sleeper since they are constants per equation for now
+                # Or assume they are uniform
+                first_sleeper = track.mount_prop[mount_pos[0]][1]
+                rho_s_val, z_st_val, z_sb_val = first_sleeper.rhos, first_sleeper.z_st, first_sleeper.z_sb
 
-            rho_s_val, z_st_val, z_sb_val = seclay.rhos, seclay.z_st, seclay.z_sb
             Ex = Constant(name='Ex', value=track.E[0])
             Ez = Constant(name='Ez', value=track.E[1])
 

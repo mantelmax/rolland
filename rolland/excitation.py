@@ -102,18 +102,18 @@ class GaussianImpulse(StationaryExcitation):
         dx = discr.dx
         dt = discr.dt
 
-        rhs_tw = 1 / (track.pad.dp_xr / dt + rail.rho * rail.Ipr / dt**2)
+        rhs_tw = 1 / (discr.f['dp_xr'] / dt + rail.rho * rail.Ipr / dt**2)
         injections = []
 
         if self.force_dir == 'vertical':
-            rhs_bw1 = 1 / (rail.dr / dt + track.pad.dp_z / dt + rail.mr / dt**2)
+            rhs_bw1 = 1 / (rail.dr / dt + discr.f['dp_z'] / dt + rail.mr / dt**2)
             injections.append(force.inject(field=discr.u_z.forward, expr=force * rhs_bw1 / dx))
 
             if self.y_e != 0.0:
                 injections.append(force.inject(field=discr.phi_x.forward, expr=(-force * self.y_e) * rhs_tw / dx))
 
         elif self.force_dir == 'lateral':
-            rhs_bw2 = 1 / (rail.dr / dt + track.pad.dp_y / dt + rail.mr / dt**2)
+            rhs_bw2 = 1 / (rail.dr / dt + discr.f['dp_y'] / dt + rail.mr / dt**2)
             injections.append(force.inject(field=discr.u_y.forward, expr=force * rhs_bw2 / dx))
 
             if self.z_e != 0.0:
@@ -242,9 +242,9 @@ class RandomForce(MovingExcitation):
         self._F_y.data[:] = force_y
 
         rail, track = discr.track.rail, discr.track
-        rhs_bw1 = 1.0 / (rail.dr / dt + track.pad.dp_z / dt + rail.mr / dt**2)
-        rhs_bw2 = 1.0 / (rail.dr / dt + track.pad.dp_y / dt + rail.mr / dt**2)
-        rhs_tw = 1.0 / (track.pad.dp_xr / dt + rail.rho * rail.Ipr / dt**2)
+        rhs_bw1 = 1.0 / (rail.dr / dt + discr.f['dp_z'] / dt + rail.mr / dt**2)
+        rhs_bw2 = 1.0 / (rail.dr / dt + discr.f['dp_y'] / dt + rail.mr / dt**2)
+        rhs_tw = 1.0 / (discr.f['dp_xr'] / dt + rail.rho * rail.Ipr / dt**2)
         inv_dx = 1.0 / dx
 
         # Uses the inherited self.y_e and self.z_e

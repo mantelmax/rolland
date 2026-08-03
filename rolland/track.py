@@ -87,10 +87,15 @@ class SingleRailTrack(Track):
         p.dp_y = p.etap_y * p.sp_y / (c[3] * (2 * pi))
         p.dp_xr = p.etap_r * p.sp_xr / (c[2] * (2 * pi))
 
-    def interpol_pad_width(self, x, dx, mp):
-        """Interpolated pad width distribution along track."""
-        def single_mount_pattern(pos):
-            start, end = pos - self.pad.wdthp / 2, pos + self.pad.wdthp / 2
+    def get_mount_patterns(self, x, dx, mp):
+        """Returns the mounting patterns for each position in a dictionary."""
+        patterns = {}
+        for pos in mp:
+            if hasattr(self, 'mount_prop') and pos in self.mount_prop:
+                pad = self.mount_prop[pos][0]
+            else:
+                pad = self.pad
+            start, end = pos - pad.wdthp / 2, pos + pad.wdthp / 2
             f_left = interp1d([start - dx, start - dx / 2, start], [0, 0.25, 1], "quadratic")
             f_right = interp1d([end, end + dx / 2, end + dx], [1, 0.25, 0], "quadratic")
 
@@ -105,12 +110,14 @@ class SingleRailTrack(Track):
                 ],
                 [0, f_left, 1, f_right, 0],
             )
-            # Normalize using rectangular integration (sum of values * dx)
             integral = sum(pattern) * dx
-            return pattern / integral  # Normalize single pattern
+            patterns[pos] = pattern / integral
+        return patterns
 
-        # Sum normalized contributions from all mounting positions
-        return sum(single_mount_pattern(pos) for pos in mp)
+    def interpol_pad_width(self, x, dx, mp):
+        """Interpolated pad width distribution along track."""
+        patterns = self.get_mount_patterns(x, dx, mp)
+        return sum(patterns.values())
 
     def calc_equiv_sleeper_factors(self, sleeper=None):
         """Calculate equivalent sleeper factors according to Kostovasilis."""
