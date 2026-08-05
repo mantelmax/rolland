@@ -9,7 +9,7 @@ Rolland
    :width: 700px
    :class: light-mode-image
 
-.. image:: images/mwi_dark.png
+.. image:: images/mwi_animated_sphinx.gif
    :alt: MWI Image
    :width: 700px
    :class: dark-mode-image
