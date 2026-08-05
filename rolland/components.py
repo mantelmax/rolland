@@ -62,7 +62,7 @@ class Rail:
         Young's modulus of rail in :math:`[\mathrm{Pa}]`.
     G : float
         Shear modulus of rail in :math:`[\mathrm{Pa}]`.
-    nu : float
+    nu : float, optional, default: None
         Poisson's ratio of rail :math:`[-]`.
     kapz : float
         Timoshenko shear correction factor in z direction (vertical) :math:`[-]`.
@@ -80,9 +80,9 @@ class Rail:
         Coordinates of rail shear center :math:`[m]`.
     centr : list[float]
         Coordinates of centroid :math:`[m]`.
-    ez : float
+    ez : float, internal (automatically calculated)
         Vertical shear center eccentricity :math:`[m]`.
-    ey : float
+    ey : float, internal (automatically calculated)
         Lateral shear center eccentricity :math:`[m]`.
     Iyr : float
         Second moment of area around y-axis :math:`[m^4]`.
@@ -94,12 +94,12 @@ class Rail:
         Polar moment of area :math:`[m^4]`.
     Ar : float
         Cross-section area :math:`[m^2]`.
-    Asr : float
+    Asr : float, optional, default: None
         Surface area per unit length of rail :math:`[m^2/m]`.
-    Vr : float
+    Vr : float, optional, default: None
         Volume per unit length of rail :math:`[m^3/m]`.
     kapp_s : float
-        Correction factor for the effective shear due to restrained torsional warping :math:`[-]
+        Correction factor for the effective shear due to restrained torsional warping :math:`[-]`.
     Iw : float
         Warping constant :math:`[m^6]`.
     Iwz : float
@@ -110,11 +110,11 @@ class Rail:
         Warping factor for rail foot :math:`[-]`.
     J : float
         Torsional constant :math:`[m^4]`.
-    J_t : float
+    J_t : float, internal (automatically calculated)
         Secondary torsional constant :math:`[m^4]`.
-    J_rs : float
+    J_rs : float, internal (automatically calculated)
         Effective shear area :math:`[m^4]`.
-    chi : ndarray
+    chi : float, optional, default: None
         Warping function of the cross-section :math:`[m^2]`.
 
     Examples
@@ -186,29 +186,29 @@ class DiscrPad:
         Lateral pad stiffness (total value) :math:`[N/m]`.
     sp_x : float
         Longitudinal pad stiffness (total value) :math:`[N/m]`.
-    sp_w : float
+    sp_w : float, internal (automatically calculated)
         Warping pad stiffness (total value) :math:`[Nm/m]`.
-    sp_xr : float
+    sp_xr : float, internal (automatically calculated)
         Longitudinal rotational pad stiffness (total value) :math:`[Nm/rad]`.
-    sp_yr : float
+    sp_yr : float, internal (automatically calculated)
         Lateral rotational pad stiffness (total value) :math:`[Nm/rad]`.
-    sp_zr : float
+    sp_zr : float, internal (automatically calculated)
         Vertical rotational pad stiffness (total value) :math:`[Nm/rad]`.
-    etap_z : float
+    etap_z : float, optional, default: None
         Vertical pad loss factor :math:`[-]`.
-    etap_y : float
+    etap_y : float, optional, default: None
         Lateral pad loss factor :math:`[-]`.
-    etap_x : float
+    etap_x : float, optional, default: None
         Longitudinal pad loss factor :math:`[-]`.
-    etap_r : float
+    etap_r : float, optional, default: None
         Rotational pad loss factor :math:`[-]`.
-    dp_z : float | None
+    dp_z : float, optional, default: None
         Vertical pad damping coefficient (viscous) :math:`[Ns/m]`.
-    dp_y : float | None
+    dp_y : float, optional, default: None
         Lateral pad damping coefficient (viscous) :math:`[Ns/m]`.
-    dp_x : float | None
+    dp_x : float, optional, default: None
         Longitudinal pad damping coefficient (viscous) :math:`[Ns/m]`.
-    dp_xr : float | None
+    dp_xr : float, optional, default: None
         Rotational pad damping coefficient (viscous) :math:`[Nms/rad]`.
     wdthp : float
         Pad width in x-direction :math:`[m]`.
@@ -260,29 +260,29 @@ class ContPad:
         Lateral pad stiffness (per meter) :math:`[N/m^2]`.
     sp_x : float
         Longitudinal pad stiffness (per meter) :math:`[N/m^2]`.
-    sp_w : float
+    sp_w : float, internal (automatically calculated)
         Warping pad stiffness (per meter) :math:`[N/m^2]`.
-    sp_zr : float
+    sp_zr : float, internal (automatically calculated)
         Vertical rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
-    sp_yr : float
+    sp_yr : float, internal (automatically calculated)
         Lateral rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
-    sp_xr : float
+    sp_xr : float, internal (automatically calculated)
         Longitudinal rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
-    etap_z : float
+    etap_z : float, optional, default: None
         Vertical pad loss factor :math:`[-]`.
-    etap_y : float
+    etap_y : float, optional, default: None
         Lateral pad loss factor :math:`[-]`.
-    etap_x : float
+    etap_x : float, optional, default: None
         Longitudinal pad loss factor :math:`[-]`.
-    etap_r : float
+    etap_r : float, optional, default: None
         Rotational pad loss factor :math:`[-]`.
-    dp_z : float
+    dp_z : float, optional, default: None
         Vertical pad damping coefficient (viscous) :math:`[Ns/m^2]`.
-    dp_y : float
+    dp_y : float, optional, default: None
         Lateral pad damping coefficient (viscous) :math:`[Ns/m^2]`.
-    dp_x : float
+    dp_x : float, optional, default: None
         Longitudinal pad damping coefficient (viscous) :math:`[Ns/m^2]`.
-    dp_xr : float
+    dp_xr : float, optional, default: None
         Rotational pad damping coefficient (viscous) :math:`[Ns/m^2]`.
     wdthp : float
         Equivalent pad width in x- and y-direction :math:`[m]`.
@@ -337,7 +337,7 @@ class Sleeper:
         Sleeper moment of inertia around z-axis :math:`[m^4]`.
     rhos : float
         Density of sleeper :math:`[kg/m^3]`.
-    Bs : float | None
+    Bs : float, optional, default: None
         Sleeper bending stiffness :math:`[Nm^2]`.
     lengs : float
         Sleeper length in y-direction :math:`[m]`.
@@ -349,14 +349,14 @@ class Sleeper:
         Vertical distance from sleeper centroid to top of sleeper :math:`[m]`.
     z_sb : float
         Vertical distance from sleeper centroid to bottom of sleeper :math:`[m]`.
-    y_sc : float, default=0.7175
+    y_sc : float, optional, default: 0.7175
         Lateral sleeper eccentricity :math:`[m]`.
         It is half of the track gauge (0.7175 m for standard gauge).
-    f_x : float
+    f_x : float, optional, default: 1.0
         Equivalent sleeper factor (x-direction) :math:`[-]`.
-    f_z : float
+    f_z : float, optional, default: 1.0
         Equivalent sleeper factor (z-direction) :math:`[-]`.
-    equi_sm : bool, default=True
+    equi_sm : bool, optional, default: True
         If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
         used.
     """
@@ -396,7 +396,7 @@ class Slab:
         Slab moment of inertia around x-axis :math:`[m^4/m]`.
     rhos : float
         Density of slab :math:`[kg/m^3]`.
-    Bs : float | None
+    Bs : float, optional, default: None
         Slab bending stiffness :math:`[Nm^2]`.
     lengs : float
         Slab length in y-direction :math:`[m]`.
@@ -408,14 +408,14 @@ class Slab:
         Vertical distance from slab centroid to top of slab :math:`[m]`.
     z_sb : float
         Vertical distance from slab centroid to bottom of slab :math:`[m]`.
-    y_sc : float, default=0.7175
+    y_sc : float, optional, default: 0.7175
         Lateral slab eccentricity :math:`[m]`.
         It is half of the track gauge (0.7175 m for standard gauge).
-    f_x : float
+    f_x : float, optional, default: 1.0
         Equivalent slab factor (x-direction) :math:`[-]`.
-    f_z : float
+    f_z : float, optional, default: 1.0
         Equivalent slab factor (z-direction) :math:`[-]`.
-    equi_sm : bool, default=True
+    equi_sm : bool, optional, default: True
         If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
         used.
     """
@@ -456,35 +456,32 @@ class Ballast:
         Lateral ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
     sb_x : float
         Longitudinal ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
-    sb_zr : float
-        Vertical rotational ballast stiffness (total value :math:`[Nm/rad]` or per meter
-        :math:`[Nm/rad/m]`).
-    sb_yr : float
-        Lateral rotational ballast stiffness (total value :math:`[Nm/rad]` or per meter
-        :math:`[Nm/rad/m]`).
-    sb_xr : float
-        Longitudinal rotational ballast stiffness (total value :math:`[Nm/rad]` or per meter
-        :math:`[Nm/rad/m]`).
-    etab_z : float
+    sb_zr : float, internal (automatically calculated)
+        Vertical rotational ballast stiffness.
+    sb_yr : float, internal (automatically calculated)
+        Lateral rotational ballast stiffness.
+    sb_xr : float, internal (automatically calculated)
+        Longitudinal rotational ballast stiffness.
+    etab_z : float, optional, default: None
         Vertical ballast loss factor :math:`[-]`.
-    etab_y : float
+    etab_y : float, optional, default: None
         Lateral ballast loss factor :math:`[-]`.
-    etab_x : float
+    etab_x : float, optional, default: None
         Longitudinal ballast loss factor :math:`[-]`.
-    etab_r : float
+    etab_r : float, optional, default: None
         Rotational ballast loss factor :math:`[-]`.
-    db_z : float
+    db_z : float, optional, default: None
         Vertical ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
-    db_y : float
+    db_y : float, optional, default: None
         Lateral ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
-    db_x : float
+    db_x : float, optional, default: None
         Longitudinal ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
-    db_zr : float
-        Rotational ballast damping coefficient for z-axis (viscous) :math:`[Nms/rad/m]`.
-    db_yr : float
-        Rotational ballast damping coefficient for y-axis (viscous) :math:`[Nms/rad/m]`.
-    db_xr : float
-        Rotational ballast damping coefficient for x-axis (viscous) :math:`[Nms/rad/m]`.
+    db_zr : float, optional, default: None
+        Rotational ballast damping coefficient for z-axis (viscous).
+    db_yr : float, optional, default: None
+        Rotational ballast damping coefficient for y-axis (viscous).
+    db_xr : float, optional, default: None
+        Rotational ballast damping coefficient for x-axis (viscous).
     """
 
     sb_z: float

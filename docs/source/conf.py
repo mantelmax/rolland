@@ -32,6 +32,51 @@ extensions = [
     'sphinx_docsearch',                # Docsearch extension
 ]
 
+# Do not prefix class names with full module paths in signatures
+add_module_names = False
+
+# Map autosummary filenames to short class names
+autosummary_filename_map = {
+    "rolland.components.Rail": "Rail",
+    "rolland.components.DiscrPad": "DiscrPad",
+    "rolland.components.ContPad": "ContPad",
+    "rolland.components.Sleeper": "Sleeper",
+    "rolland.components.Slab": "Slab",
+    "rolland.components.Ballast": "Ballast",
+    "rolland.components.Wheel": "Wheel",
+    "rolland.components.WheelGreensfunc": "WheelGreensfunc",
+    "rolland.track.Track": "Track",
+    "rolland.track.SingleRailTrack": "SingleRailTrack",
+    "rolland.track.SlabSingleRailTrack": "SlabSingleRailTrack",
+    "rolland.track.BallastedSingleRailTrack": "BallastedSingleRailTrack",
+    "rolland.track.ContSlabSingleRailTrack": "ContSlabSingleRailTrack",
+    "rolland.track.DiscrSlabSingleRailTrack": "DiscrSlabSingleRailTrack",
+    "rolland.track.SimplePeriodicSlabSingleRailTrack": "SimplePeriodicSlabSingleRailTrack",
+    "rolland.track.ArrangedSlabSingleRailTrack": "ArrangedSlabSingleRailTrack",
+    "rolland.track.ContBallastedSingleRailTrack": "ContBallastedSingleRailTrack",
+    "rolland.track.DiscrBallastedSingleRailTrack": "DiscrBallastedSingleRailTrack",
+    "rolland.track.SimplePeriodicBallastedSingleRailTrack": "SimplePeriodicBallastedSingleRailTrack",
+    "rolland.track.ArrangedBallastedSingleRailTrack": "ArrangedBallastedSingleRailTrack",
+    "rolland.arrangement.Arrangement": "Arrangement",
+    "rolland.arrangement.PeriodicArrangement": "PeriodicArrangement",
+    "rolland.arrangement.RandomArrangement": "RandomArrangement",
+    "rolland.excitation.Excitation": "Excitation",
+    "rolland.excitation.GaussianImpulse": "GaussianImpulse",
+    "rolland.methods.analytical.AnalyticalMethods": "AnalyticalMethods",
+    "rolland.methods.analytical.EBBCont1LSupp": "EBBCont1LSupp",
+    "rolland.methods.analytical.EBBCont2LSupp": "EBBCont2LSupp",
+    "rolland.methods.analytical.TSDiscr1LSupp": "TSDiscr1LSupp",
+    "rolland.methods.analytical.TSDiscr2LSupp": "TSDiscr2LSupp",
+    "rolland.methods.analytical.TBDiscr": "TBDiscr",
+    "rolland.boundary.CFSPML": "CFSPML",
+    "rolland.deflection.Deflection": "Deflection",
+    "rolland.domainsetup.DomSetup": "DomSetup",
+    "rolland.postprocessing.PostProcessing": "PostProcessing",
+}
+
+
+
+
 # sphinxcontrib-bibtex extension settings
 # ---------------------------------------
 bibtex_bibfiles = ["literature/literature.bib"]
@@ -46,14 +91,20 @@ autodoc_default_options = {
     'show-inheritance': True,
 }
 
-autodoc_typehints = "description"       # Include type hints in the description
+autodoc_preserve_defaults = True       # Show default values in function/class signatures
+autodoc_typehints = "description"       # Include type hints in parameter descriptions
 napoleon_google_docstring = False       # Use NumPy-style docstrings
 napoleon_numpy_docstring = True
 
+
 # Select a color scheme for light mode
-pygments_style = "default"
+pygments_style = "friendly"
 # Select a different color scheme for dark mode
-pygments_style_dark = "github-dark"
+pygments_style_dark = "one-dark"
+
+
+
+
 
 # docsearch settings
 docsearch_app_id = "TFRLLVQ6L2"

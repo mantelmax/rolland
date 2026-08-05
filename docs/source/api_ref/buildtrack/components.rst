@@ -1,10 +1,23 @@
 .. _components:
 
 Components
----------------------
+==========
 
-.. note:: This class is still under development and may change in the future.
+The ``components`` module defines physical track superstructure components and wheel properties.
 
-.. automodule:: rolland.components
-   :no-members:
-   :no-index:
+.. currentmodule:: rolland.components
+
+Component Classes
+-----------------
+
+.. autosummary::
+   :toctree: components
+
+   Rail
+   DiscrPad
+   ContPad
+   Sleeper
+   Slab
+   Ballast
+   Wheel
+

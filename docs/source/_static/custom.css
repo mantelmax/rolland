@@ -17,3 +17,41 @@
         display: block;
     }
 }
+
+/* Enhancements for Code Blocks and Pygments syntax highlighting */
+div.highlight {
+    border-radius: 8px;
+    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
+    margin: 1.25em 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.highlight pre {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* Sidebar Accordion Folding Behavior: Collapse inactive sub-trees (level-3 class listings) */
+#left-sidebar ul.current > li.current > ul {
+    display: block !important;
+}
+
+#left-sidebar ul.current > li:not(.current) > ul {
+    display: none !important;
+}
+
+/* Tiny Header Logo next to "Rolland Documentation" */
+header img[alt="Logo"],
+header a img {
+    height: 22px !important;
+    width: 22px !important;
+    margin-right: 0.5rem !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+    filter: none !important;
+}
+
+header a img.dark\:invert {
+    filter: none !important;
+}
