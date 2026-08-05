@@ -29,8 +29,8 @@ By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solv
 - Rail acoustic radiation modeling.
 
 <picture>
-  <source srcset="docs/source/images/mwi_github_dark.png" media="(prefers-color-scheme: dark)">
-  <img src="docs/source/images/mwi_light.png">
+  <source srcset="docs/source/images/mwi_dark_animated.gif" media="(prefers-color-scheme: dark)">
+  <img src="docs/source/images/mwi_dark_animated.gif">
 </picture>
 
 # Installation
