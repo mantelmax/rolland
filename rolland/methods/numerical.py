@@ -550,6 +550,8 @@ class DeflectionEBBVertic(Deflection):
         Discretization instance.
     deflection : numpy.ndarray
         Deflection array :math:`[m]`.
+    rotation : numpy.ndarray
+        Rotation array :math:`[rad]`.
     ind_excit : int
         Index of excitation point :math:`[-]`.
     """
@@ -568,14 +570,18 @@ class DeflectionEBBVertic(Deflection):
         Attributes
         ----------
         deflection : numpy.ndarray
-            Array of calculated deflections with shape (2 * nx, nt + 1).
+            Array of calculated deflections with shape (nx, nt + 1).
+        rotation : numpy.ndarray
+            Array of calculated rotations with shape (nx, nt + 1).
         """
         super().__init__(*args, **kwargs)
         # Initialize starting values
         self.calc_force()
-        defl = self.initialize_start_values()
+        state = self.initialize_start_values()
         # Calculate deflection
-        self.deflection = self.calc_deflection(defl)
+        self.state = self.calc_deflection(state)
+        self.deflection = self.state[:self.discr.nx, :].T
+        self.rotation = self.state[self.discr.nx:2 * self.discr.nx, :].T
 
     __init__.__signature__ = inspect.signature(Deflection.__init__)
 
