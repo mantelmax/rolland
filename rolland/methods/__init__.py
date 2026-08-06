@@ -13,8 +13,6 @@ from .analytical import (
     TSDiscr2LSupp,
 )
 from .numerical import (
-    TDR,
-    AnalyticPP,
     Deflection,
     DeflectionEBBVertic,
     Discretization,
@@ -24,9 +22,6 @@ from .numerical import (
     Excitation,
     GaussianImpulse,
     PMLRailDampVertic,
-    PostProcessing,
-    Response,
-    RollandPP,
     StationaryExcitation,
 )
 
@@ -35,8 +30,6 @@ __all__ = ["AnalyticalMethods",
            "TSDiscr2LSupp",
            "TSDiscr1LSupp",
            "EBBCont2LSupp",
-           "TDR",
-           "AnalyticPP",
            "Deflection",
            "DeflectionEBBVertic",
            "Discretization",
@@ -46,9 +39,6 @@ __all__ = ["AnalyticalMethods",
            "Excitation",
            "GaussianImpulse",
            "PMLRailDampVertic",
-           "PostProcessing",
-           "Response",
-           "RollandPP",
            "StationaryExcitation"]
 
 
