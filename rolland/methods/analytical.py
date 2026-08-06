@@ -23,6 +23,42 @@ from rolland.track import (
 )
 
 
+def _require_damping_mode(component, mode, name, method):
+    r"""Check that a component carries the damping representation a method needs.
+
+    A component built via :mod:`rolland.components` holds either loss factors
+    (``etap_*`` / ``etab_*``) or viscous coefficients (``dp_*`` / ``db_*``), never
+    both -- the unused set stays ``None``. The analytical methods keep their
+    respective formulation, so a track built for one of them cannot be passed to
+    the other. Without this check the mismatch would only surface deep inside the
+    formulas as an opaque ``TypeError`` on ``None``.
+
+    Parameters
+    ----------
+    component : object
+        Pad or ballast instance exposing ``damping_mode``.
+    mode : str
+        Damping representation the method requires, ``'viscous'`` or ``'hysteretic'``.
+    name : str
+        Component name used in the error message, e.g. ``'pad'``.
+    method : str
+        Name of the calling method, used in the error message.
+
+    Raises
+    ------
+    ValueError
+        If the component was built with the other damping representation.
+    """
+    if component.damping_mode != mode:
+        fields = "dp_*" if mode == "viscous" else "etap_*"
+        msg = (
+            f"{method} requires {mode} damping, but the {name} was built with "
+            f"{component.damping_mode} damping. Build a separate track whose {name} "
+            f"defines {fields} values."
+        )
+        raise ValueError(msg)
+
+
 @dataclass(kw_only=True)
 class AnalyticalMethods(ABC):
     r"""Abstract base class for analytical methods.
@@ -130,9 +166,11 @@ class EBBCont1LSupp(AnalyticalMethods):
         omega_0 : float
             The resonance frequency rail <--> foundation :math:`[Hz]`.
         """
+        _require_damping_mode(self.track.pad, "viscous", "pad", type(self).__name__)
+
         mr = self.track.rail.mr
-        sp = self.track.pad.sp[0]
-        dp = self.track.pad.dp[0]
+        sp = self.track.pad.sp_z
+        dp = self.track.pad.dp_z
 
         # Eq. 3.5
         self.omega_0 = sqrt(sp / mr)
@@ -212,11 +250,15 @@ class EBBCont2LSupp(AnalyticalMethods):
         omega_2 : float
             The resonance frequency rail <--> slab :math:`[Hz]`.
         """
+        method = type(self).__name__
+        _require_damping_mode(self.track.pad, "viscous", "pad", method)
+        _require_damping_mode(self.track.ballast, "viscous", "ballast", method)
+
         mr = self.track.rail.mr
-        sp = self.track.pad.sp[0]
-        sb = self.track.ballast.sb[0]
-        dp = self.track.pad.dp[0]
-        db = self.track.ballast.db[0]
+        sp = self.track.pad.sp_z
+        sb = self.track.ballast.sb_z
+        dp = self.track.pad.dp_z
+        db = self.track.ballast.db_z
         ms = self.track.slab.ms
 
         self.omega_0 = sqrt(sp / mr)            # Eq. 3.47
@@ -317,16 +359,17 @@ class TBDiscr(AnalyticalMethods):
         mobility : numpy.ndarray
             Calculated mobility of the track [m/N].
         """
+        _require_damping_mode(track.pad, "hysteretic", "pad", type(self).__name__)
+
         mr = track.rail.mr
         rho = track.rail.rho
-        etap = track.pad.etap
-        kap = track.rail.kap[0]
+        etap = track.pad.etap_z
+        kap = track.rail.kapz
         youm = track.rail.E
         shearm = track.rail.G
         ar = track.rail.Ar
         aream = track.rail.Iyr
-        sp = track.pad.sp[0]
-        sb = sb
+        sp = track.pad.sp_z
 
         # Positions of point forces [m]
         x_n = array(list(track.mount_prop.keys()))
@@ -499,5 +542,6 @@ class TSDiscr2LSupp(TBDiscr):
         mobility : numpy.ndarray
             Calculated mobility of the track :math:`[m/N]`.
         """
+        _require_damping_mode(self.track.ballast, "hysteretic", "ballast", type(self).__name__)
         self.compute_mobility_common(self.track, self.track.sleeper.ms,
-                                     self.track.ballast.sb[0], self.track.ballast.etab)
+                                     self.track.ballast.sb_z, self.track.ballast.etab_z)
