@@ -23,10 +23,18 @@ from rolland.methods.numerical import (
     DiscretizationEBBVerticConst,
     GaussianImpulse,
     PMLRailDampVertic,
-    Response,
 )
+from rolland.postprocessing import PointResponse
 
-RELATIVE_TOLERANCE = 1e-2
+RELATIVE_TOLERANCE = 1e-9
+
+# atol must be 0. numpy's default atol=1e-8 is of the same order as the mobilities
+# themselves, so it would make the comparison pass regardless of the values.
+ABSOLUTE_TOLERANCE = 0.0
+
+# Frequency band of the reference data.
+F_MIN = 100.0
+F_MAX = 3000.0
 
 # Mapping between CSV keys and test keys
 CSV_KEY_MAPPING = {
@@ -248,10 +256,15 @@ def mobility_results(deflections):
     """Compute mobility results for testing."""
     results = {}
     for key, deflection in deflections.items():
-        # Compute mobility using the Response class from PostProcessing
-        response = Response(results=deflection)
-        fftfre, mob = response.freq, response.mob
-        results[key] = (fftfre, mob)
+        # Point mobility: response taken at the excitation point itself. The
+        # deflection is stored as (n_time, n_positions), so the position is the
+        # second index.
+        signal = deflection.deflection[:, deflection.ind_excit]
+        fftfre, mob = PointResponse.calculate_mobility_1d(
+            signal, deflection.force, deflection.discr.dt,
+        )
+        band = (fftfre > F_MIN) & (fftfre <= F_MAX)
+        results[key] = (fftfre[band], mob[band])
     return results
 
 
@@ -290,4 +303,5 @@ def test_fdm_stampka_methods(mobility_name, mobility_results, csv_data):
             actual_value,
             expected_value,
             rtol=RELATIVE_TOLERANCE,
+            atol=ABSOLUTE_TOLERANCE,
         ), f'Mismatch in {mobility_name} at frequency {freq}: expected {expected_value}, got {actual_value}'
