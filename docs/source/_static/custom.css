@@ -69,7 +69,21 @@ div.admonition,
     color: hsl(213 31% 91%) !important;
 }
 
+/* Sidebar Active Category Highlighting */
+#left-sidebar a.current,
+#left-sidebar li.current > a {
+    background-color: #181628 !important;
+    border: 1px solid #322b59 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
 /* Sidebar Dropdown Behavior and Accordion Styling */
+#left-sidebar a > button:not(.sidebar-dropdown-toggle),
+#left-sidebar a > svg:first-child {
+    display: none !important;
+}
+
 #left-sidebar li.has-dropdown > a {
     display: flex !important;
     align-items: center !important;
