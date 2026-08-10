@@ -62,6 +62,8 @@ class DomSetup:
         The continuous time function representing lateral displacement.
     phi_x : devito.TimeFunction
         The continuous time function representing torsional rotation.
+    f : dict[str, devito.Function]
+        Dictionary mapping property names to their corresponding DEVITO spatial functions.
     """
 
     track: Track
@@ -76,7 +78,10 @@ class DomSetup:
         self.build_operator()
 
     def build_grid(self):
-        """Build the Devito computational grid."""
+        """Build the Devito computational grid.
+        
+        Initializes `nt`, `nx`, `grid`, `bd_grid`, and `bound_dom` attributes.
+        """
         self.nt = int(self.req_simt / self.dt)
         self.nx = int(self.track.l_track / self.dx)
 
@@ -101,7 +106,20 @@ class DomSetup:
         self.bound_dom = Border(grid=self.bd_grid, border=_nx_bound, dims=x)
 
     def _setup_track_interpolation(self, f, track):
-        """Set up spatial functions with track properties and handle interpolation."""
+        """Set up spatial functions with track properties and handle interpolation.
+
+        Parameters
+        ----------
+        f : dict[str, devito.Function]
+            Dictionary of spatial property functions.
+        track : Track
+            The track model instance.
+
+        Returns
+        -------
+        tuple
+            A tuple containing (is_slab, rho_s_val, z_st_val, z_sb_val, Ex, Ez).
+        """
         is_cont_slab_or_ballast = isinstance(track, (ContSlabSingleRailTrack, ContBallastedSingleRailTrack))
         is_slab = isinstance(track, (ContSlabSingleRailTrack, DiscrSlabSingleRailTrack))
 
@@ -165,7 +183,11 @@ class DomSetup:
         return is_slab, rho_s_val, z_st_val, z_sb_val, Ex, Ez
 
     def build_operator(self):
-        """Build the track operator for the simulation."""
+        """Build the track operator for the simulation.
+        
+        Initializes dynamic spatial functions (`f`), sets up wave equations and ADE-PML
+        updates, and populates `op_track`, `u_z`, `u_y`, and `phi_x`.
+        """
         # --- 1. Dynamic Spatial Function Initialization ---
         func_names = [
             'sp_z', 'sp_y', 'sp_x', 'sp_w', 'sp_zr', 'sp_yr', 'sp_xr',
