@@ -10,8 +10,17 @@ In this section, you can find various examples that demonstrate the capabilities
    :titlesonly:
 
    track_response/quick_start
-   track_response/different_tracks
+   track_response/different_tracks_vertical
+   track_response/different_tracks_lateral
    track_response/variation
+
+.. toctree::
+   :hidden:
+   :caption: Moving Excitation
+   :maxdepth: 2
+   :titlesonly:
+
+   moving_excitation/moving_random_force
 
 
 .. tab-set::
@@ -21,12 +30,15 @@ In this section, you can find various examples that demonstrate the capabilities
       Examples demonstrating track response calculations under stationary excitation.
 
       * :doc:`First Simulation <track_response/quick_start>`
-      * :doc:`Compare Different Tracks <track_response/different_tracks>`
-      * :doc:`Apply Structural Disorder <track_response/variation>`
+      * :doc:`Compare Different Tracks (Vertical) <track_response/different_tracks_vertical>`
+      * :doc:`Compare Different Tracks (Lateral) <track_response/different_tracks_lateral>`
+      * :doc:`Structural Irregularity <track_response/variation>`
 
    .. tab-item:: Moving Excitation
 
-      Examples for this category will be added shortly.
+      Examples demonstrating track response under moving loads.
+
+      * :doc:`Moving Random Force Excitation <moving_excitation/moving_random_force>`
 
    .. tab-item:: Radiation
 
