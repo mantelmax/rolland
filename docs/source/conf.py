@@ -98,9 +98,9 @@ napoleon_numpy_docstring = True
 
 
 # Select a color scheme for light mode
-pygments_style = "dracula"
+pygments_style = "laserwave-high-contrast"
 # Select a different color scheme for dark mode
-pygments_style_dark = "dracula"
+pygments_style_dark = "laserwave-high-contrast"
 
 
 
@@ -118,6 +118,7 @@ html_theme = 'sphinxawesome_theme'
 html_permalinks_icon = "<span>¶</span>"
 html_static_path = ["_static"]
 html_css_files = ["custom.css"]
+html_js_files = ["custom.js"]
 html_title = "Rolland Documentation"
 html_last_updated_fmt = ""
 html_logo = "images/logo_rolland_white_small.svg"

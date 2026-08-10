@@ -47,7 +47,7 @@ Citation
 
 If you use **Rolland** in your research, please cite the following paper:
 
-.. code-block:: bibtex
+.. code-block::
 
    @inproceedings{mantel2026rolland,
      title     = {Rolland: A New Framework for Realistic and Computationally Efficient Rolling Noise Modeling in the Time Domain},
@@ -59,7 +59,7 @@ If you use **Rolland** in your research, please cite the following paper:
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    
    Installation <install/index>
    User Guide <user_guide/index>
