@@ -21,7 +21,7 @@ class Excitation(ABC):
     """Abstract base class for excitation."""
 
     @abstractmethod
-    def inject_in_track(self, discr) -> list[Eq]:
+    def inject_in_track(self, discr: 'DomSetup') -> list[Eq]:
         """Build injection expressions for the excitation.
 
         Parameters
@@ -36,7 +36,7 @@ class Excitation(ABC):
         """
 
     @abstractmethod
-    def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
+    def observe_excitation(self, discr: 'DomSetup') -> tuple[dict, list[Eq]]:
         """Build expressions to observe deflections at the excitation position.
 
         Parameters
@@ -77,9 +77,9 @@ class GaussianImpulse(StationaryExcitation):
     Attributes
     ----------
     sigma : float, default=0.7e-4
-        Pulse parameter (regulates pulse-time) :math:`[-]`.
+        Pulse parameter (regulates pulse-time) :math:`[s]`.
     a : float, default=0.5e2
-        Pulse parameter (regulates amplitude) :math:`[s]`.
+        Pulse parameter (regulates amplitude) :math:`[N]`.
     x_excit : float, default=50.0
         Excitation position :math:`[m]`.
     force_dir : str, default='vertical'
@@ -109,7 +109,7 @@ class GaussianImpulse(StationaryExcitation):
         shifted_time = time_array - 4 * self.sigma
         return self.a * shifted_time / self.sigma**2 * np.exp(-(shifted_time**2) / self.sigma**2)
 
-    def build_force_array(self, nt: int, dt: float, grid) -> SparseTimeFunction:
+    def build_force_array(self, nt: int, dt: float, grid: 'devito.Grid') -> SparseTimeFunction:
         """Build the Devito SparseTimeFunction for the excitation.
 
         Parameters
@@ -141,7 +141,7 @@ class GaussianImpulse(StationaryExcitation):
         self.force = force_func
         return force_func
 
-    def inject_in_track(self, discr) -> list[Eq]:
+    def inject_in_track(self, discr: 'DomSetup') -> list[Eq]:
         """Build injection expressions for the excitation.
 
         Parameters
@@ -179,7 +179,7 @@ class GaussianImpulse(StationaryExcitation):
 
         return injections
 
-    def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
+    def observe_excitation(self, discr: 'DomSetup') -> tuple[dict, list[Eq]]:
         """Observes deflections exactly at the stationary excitation position.
 
         Parameters
@@ -250,18 +250,10 @@ class RandomForce(MovingExcitation):
         Static force in the vertical (z) direction :math:`[N]`.
     F_stat_y : float
         Static force in the lateral (y) direction :math:`[N]`.
-    force_z : numpy.ndarray, internal (automatically calculated)
-        Calculated vertical random force time series.
-    force_y : numpy.ndarray, internal (automatically calculated)
-        Calculated lateral random force time series.
-    _indices : list[devito.Function], internal (automatically calculated)
-        Interpolation indices.
-    _weights : list[devito.Function], internal (automatically calculated)
-        Interpolation weights.
-    _F_z : devito.Function, internal (automatically calculated)
-        Vertical force function.
-    _F_y : devito.Function, internal (automatically calculated)
-        Lateral force function.
+    force_z : numpy.ndarray
+        Calculated vertical random force time series (automatically calculated).
+    force_y : numpy.ndarray
+        Calculated lateral random force time series (automatically calculated).
     """
 
     v: float
@@ -298,7 +290,7 @@ class RandomForce(MovingExcitation):
 
         return np.stack([force_z, force_y], axis=0)
 
-    def inject_in_track(self, discr) -> list[Eq]:
+    def inject_in_track(self, discr: 'DomSetup') -> list[Eq]:
         """Build Devito equations to inject the moving random force into the track.
 
         Parameters
@@ -376,7 +368,7 @@ class RandomForce(MovingExcitation):
 
         return injections
 
-    def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
+    def observe_excitation(self, discr: 'DomSetup') -> tuple[dict, list[Eq]]:
         """Observes deflections dynamically tracking the moving excitation position.
 
         Parameters
