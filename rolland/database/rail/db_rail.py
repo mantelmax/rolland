@@ -64,7 +64,7 @@ UIC60 = Rail(
     Iwy = 0.0,
     k_w = -0.6016,
     J = 2.212e-6,
-    chi = 0.0, # Todo: Add full function
+    chi = 0.0, # TODO: Add full function
 )
 
 # UIC54 = Rail(
