@@ -98,9 +98,9 @@ napoleon_numpy_docstring = True
 
 
 # Select a color scheme for light mode
-pygments_style = "friendly"
+pygments_style = "dracula"
 # Select a different color scheme for dark mode
-pygments_style_dark = "one-dark"
+pygments_style_dark = "dracula"
 
 
 
@@ -120,8 +120,8 @@ html_static_path = ["_static"]
 html_css_files = ["custom.css"]
 html_title = "Rolland Documentation"
 html_last_updated_fmt = ""
-html_logo = "images/logo_rolland_dark.svg"
-html_favicon = "images/logo_rolland_dark.svg"
+html_logo = "images/logo_rolland_white_small.svg"
+html_favicon = "images/logo_rolland_white_small.svg"
 
 
 from dataclasses import asdict
