@@ -246,7 +246,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
 
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
-    >>> track = ContSlabSingleRailTrack(rail = UIC60, pad = thepad, slab = theslab, l_track = 145)
+    >>> track = ContSlabSingleRailTrack(rail = UIC60, pad = thepad, slab = theslab, l_track = 145, z_f=0.076, y_f=0.0)
     ...
     """
 
@@ -294,7 +294,7 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
     slab : Slab
         Slab instance.
     mount_prop : dict[float, tuple[DiscrPad, None, None]]
-        Dictionary for discrete mounting positions (x-> (Pad, None)).
+        Dictionary for discrete mounting positions (x-> (Pad, None, None)).
     """
 
     def __repr__(self):
@@ -337,8 +337,8 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     num_mount : int, default=100
         Number of mounting positions.
     mount_prop : dict[float, tuple[DiscrPad, None, None]]
-        Dictionary for discrete mounting positions (x-> (Pad, None)).
-    l_track : float, default=100.0
+        Dictionary for discrete mounting positions (x-> (Pad, None, None)).
+    l_track : float
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
     cof : ndarray
@@ -362,7 +362,9 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...     pad=thepad,
     ...     slab=theslab,
     ...     distance=0.6,
-    ...     num_mount=100)
+    ...     num_mount=100,
+    ...     z_f=0.076,
+    ...     y_f=0.0)
     ...
     """
 
@@ -440,11 +442,11 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     num_mount : int, default=100
         Number of mounting positions.
     mount_prop : dict[float, tuple[DiscrPad, None, None]]
-        Dictionary for discrete mounting positions (x-> (Pad, None)).
-    l_track : float, default=100.0
+        Dictionary for discrete mounting positions (x-> (Pad, None, None)).
+    l_track : float
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
-    cof : ndarray
+    cof : dict[float, ndarray]
         Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
@@ -469,7 +471,9 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...     pad=pad,
     ...     slab=theslab,
     ...     distance=distance,
-    ...     num_mount=100)
+    ...     num_mount=100,
+    ...     z_f=0.076,
+    ...     y_f=0.0)
     ...
     """
 
@@ -584,7 +588,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
 
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
-    >>> track = ContBallastedSingleRailTrack(rail = UIC60, pad = thepad, slab = theslab)
+    >>> track = ContBallastedSingleRailTrack(rail = UIC60, pad = thepad, slab = theslab, z_f=0.076, y_f=0.0)
     ...
     """
 
@@ -633,8 +637,8 @@ class DiscrBallastedSingleRailTrack(BallastedSingleRailTrack):
         Rail instance.
     ballast : Ballast
         Ballast instance.
-    mount_prop : dict[float, tuple[DiscrPad, None, None]]
-        Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
+    mount_prop : dict[float, tuple[DiscrPad, Sleeper, Ballast]]
+        Dictionary for discrete mounting positions (x-> (Pad, Sleeper, Ballast)).
     """
 
     def __repr__(self):
@@ -673,16 +677,16 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Rail instance.
     ballast : Ballast
         Ballast instance.
-    pad : ContPad
-        Continuous pad instance.
+    pad : DiscrPad
+        Discrete pad instance.
     sleeper : Instance of :class:`~rolland.components.sleeper` class
         Sleeper instance.
     distance : float, default=0.6
         Distance between mounting positions.
     num_mount : int, default=100
         Number of mounting positions.
-    mount_prop : dict
-        Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
+    mount_prop : dict[float, tuple[DiscrPad, Sleeper, Ballast]]
+        Dictionary for discrete mounting positions (x-> (Pad, Sleeper, Ballast)).
     l_track : float
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
@@ -707,7 +711,10 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...     rail=UIC60,
     ...     pad=thepad,
     ...     sleeper=thesleeper,
-    ...     distance=distance)
+    ...     ballast=theballast,
+    ...     distance=distance,
+    ...     z_f=0.076,
+    ...     y_f=0.0)
     """
 
     sleeper: Sleeper
@@ -791,12 +798,12 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Arrangement instance containing multiple distances.
     num_mount : int, default=100
         Number of mounting positions.
-    mount_prop : dict
-        Dictionary for discrete mounting positions (x-> (Pad, Sleeper)).
+    mount_prop : dict[float, tuple[DiscrPad, Sleeper, Ballast]]
+        Dictionary for discrete mounting positions (x-> (Pad, Sleeper, Ballast)).
     l_track : float
         Track length :math:`[m]`. (May change slightly after discretization.
         Results from the number of mounting positions and the mounting distances).
-    cof : ndarray
+    cof : dict[float, ndarray]
         Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
         Vertical distance from rail foot to centroid :math:`[m]`.
@@ -822,7 +829,10 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...     rail=UIC60,
     ...     pad=pad,
     ...     sleeper=sleeper,
-    ...     distance=distance)
+    ...     ballast=ballast_arr,
+    ...     distance=distance,
+    ...     z_f=0.076,
+    ...     y_f=0.0)
     """
 
     sleeper: Arrangement
