@@ -30,7 +30,18 @@ class Arrangement(ABC):
 
     @abstractmethod
     def generate(self, num_mount):
-        """Generate count repetitions of objects."""
+        """Generate `num_mount` repetitions of objects.
+
+        Parameters
+        ----------
+        num_mount : int
+            The number of repetitions to generate.
+
+        Yields
+        ------
+        Any
+            The repeated item(s).
+        """
 
 
 class PeriodicArrangement(Arrangement):
@@ -69,7 +80,18 @@ class PeriodicArrangement(Arrangement):
     """
 
     def generate(self, num_mount):
-        """Generate count repetitions of objects."""
+        """Generate `num_mount` repetitions of objects.
+
+        Parameters
+        ----------
+        num_mount : int
+            The number of repetitions to generate.
+
+        Yields
+        ------
+        Any
+            The repeated item(s).
+        """
         c = 0
         while c < num_mount:
             if isinstance(self.item, list):
@@ -117,7 +139,18 @@ class RandomArrangement(Arrangement):
     """
 
     def generate(self, num_mount):
-        """Generate count repetitions of objects."""
+        """Generate `num_mount` repetitions of objects.
+
+        Parameters
+        ----------
+        num_mount : int
+            The number of repetitions to generate.
+
+        Yields
+        ------
+        Any
+            The repeated item(s).
+        """
         for _ in range(num_mount):
             if isinstance(self.item, list):
                 yield random.choice(self.item)
@@ -141,7 +174,8 @@ class RandomArrangement(Arrangement):
 
         Returns
         -------
-        object
+        float
+            A random value from the truncated normal distribution.
         """
         sd = sd + 1e-6  # Low value added to avoid error.
         minv = minv - 1e-6
