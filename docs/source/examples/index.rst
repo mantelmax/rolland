@@ -29,16 +29,45 @@ In this section, you can find various examples that demonstrate the capabilities
 
       Examples demonstrating track response calculations under stationary excitation.
 
-      * :doc:`First Simulation <track_response/quick_start>`
-      * :doc:`Compare Different Tracks (Vertical) <track_response/different_tracks_vertical>`
-      * :doc:`Compare Different Tracks (Lateral) <track_response/different_tracks_lateral>`
-      * :doc:`Structural Irregularity <track_response/variation>`
+      .. grid:: 1 2 2 2
+         :gutter: 3
+
+         .. grid-item-card:: First Simulation
+            :link: track_response/quick_start
+            :link-type: doc
+
+            Basic track vibration analysis under a vertical Gaussian impulse.
+
+         .. grid-item-card:: Compare Different Tracks (Vertical)
+            :link: track_response/different_tracks_vertical
+            :link-type: doc
+
+            Comparison of vertical mobility across continuous and discrete track models.
+
+         .. grid-item-card:: Compare Different Tracks (Lateral)
+            :link: track_response/different_tracks_lateral
+            :link-type: doc
+
+            Comparison of lateral mobility at the rail head across track configurations.
+
+         .. grid-item-card:: Structural Irregularity
+            :link: track_response/variation
+            :link-type: doc
+
+            Track dynamics with custom support arrangements and non-uniform sleeper spacing.
 
    .. tab-item:: Moving Excitation
 
       Examples demonstrating track response under moving loads.
 
-      * :doc:`Moving Random Force Excitation <moving_excitation/moving_random_force>`
+      .. grid:: 1 2 2 2
+         :gutter: 3
+
+         .. grid-item-card:: Moving Random Force Excitation
+            :link: moving_excitation/moving_random_force
+            :link-type: doc
+
+            Time-domain simulation and moving receptance under a moving random load.
 
    .. tab-item:: Radiation
 
