@@ -22,11 +22,33 @@ class Excitation(ABC):
 
     @abstractmethod
     def inject_in_track(self, discr) -> list[Eq]:
-        """Build injection expressions for the excitation."""
+        """Build injection expressions for the excitation.
+
+        Parameters
+        ----------
+        discr : DomSetup
+            The domain setup instance.
+
+        Returns
+        -------
+        list[devito.Eq]
+            List of injection equations.
+        """
 
     @abstractmethod
     def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
-        """Build expressions to observe deflections at the excitation position."""
+        """Build expressions to observe deflections at the excitation position.
+
+        Parameters
+        ----------
+        discr : DomSetup
+            The domain setup instance.
+
+        Returns
+        -------
+        tuple[dict, list[devito.Eq]]
+            Observation functions and their corresponding equations.
+        """
 
 
 @dataclass(kw_only=True)
@@ -72,12 +94,38 @@ class GaussianImpulse(StationaryExcitation):
     force_dir: str = 'vertical'
 
     def evaluate_wavelet(self, time_array: np.ndarray) -> np.ndarray:
-        """Compute the force magnitude over time."""
+        """Compute the force magnitude over time.
+
+        Parameters
+        ----------
+        time_array : numpy.ndarray
+            Array of time values.
+
+        Returns
+        -------
+        numpy.ndarray
+            The computed force magnitude array.
+        """
         shifted_time = time_array - 4 * self.sigma
         return self.a * shifted_time / self.sigma**2 * np.exp(-(shifted_time**2) / self.sigma**2)
 
     def build_force_array(self, nt: int, dt: float, grid) -> SparseTimeFunction:
-        """Build the Devito SparseTimeFunction for the excitation."""
+        """Build the Devito SparseTimeFunction for the excitation.
+
+        Parameters
+        ----------
+        nt : int
+            Number of time steps.
+        dt : float
+            Time step size.
+        grid : devito.Grid
+            The computational grid.
+
+        Returns
+        -------
+        devito.SparseTimeFunction
+            The generated force function.
+        """
         time = dt * np.arange(nt)
 
         force_func = SparseTimeFunction(
@@ -94,7 +142,18 @@ class GaussianImpulse(StationaryExcitation):
         return force_func
 
     def inject_in_track(self, discr) -> list[Eq]:
-        """Build injection expressions for the excitation."""
+        """Build injection expressions for the excitation.
+
+        Parameters
+        ----------
+        discr : DomSetup
+            The domain setup instance.
+
+        Returns
+        -------
+        list[devito.Eq]
+            List of injection equations.
+        """
         force = self.build_force_array(nt=discr.nt, dt=discr.dt, grid=discr.grid)
 
         rail = discr.track.rail
@@ -121,7 +180,18 @@ class GaussianImpulse(StationaryExcitation):
         return injections
 
     def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
-        """Observes deflections exactly at the stationary excitation position."""
+        """Observes deflections exactly at the stationary excitation position.
+
+        Parameters
+        ----------
+        discr : DomSetup
+            The domain setup instance.
+
+        Returns
+        -------
+        tuple[dict, list[devito.Eq]]
+            Observation functions and their corresponding equations.
+        """
         obs_funcs = {}
         obs_terms = []
 
@@ -175,11 +245,23 @@ class RandomForce(MovingExcitation):
     Attributes
     ----------
     v : float
-        Velocity of the moving excitation [m/s].
+        Velocity of the moving excitation :math:`[m/s]`.
     F_stat_z : float
-        Static force in the vertical (z) direction [N].
+        Static force in the vertical (z) direction :math:`[N]`.
     F_stat_y : float
-        Static force in the lateral (y) direction [N].
+        Static force in the lateral (y) direction :math:`[N]`.
+    force_z : numpy.ndarray, internal (automatically calculated)
+        Calculated vertical random force time series.
+    force_y : numpy.ndarray, internal (automatically calculated)
+        Calculated lateral random force time series.
+    _indices : list[devito.Function], internal (automatically calculated)
+        Interpolation indices.
+    _weights : list[devito.Function], internal (automatically calculated)
+        Interpolation weights.
+    _F_z : devito.Function, internal (automatically calculated)
+        Vertical force function.
+    _F_y : devito.Function, internal (automatically calculated)
+        Lateral force function.
     """
 
     v: float
@@ -187,7 +269,18 @@ class RandomForce(MovingExcitation):
     F_stat_y: float
 
     def calc_rnd_forcearray(self, nt: int) -> np.ndarray:
-        """Calculate the time-series arrays for the randomized forces."""
+        """Calculate the time-series arrays for the randomized forces.
+
+        Parameters
+        ----------
+        nt : int
+            Number of time steps.
+
+        Returns
+        -------
+        numpy.ndarray
+            Array of shape (2, nt) containing vertical and lateral random forces.
+        """
         ramp_len = int(0.4 * nt)
 
         # Create a linear ramp from ~0 to 1, padded with ones for the remaining time
@@ -206,7 +299,18 @@ class RandomForce(MovingExcitation):
         return np.stack([force_z, force_y], axis=0)
 
     def inject_in_track(self, discr) -> list[Eq]:
-        """Build Devito equations to inject the moving random force into the track."""
+        """Build Devito equations to inject the moving random force into the track.
+
+        Parameters
+        ----------
+        discr : DomSetup
+            The domain setup instance.
+
+        Returns
+        -------
+        list[devito.Eq]
+            List of injection equations.
+        """
         grid = discr.grid
         t = grid.time_dim
         x = grid.dimensions[0]
@@ -273,7 +377,18 @@ class RandomForce(MovingExcitation):
         return injections
 
     def observe_excitation(self, discr) -> tuple[dict, list[Eq]]:
-        """Observes deflections dynamically tracking the moving excitation position."""
+        """Observes deflections dynamically tracking the moving excitation position.
+
+        Parameters
+        ----------
+        discr : DomSetup
+            The domain setup instance.
+
+        Returns
+        -------
+        tuple[dict, list[devito.Eq]]
+            Observation functions and their corresponding equations.
+        """
         if not hasattr(self, '_indices'):
             msg = 'inject_in_track must be called before observe_excitation.'
             raise RuntimeError(msg)
