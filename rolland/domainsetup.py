@@ -79,7 +79,7 @@ class DomSetup:
 
     def build_grid(self):
         """Build the Devito computational grid.
-        
+
         Initializes `nt`, `nx`, `grid`, `bd_grid`, and `bound_dom` attributes.
         """
         self.nt = int(self.req_simt / self.dt)
@@ -184,7 +184,7 @@ class DomSetup:
 
     def build_operator(self):
         """Build the track operator for the simulation.
-        
+
         Initializes dynamic spatial functions (`f`), sets up wave equations and ADE-PML
         updates, and populates `op_track`, `u_z`, `u_y`, and `phi_x`.
         """

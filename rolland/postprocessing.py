@@ -81,15 +81,30 @@ class PostProcessing(ABC):
         plt.grid(True)
         plt.show()
 
-class DEVITO_PP(PostProcessing):
-    r"""Postprocessing class for DEVITO results.
-    """
+class DEVITO_PP(PostProcessing):  # noqa: N801
+    r"""Postprocessing class for DEVITO results."""
 
     def validate_postprocessing(self):
         """Validate the postprocessing methods."""
 
     @staticmethod
     def calculate_mobility(u, excit, pd):
+        """Calculate mobility from displacement and excitation force.
+
+        Parameters
+        ----------
+        u : numpy.ndarray
+            Displacement time series.
+        excit : SparseTimeFunction
+            Excitation force function.
+        pd : DomSetup
+            Domain setup instance.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]
+            Frequency array and mobility spectrum.
+        """
         displ_exc = u[:,0]
 
         # Extract excitation force data
@@ -108,6 +123,22 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calculate_recep(u, excit, pd):
+        """Calculate receptance from displacement and excitation force.
+
+        Parameters
+        ----------
+        u : Function
+            Displacement function.
+        excit : SparseTimeFunction
+            Excitation force function.
+        pd : DomSetup
+            Domain setup instance.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]
+            Frequency array and receptance spectrum.
+        """
         displ_exc = u.data[:, 0]
 
         # Extract excitation force data
@@ -125,8 +156,28 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calc_coupled_mobility(u, phi, offset, excit, pd):
+        """Calculate coupled mobility taking rotational offset into account.
+
+        Parameters
+        ----------
+        u : numpy.ndarray
+            Translational displacement time series.
+        phi : numpy.ndarray
+            Rotational displacement time series.
+        offset : float
+            Distance offset.
+        excit : SparseTimeFunction
+            Excitation force function.
+        pd : DomSetup
+            Domain setup instance.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]
+            Frequency array and coupled mobility spectrum.
+        """
         displ_exc = u[:, 0] + phi[:, 0] * offset
-        # TODO: Implement tranformation Matrix, for lateral excentricity
+        # TODO(mantelmax): Implement transformation matrix for lateral eccentricity  # noqa: TD003, FIX002
 
         exc = excit.data[:, 0]
         displ_fft = fft(displ_exc)
@@ -140,6 +191,26 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calc_coupled_recep(u, phi, offset, excit, pd):
+        """Calculate coupled receptance taking rotational offset into account.
+
+        Parameters
+        ----------
+        u : numpy.ndarray
+            Translational displacement time series.
+        phi : numpy.ndarray
+            Rotational displacement time series.
+        offset : float
+            Distance offset.
+        excit : SparseTimeFunction
+            Excitation force function.
+        pd : DomSetup
+            Domain setup instance.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]
+            Frequency array and coupled receptance spectrum.
+        """
         displ_exc = u[:, 0] + phi[:, 0] * offset
 
         exc = excit.data[:, 0]
@@ -152,6 +223,24 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calculate_mov_recep(u, excit, pd, skip):
+        """Calculate moving receptance skipping initial transient time steps.
+
+        Parameters
+        ----------
+        u : numpy.ndarray
+            Displacement time series.
+        excit : Function
+            Excitation force function.
+        pd : DomSetup
+            Domain setup instance.
+        skip : int
+            Number of initial time steps to skip.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]
+            Frequency array and moving receptance spectrum.
+        """
         # Perform FFT on displacement and excitation force
         displ_fft = fft(u[skip:])
         exc_fft = fft(excit.data[skip:])
@@ -163,6 +252,28 @@ class DEVITO_PP(PostProcessing):
 
     @staticmethod
     def calc_coupled_mov_recep(u, phi, offset, excit, pd, skip):
+        """Calculate coupled moving receptance skipping initial transient time steps.
+
+        Parameters
+        ----------
+        u : Function
+            Translational displacement function.
+        phi : Function
+            Rotational displacement function.
+        offset : float
+            Distance offset.
+        excit : Function
+            Excitation force function.
+        pd : DomSetup
+            Domain setup instance.
+        skip : int
+            Number of initial time steps to skip.
+
+        Returns
+        -------
+        tuple[numpy.ndarray, numpy.ndarray]
+            Frequency array and coupled moving receptance spectrum.
+        """
         displ_exc = u.data[skip:] + phi.data[skip:] * offset
 
         exc = excit.data[skip:]

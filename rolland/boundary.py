@@ -114,8 +114,8 @@ class CFSPML:
         Returns
         -------
         tuple[DevitoEq, DevitoEq, list[DevitoEq]]
-            The modified spatial derivatives (`dx_pml`, `dx2_pml`) and a list of forward update equations
-            for the auxiliary variables.
+            The modified spatial derivatives (`dx_pml`, `dx2_pml`) and a list
+            of forward update equations for the auxiliary variables.
         """
         # Auxiliary fields
         psi = TimeFunction(

@@ -12,9 +12,14 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
+import devito
 import numpy as np
 from devito import Eq, Function, SparseTimeFunction
+
+if TYPE_CHECKING:
+    from rolland.domainsetup import DomSetup
 
 
 class Excitation(ABC):

@@ -66,5 +66,6 @@ If you use **Rolland** in your research, please cite the following paper:
    API Reference <api_ref/index>
    Examples <examples/index>
    What's New <whats_new/index>
+   Funding <funding/index>
    License <license/index>
    Literature <literature/index>

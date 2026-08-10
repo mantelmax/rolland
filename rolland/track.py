@@ -246,8 +246,9 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
 
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
-    >>> track = ContSlabSingleRailTrack(rail = UIC60, pad = thepad, slab = theslab, l_track = 145, z_f=0.076, y_f=0.0)
-    ...
+    >>> track = ContSlabSingleRailTrack(
+    ...     rail=UIC60, pad=thepad, slab=theslab, l_track=145, z_f=0.076, y_f=0.0
+    ... )
     """
 
     pad: ContPad
@@ -588,8 +589,9 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
 
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
-    >>> track = ContBallastedSingleRailTrack(rail = UIC60, pad = thepad, slab = theslab, z_f=0.076, y_f=0.0)
-    ...
+    >>> track = ContBallastedSingleRailTrack(
+    ...     rail=UIC60, pad=thepad, slab=theslab, z_f=0.076, y_f=0.0
+    ... )
     """
 
     pad: ContPad
