@@ -242,8 +242,8 @@ class DEVITO_PP(PostProcessing):  # noqa: N801
             Frequency array and moving receptance spectrum.
         """
         # Perform FFT on displacement and excitation force
-        displ_fft = fft(u[skip:])
-        exc_fft = fft(excit.data[skip:])
+        displ_fft = fft(u[skip:-10])
+        exc_fft = fft(excit.data[skip:-10])
         frequ = fftfreq(displ_fft.shape[0], pd.dt)
 
         # Calculate mobility (velocity/displacement)
