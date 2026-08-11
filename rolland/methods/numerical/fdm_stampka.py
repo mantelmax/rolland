@@ -1,12 +1,31 @@
 """Contains numerical methods as developed by K.Stampka and E.Sarradj.
 
+These methods utilize the Euler-Bernoulli Beam Theory and only calculate
+the vertical beam dynamics (1 DOF per node). Eccentricities cannot be
+represented, meaning that the mechanical properties of the foundation
+and the excitation act directly at the rail centroid.
+
 Katja Stampka and Ennes Sarradj.
 A Time-Domain Finite-Difference Method for Bending Waves
 on Infinite Beams on an Elastic Foundation.
 Acoustics, January 2022. Num Pages: 18. doi:10.3390/acoustics4040052.
+
+.. autosummary::
+    :toctree: numerical/
+
+    PMLStampka
+    GaussianImpulseStampka
+    DiscretizationStampka
+    DeflectionStampka
+    PostProcessing
+    AnalyticPP
+    RollandPP
+    Response
+    TDR
 """
 
-import inspect
+# ruff: noqa: N806
+
 import warnings
 from dataclasses import dataclass, field
 
@@ -26,7 +45,7 @@ from numpy import (  # noqa: A004
     zeros,
 )
 from numpy.fft import fft, fftfreq
-from scipy.sparse import SparseEfficiencyWarning, bmat, csc_matrix, diags, eye
+from scipy.sparse import SparseEfficiencyWarning, bmat, diags, eye
 from scipy.sparse.linalg import splu
 
 from rolland.methods import AnalyticalMethods
@@ -61,7 +80,8 @@ class PMLStampka:
     l_bound: float = 33.0
 
     def pml(self, drbc, xbc):
-        #Exponential increasing rail damping, added to dr.
+        """Calculate exponentially increasing rail damping for boundary domain."""
+        # Exponential increasing rail damping, added to dr.
         return drbc * xbc ** self.alpha / self.l_bound ** self.alpha
 
 @dataclass(kw_only=True)
@@ -186,7 +206,15 @@ class DiscretizationStampka:
         self.pml = self.bound.pml(drbc, xbc)
 
 
-    def build_matrix(self, vec_dr: ndarray, vec_sp: ndarray, vec_dp: ndarray, vec_ms: ndarray, vec_sb: ndarray, vec_db: ndarray):
+    def build_matrix(
+        self,
+        vec_dr: ndarray,
+        vec_sp: ndarray,
+        vec_dp: ndarray,
+        vec_ms: ndarray,
+        vec_sb: ndarray,
+        vec_db: ndarray,
+    ):
         """Build matrices A, B, and C according to :cite:t:`stampka2022a`.
 
         Parameters
@@ -216,60 +244,60 @@ class DiscretizationStampka:
              (2 * self.track.rail.mr * self.dx ** 4))
 
         # Coefficient matrix for x'''' (4th derivative)
-        D_diagonals = [ones(self.nx - 2),  # noqa: N806
+        D_diagonals = [ones(self.nx - 2),
                        (-4) * ones(self.nx - 1),
                        6 * ones(self.nx),
                        (-4) * ones(self.nx - 1),
                        ones(self.nx - 2)]
 
-        D = diags(D_diagonals, [-2, -1, 0, 1, 2])  # noqa: N806
-        Eye = eye(self.nx)  # noqa: N806
+        D = diags(D_diagonals, [-2, -1, 0, 1, 2])
+        Eye = eye(self.nx)
 
-        A11_1_diagonals = self.dt / self.track.rail.mr * (vec_dr + vec_dp)  # noqa: N806
-        A11_1_diagonals += self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp  # noqa: N806
-        A11_1 = diags([A11_1_diagonals], [0])  # noqa: N806
-        A11 = (r * D + Eye + A11_1).tocsc()  # noqa: N806
+        A11_1_diagonals = self.dt / self.track.rail.mr * (vec_dr + vec_dp)
+        A11_1_diagonals += self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp
+        A11_1 = diags([A11_1_diagonals], [0])
+        A11 = (r * D + Eye + A11_1).tocsc()
 
-        B11_1_diagonals = self.dt / self.track.rail.mr * (vec_dr + vec_dp)  # noqa: N806
-        B11_1 = diags([B11_1_diagonals], [0])  # noqa: N806
-        B11 = (2 * Eye + B11_1).tocsc()  # noqa: N806
+        B11_1_diagonals = self.dt / self.track.rail.mr * (vec_dr + vec_dp)
+        B11_1 = diags([B11_1_diagonals], [0])
+        B11 = (2 * Eye + B11_1).tocsc()
 
-        C11_1_diagonals = self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp  # noqa: N806
-        C11_1 = diags([C11_1_diagonals], [0])  # noqa: N806
-        C11 = (-(Eye + C11_1 + r * D)).tocsc()  # noqa: N806
+        C11_1_diagonals = self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp
+        C11_1 = diags([C11_1_diagonals], [0])
+        C11 = (-(Eye + C11_1 + r * D)).tocsc()
 
-        A12_diagonals = -self.dt / self.track.rail.mr * vec_dp  # noqa: N806
-        A12_diagonals += -self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp  # noqa: N806
-        A12 = diags([A12_diagonals], [0]).tocsc()  # noqa: N806
+        A12_diagonals = -self.dt / self.track.rail.mr * vec_dp
+        A12_diagonals += -self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp
+        A12 = diags([A12_diagonals], [0]).tocsc()
 
-        A21_diagonals = -self.dt * vec_dp / vec_ms  # noqa: N806
-        A21_diagonals += -self.dt ** 2 / (2 * vec_ms) * vec_sp  # noqa: N806
-        A21 = diags([A21_diagonals], [0]).tocsc()  # noqa: N806
+        A21_diagonals = -self.dt * vec_dp / vec_ms
+        A21_diagonals += -self.dt ** 2 / (2 * vec_ms) * vec_sp
+        A21 = diags([A21_diagonals], [0]).tocsc()
 
-        A22_1_diagonals = self.dt * ((vec_dp + vec_db) / vec_ms)  # noqa: N806
-        A22_1_diagonals += self.dt ** 2 / (2 * vec_ms) * (vec_sp + vec_sb)  # noqa: N806
-        A22_1 = diags([A22_1_diagonals], [0])  # noqa: N806
-        A22 = (Eye + A22_1).tocsc()  # noqa: N806
+        A22_1_diagonals = self.dt * ((vec_dp + vec_db) / vec_ms)
+        A22_1_diagonals += self.dt ** 2 / (2 * vec_ms) * (vec_sp + vec_sb)
+        A22_1 = diags([A22_1_diagonals], [0])
+        A22 = (Eye + A22_1).tocsc()
 
-        B12_diagonals = -self.dt / self.track.rail.mr * vec_dp  # noqa: N806
-        B12 = diags([B12_diagonals], [0]).tocsc()  # noqa: N806
+        B12_diagonals = -self.dt / self.track.rail.mr * vec_dp
+        B12 = diags([B12_diagonals], [0]).tocsc()
 
-        B21_diagonals = -self.dt * vec_dp / vec_ms  # noqa: N806
-        B21 = diags([B21_diagonals], [0]).tocsc()  # noqa: N806
+        B21_diagonals = -self.dt * vec_dp / vec_ms
+        B21 = diags([B21_diagonals], [0]).tocsc()
 
-        B22_1_diagonals = self.dt * (vec_db + vec_dp) / vec_ms  # noqa: N806
-        B22_1 = diags([B22_1_diagonals], [0])  # noqa: N806
-        B22 = (2 * Eye + B22_1).tocsc()  # noqa: N806
+        B22_1_diagonals = self.dt * (vec_db + vec_dp) / vec_ms
+        B22_1 = diags([B22_1_diagonals], [0])
+        B22 = (2 * Eye + B22_1).tocsc()
 
-        C12_diagonals = self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp  # noqa: N806
-        C12 = diags([C12_diagonals], [0]).tocsc()  # noqa: N806
+        C12_diagonals = self.dt ** 2 / (2 * self.track.rail.mr) * vec_sp
+        C12 = diags([C12_diagonals], [0]).tocsc()
 
-        C21_diagonals = self.dt ** 2 / (2 * vec_ms) * vec_sp  # noqa: N806
-        C21 = diags([C21_diagonals], [0]).tocsc()  # noqa: N806
+        C21_diagonals = self.dt ** 2 / (2 * vec_ms) * vec_sp
+        C21 = diags([C21_diagonals], [0]).tocsc()
 
-        C22_1_diagonals = self.dt ** 2 * (vec_sp + vec_sb) / (2 * vec_ms)  # noqa: N806
-        C22_1 = diags([C22_1_diagonals], [0])  # noqa: N806
-        C22 = (-(Eye + C22_1)).tocsc()  # noqa: N806
+        C22_1_diagonals = self.dt ** 2 * (vec_sp + vec_sb) / (2 * vec_ms)
+        C22_1 = diags([C22_1_diagonals], [0])
+        C22 = (-(Eye + C22_1)).tocsc()
 
         self.A = bmat([[A11, A12], [A21, A22]], format='csc')
         self.B = bmat([[B11, B12], [B21, B22]], format='csc')
@@ -520,7 +548,6 @@ class DeflectionStampka:
 #---postprocessing.py---
 class PostProcessing:
     r"""Abstract base class for postprocessing classes."""
-
 
     def validate_postprocessing(self):
         """Validate the postprocessing methods."""

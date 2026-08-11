@@ -18,7 +18,7 @@ from rolland import (
     Sleeper,
 )
 from rolland.database.rail.db_rail import UIC60
-from rolland.methods.fdm_stampka import (
+from rolland.methods.numerical.fdm_stampka import (
     DeflectionStampka,
     DiscretizationStampka,
     GaussianImpulseStampka,
