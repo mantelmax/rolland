@@ -8,16 +8,15 @@
 from .analytical import (
     EBBCont1L,
     EBBCont2L,
-    TSDiscr1LSupp,
-    TSDiscr2LSupp,
+)
+from .semi_analytical import (
+    TSBDiscr1L,
+    TSBDiscr2L,
 )
 
 __all__ = ["EBBCont1L",
-           "TSDiscr2LSupp",
-           "TSDiscr1LSupp",
            "EBBCont2L",
+           "TSBDiscr1L",
+           "TSBDiscr2L",
            ]
-
-
-
 

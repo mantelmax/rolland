@@ -3,7 +3,10 @@
 Analytical Models
 =================
 
-The ``methods.analytical`` module provides frequency-domain reference track models for benchmarking and validation.
+.. note:: 
+   The ``methods.analytical`` package is provided solely for reference, benchmarking, and validation purposes against the core Rolland model.
+
+The package provides exact continuous beam analytical solutions.
 
 .. currentmodule:: rolland.methods.analytical
 
@@ -13,7 +16,7 @@ Abstract Base Classes
 .. autosummary::
    :toctree: analytical
 
-   AnalyticalMethods
+   EBBCont
 
 Continuous Support Models
 -------------------------
@@ -21,19 +24,5 @@ Continuous Support Models
 .. autosummary::
    :toctree: analytical
 
-   EBBCont1LSupp
-   EBBCont2LSupp
-
-Discrete Support Models
------------------------
-
-.. autosummary::
-   :toctree: analytical
-
-   TSDiscr1LSupp
-   TSDiscr2LSupp
-   TBDiscr
-
-
-
-
+   EBBCont1L
+   EBBCont2L

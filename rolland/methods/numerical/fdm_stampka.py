@@ -48,7 +48,6 @@ from numpy.fft import fft, fftfreq
 from scipy.sparse import SparseEfficiencyWarning, bmat, diags, eye
 from scipy.sparse.linalg import splu
 
-from rolland.methods import AnalyticalMethods
 from rolland.track import (
     ArrangedBallastedSingleRailTrack,
     ArrangedSlabSingleRailTrack,
@@ -613,17 +612,17 @@ class AnalyticPP(PostProcessing):
 
     Attributes
     ----------
-    results : AnalyticalMethods
-        Instance of the AnalyticalMethods class containing the results.
+    results : Any
+        Instance containing analytical results (must have .f, .mobility, .force, .omega).
     """
 
-    def __init__(self, results: AnalyticalMethods):
+    def __init__(self, results):
         """Initialize AnalyticPP.
 
         Parameters
         ----------
-        results : AnalyticalMethods
-            Instance of the AnalyticalMethods class containing the results.
+        results : Any
+            Instance containing analytical results.
         """
         self.results = results
 

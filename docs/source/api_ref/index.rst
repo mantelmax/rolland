@@ -24,11 +24,13 @@ API Reference
 
 .. toctree::
    :hidden:
-   :caption: Other Models
+   :caption: Reference Models
    :maxdepth: 2
    :titlesonly:
 
    other_models/analyticalmethods
+   other_models/semianalyticalmethods
+   other_models/numericalmethods
 
 .. toctree::
    :hidden:
@@ -100,9 +102,12 @@ API Reference
 
             Time-domain finite difference wavefield deflection solvers and record stores.
 
-   .. tab-item:: Other Models
+   .. tab-item:: Reference Models
 
-      This section contains analytical and numerical models for benchmark comparisons.
+      The **Reference Models** section contains analytical, semi-analytical, and numerical models.
+
+      .. note:: 
+         These models are **strictly for reference and comparison**. They are provided to allow users to benchmark and validate the primary Rolland solvers against established classical theories.
 
       .. grid:: 1 2 2 2
          :gutter: 3
@@ -111,7 +116,19 @@ API Reference
             :link: other_models/analyticalmethods
             :link-type: doc
 
-            Reference analytical solutions and benchmark track models.
+            Exact continuous beam analytical solutions.
+
+         .. grid-item-card:: Semi-Analytical Methods
+            :link: other_models/semianalyticalmethods
+            :link-type: doc
+
+            Discrete supports semi-analytical solutions.
+
+         .. grid-item-card:: Numerical Methods
+            :link: other_models/numericalmethods
+            :link-type: doc
+
+            Purely numerical solvers for benchmark tracking.
 
    .. tab-item:: Postprocessing
 

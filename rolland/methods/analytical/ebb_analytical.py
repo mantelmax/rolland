@@ -16,7 +16,6 @@ and accelerance.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import List, Union
 
 from numpy import array, exp, ndarray, pi, sqrt, squeeze
 
@@ -47,7 +46,7 @@ class EBBCont(ABC):
     f: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
     force: ndarray = field(default_factory=lambda: array(1.0), metadata={"default_repr": "numpy.array([1.0])"})
     x_excit: float = 0.0
-    x: Union[float, List[float], ndarray] = 0.0
+    x: float | list[float] | ndarray = 0.0
     mobility: ndarray = field(init=False, default_factory=lambda: array([]),
                               metadata={"default_repr": "numpy.array([])"})
 
@@ -80,7 +79,6 @@ class EBBCont(ABC):
     @abstractmethod
     def _validate_track(self) -> None:
         """Validate track type."""
-        pass
 
     @abstractmethod
     def compute_mobility(self) -> None:
@@ -92,7 +90,8 @@ class EBBCont(ABC):
         NotImplementedError
             If the method is not implemented in a subclass.
         """
-        raise NotImplementedError("Subclasses must implement compute_mobility.")
+        msg = "Subclasses must implement compute_mobility."
+        raise NotImplementedError(msg)
 
 
 @dataclass(kw_only=True)
@@ -117,7 +116,8 @@ class EBBCont1L(EBBCont):
     def _validate_track(self) -> None:
         """Validate track type."""
         if not isinstance(self.track, ContSlabSingleRailTrack):
-            raise TypeError(f"Expected ContSlabSingleRailTrack, got {type(self.track).__name__}")
+            msg = f"Expected ContSlabSingleRailTrack, got {type(self.track).__name__}"
+            raise TypeError(msg)
 
     def compute_mobility(self) -> None:
         r"""
@@ -175,7 +175,8 @@ class EBBCont2L(EBBCont):
     def _validate_track(self) -> None:
         """Validate track type."""
         if not isinstance(self.track, ContBallastedSingleRailTrack):
-            raise TypeError(f"Expected ContBallastedSingleRailTrack, got {type(self.track).__name__}")
+            msg = f"Expected ContBallastedSingleRailTrack, got {type(self.track).__name__}"
+            raise TypeError(msg)
 
     def compute_mobility(self) -> None:
         r"""
