@@ -12,22 +12,16 @@ from .analytical import (
     TSDiscr1LSupp,
     TSDiscr2LSupp,
 )
-from .numerical import (
+from .fdm_stampka import (
     TDR,
     AnalyticPP,
-    Deflection,
-    DeflectionEBBVertic,
-    Discretization,
-    DiscretizationEBBVertic,
-    DiscretizationEBBVerticConst,
-    DiscretizationEBBVerticTimeDepend,
-    Excitation,
-    GaussianImpulse,
-    PMLRailDampVertic,
+    DeflectionStampka,
+    DiscretizationStampka,
+    GaussianImpulseStampka,
+    PMLStampka,
     PostProcessing,
     Response,
     RollandPP,
-    StationaryExcitation,
 )
 
 __all__ = ["AnalyticalMethods",
@@ -37,19 +31,13 @@ __all__ = ["AnalyticalMethods",
            "EBBCont2LSupp",
            "TDR",
            "AnalyticPP",
-           "Deflection",
-           "DeflectionEBBVertic",
-           "Discretization",
-           "DiscretizationEBBVertic",
-           "DiscretizationEBBVerticConst",
-           "DiscretizationEBBVerticTimeDepend",
-           "Excitation",
-           "GaussianImpulse",
-           "PMLRailDampVertic",
+           "DeflectionStampka",
+           "DiscretizationStampka",
+           "GaussianImpulseStampka",
+           "PMLStampka",
            "PostProcessing",
            "Response",
-           "RollandPP",
-           "StationaryExcitation"]
+           "RollandPP"]
 
 
 
