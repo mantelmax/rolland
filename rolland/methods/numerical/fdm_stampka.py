@@ -306,12 +306,6 @@ class DiscretizationStampka:
 
 
 
-    def validate_discretization(self):
-        """Validate the discretization."""
-
-    def validate_discretization_stampka(self):
-        """Validate the discretization according to Stampka."""
-
     def __post_init__(self):
         """Calculate superstructure property vectors."""
         self.calc_grid()
@@ -549,9 +543,6 @@ class DeflectionStampka:
 class PostProcessing:
     r"""Abstract base class for postprocessing classes."""
 
-    def validate_postprocessing(self):
-        """Validate the postprocessing methods."""
-
     @staticmethod
     def fast_fourier_tr(tsignal, dt):
         """Calculate the Fast Fourier Transform (FFT) of a time signal.
@@ -636,9 +627,6 @@ class AnalyticPP(PostProcessing):
         """
         self.results = results
 
-    def validate_postprocessing(self):
-        """Validate the postprocessing methods."""
-
     @property
     def f(self):
         """Frequency vector."""
@@ -674,9 +662,6 @@ class RollandPP(PostProcessing):
     results: DeflectionStampka
     f_min: float = 100.0
     f_max: float = 3000.0
-
-    def validate_postprocessing(self):
-        """Validate the postprocessing methods."""
 
 
 @dataclass(kw_only=True)
