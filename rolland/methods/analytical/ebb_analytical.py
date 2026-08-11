@@ -185,12 +185,13 @@ class EBBCont2L(EBBCont):
         This method calculates the mobility of the track using the given parameters
         and the analytical solution for a continuous ballasted single rail track.
         """
+        Ez = self.track.E[1]
         mr = self.track.rail.mr
         sp = self.track.pad.sp_z
-        sb = self.track.ballast.sb_z
+        sb = self.track.ballast.sb_z * Ez
         dp = self.track.pad.dp_z
-        db = self.track.ballast.db_z
-        ms = self.track.slab.ms
+        db = self.track.ballast.db_z * Ez
+        ms = self.track.slab.ms * Ez
 
         self.omega_0 = float(sqrt(sp / mr))            # Eq. 3.47
         self.omega_1 = float(sqrt(sb / ms))            # Eq. 3.44

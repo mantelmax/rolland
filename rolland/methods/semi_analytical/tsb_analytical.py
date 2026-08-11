@@ -124,12 +124,16 @@ class TSBDiscr(ABC):
             self.mobility = array([])
             return
 
+        Ez = track.E[1]
+        ms = ms * Ez
+        sb = sb * Ez
+
         mr = track.rail.mr
         rho = track.rail.rho
         etap = track.pad.etap_z
         kap = track.rail.kapz
-        youm = track.rail.E
-        shearm = track.rail.G
+        youm = track.rail.E * (1 + 1j * track.rail.etar)
+        shearm = track.rail.G * (1 + 1j * track.rail.etar)
         ar = track.rail.Ar
         aream = track.rail.Iyr
         sp = track.pad.sp_z
