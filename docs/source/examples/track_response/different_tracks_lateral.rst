@@ -33,7 +33,7 @@ at the rail head under a lateral Gaussian impulse excitation.
     from rolland.excitation import GaussianImpulse
     from rolland.deflection import Deflection
     from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import DEVITO_PP
+    from rolland.postprocessing import PointResponse
 
     # 1. PARAMETERS DEFINITION -----------------------------------------------------
     slep_dist = 0.6
@@ -147,7 +147,7 @@ at the rail head under a lateral Gaussian impulse excitation.
     for label, trk in tracks:
         discr = DomSetup(track=trk, bound=bound, req_simt=0.5)
         defl = Deflection(discr=discr, excit=exc_lat, store="excit")
-        freq, mob_y = DEVITO_PP.calc_coupled_mobility(
+        freq, mob_y = PointResponse.calc_coupled_mobility(
             defl.u_y_obs, defl.phi_x_obs, exc_lat.z_e, exc_lat.force, discr
         )
         plt.loglog(freq[:discr.nt // 2], abs(mob_y[:discr.nt // 2]), label=label)
@@ -164,7 +164,7 @@ at the rail head under a lateral Gaussian impulse excitation.
     for label, trk in tracks:
         discr = DomSetup(track=trk, bound=bound, req_simt=0.5)
         defl = Deflection(discr=discr, excit=exc_lat, store="observe", obs_pos=40.3)
-        freq, mob_y = DEVITO_PP.calc_coupled_mobility(
+        freq, mob_y = PointResponse.calc_coupled_mobility(
             defl.u_y_obs, defl.phi_x_obs, exc_lat.z_e, exc_lat.force, discr
         )
         plt.loglog(freq[:discr.nt // 2], abs(mob_y[:discr.nt // 2]), label=label)

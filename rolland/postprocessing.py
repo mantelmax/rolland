@@ -696,7 +696,7 @@ class TrackDecayRate(TrackResponse):
             If the excitation does not lie between two supports, or if it is
             further than ``tol_excit`` from the centre of its sleeper bay.
         """
-        if not isinstance(self.track, DiscrSlabSingleRailTrack | DiscrBallastedSingleRailTrack):
+        if not isinstance(self.track, (DiscrSlabSingleRailTrack, DiscrBallastedSingleRailTrack)):
             return
 
         x_mp = array(list(self.track.mount_prop.keys()))
@@ -747,7 +747,7 @@ class TrackDecayRate(TrackResponse):
         ind_tdr : list[int]
             Corresponding spatial grid indices, offset by ``ind_excit``.
         """
-        if isinstance(self.track, ArrangedSlabSingleRailTrack | ArrangedBallastedSingleRailTrack):
+        if isinstance(self.track, (ArrangedSlabSingleRailTrack, ArrangedBallastedSingleRailTrack)):
             x_mp = array(list(self.track.mount_prop.keys()))
             ind_mp = (x_mp / self.dx).astype(int)
 

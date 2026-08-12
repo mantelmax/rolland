@@ -31,7 +31,7 @@ and lateral frequency responses of a track model with structural irregularity.
     from rolland.excitation import GaussianImpulse
     from rolland.deflection import Deflection
     from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import DEVITO_PP
+    from rolland.postprocessing import PointResponse
 
     # 1. TRACK & ARRANGEMENT DEFINITION -------------------------------------------
     rail = UIC60
@@ -88,13 +88,13 @@ and lateral frequency responses of a track model with structural irregularity.
     defl_lat_dist = Deflection(discr=discr, excit=exc_lat, store="observe", obs_pos=40.3)
 
     # 4. POSTPROCESSING & VISUALIZATION -------------------------------------------
-    freq, mob_z_excit = DEVITO_PP.calculate_mobility(defl_vert_excit.u_z_obs, exc_vert.force, discr)
-    _, mob_z_dist = DEVITO_PP.calculate_mobility(defl_vert_dist.u_z_obs, exc_vert.force, discr)
+    freq, mob_z_excit = PointResponse.calculate_mobility_1d(defl_vert_excit.u_z_obs, exc_vert.force, discr.dt)
+    _, mob_z_dist = PointResponse.calculate_mobility_1d(defl_vert_dist.u_z_obs, exc_vert.force, discr.dt)
 
-    _, mob_y_excit = DEVITO_PP.calc_coupled_mobility(
+    _, mob_y_excit = PointResponse.calc_coupled_mobility(
         defl_lat_excit.u_y_obs, defl_lat_excit.phi_x_obs, exc_lat.z_e, exc_lat.force, discr
     )
-    _, mob_y_dist = DEVITO_PP.calc_coupled_mobility(
+    _, mob_y_dist = PointResponse.calc_coupled_mobility(
         defl_lat_dist.u_y_obs, defl_lat_dist.phi_x_obs, exc_lat.z_e, exc_lat.force, discr
     )
 

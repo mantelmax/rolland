@@ -29,7 +29,7 @@ The track is excited between two sleepers by a Gaussian impulse.
     from rolland.excitation import GaussianImpulse
     from rolland.deflection import Deflection
     from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import DEVITO_PP
+    from rolland.postprocessing import PointResponse
 
     # 1. TRACK DEFINITION ----------------------------------------------------------
     track = SimplePeriodicBallastedSingleRailTrack(
@@ -97,8 +97,8 @@ The track is excited between two sleepers by a Gaussian impulse.
     )
 
     # 4. POSTPROCESSING & VISUALIZATION -------------------------------------------
-    freq, mob_excit = DEVITO_PP.calculate_mobility(defl_excit.u_z_obs, exc_vert.force, discr)
-    _, mob_dist = DEVITO_PP.calculate_mobility(defl_dist.u_z_obs, exc_vert.force, discr)
+    freq, mob_excit = PointResponse.calculate_mobility_1d(defl_excit.u_z_obs, exc_vert.force, discr.dt)
+    _, mob_dist = PointResponse.calculate_mobility_1d(defl_dist.u_z_obs, exc_vert.force, discr.dt)
 
     plt.figure(figsize=(10, 8))
 

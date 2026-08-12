@@ -34,7 +34,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     from rolland.excitation import GaussianImpulse
     from rolland.deflection import Deflection
     from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import DEVITO_PP
+    from rolland.postprocessing import PointResponse
 
     # 1. PARAMETERS DEFINITION -----------------------------------------------------
     slep_dist = 0.6
@@ -148,7 +148,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     for label, trk in tracks:
         discr = DomSetup(track=trk, bound=bound, req_simt=0.5)
         defl = Deflection(discr=discr, excit=exc_vert, store="excit")
-        freq, mob_z = DEVITO_PP.calculate_mobility(defl.u_z_obs, exc_vert.force, discr)
+        freq, mob_z = PointResponse.calculate_mobility_1d(defl.u_z_obs, exc_vert.force, discr.dt)
         plt.loglog(freq[:discr.nt // 2], abs(mob_z[:discr.nt // 2]), label=label)
 
     plt.xlabel("Frequency [Hz]")
@@ -163,7 +163,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     for label, trk in tracks:
         discr = DomSetup(track=trk, bound=bound, req_simt=0.5)
         defl = Deflection(discr=discr, excit=exc_vert, store="observe", obs_pos=40.3)
-        freq, mob_z = DEVITO_PP.calculate_mobility(defl.u_z_obs, exc_vert.force, discr)
+        freq, mob_z = PointResponse.calculate_mobility_1d(defl.u_z_obs, exc_vert.force, discr.dt)
         plt.loglog(freq[:discr.nt // 2], abs(mob_z[:discr.nt // 2]), label=label)
 
     plt.xlabel("Frequency [Hz]")

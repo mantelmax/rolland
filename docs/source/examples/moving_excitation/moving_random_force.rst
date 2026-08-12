@@ -31,7 +31,7 @@ and evaluate the moving receptance spectrum using the Rolland library.
     from rolland.excitation import RandomForce
     from rolland.deflection import Deflection
     from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import DEVITO_PP
+    from rolland.postprocessing import PointResponse
 
     # 1. TRACK DEFINITION ----------------------------------------------------------
     track = SimplePeriodicBallastedSingleRailTrack(
@@ -81,7 +81,7 @@ and evaluate the moving receptance spectrum using the Rolland library.
     # 4. POSTPROCESSING & VISUALIZATION -------------------------------------------c
     # Skip initial 30% of time steps to exclude transient effects
     skip = int(0.3 * discr.nt)
-    freq, mov_recep = DEVITO_PP.calculate_mov_recep(defl.u_z_obs, exc.force_z, discr, skip=skip)
+    freq, mov_recep = PointResponse.calculate_mov_recep(defl.u_z_obs, exc.force_z, discr, skip=skip)
 
     plt.figure(figsize=(10, 6))
     plt.loglog(freq[1:discr.nt // 2-1], abs(mov_recep[1:discr.nt // 2-1]), "g", label="Moving Receptance")

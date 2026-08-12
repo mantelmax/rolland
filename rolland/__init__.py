@@ -10,7 +10,7 @@ from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, 
 from .deflection import Deflection
 from .domainsetup import DomSetup
 from .excitation import Excitation, GaussianImpulse
-from .postprocessing import DEVITO_PP
+from .postprocessing import PointResponse, TrackDecayRate, TrackResponse, TransferResponse, VehicleResponse
 from .track import (
                     ArrangedBallastedSingleRailTrack,
                     ArrangedSlabSingleRailTrack,
@@ -42,5 +42,9 @@ __all__ = ["Arrangement",
            "CFSPML",
            "DomSetup",
            "GaussianImpulse",
-           "DEVITO_PP",
+           "TrackResponse",
+           "PointResponse",
+           "TransferResponse",
+           "TrackDecayRate",
+           "VehicleResponse",
            ]
