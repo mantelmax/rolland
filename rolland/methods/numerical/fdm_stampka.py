@@ -348,31 +348,33 @@ class DiscretizationStampka:
         -------
         None
         """
+        Ez = self.track.E[1]
+
         if isinstance(self.track, ContSlabSingleRailTrack):
             # Properties are assigned to each grid point
             self.vec_sp += self.track.pad.sp_z
             self.vec_dp += self.track.pad.dp_z
-            self.vec_ms += self.track.slab.ms
+            self.vec_ms += self.track.slab.ms * Ez
 
         elif isinstance(self.track, SimplePeriodicSlabSingleRailTrack | ArrangedSlabSingleRailTrack):
-            self.build_discrete_slab_track()
+            self.build_discrete_slab_track(Ez)
 
         elif isinstance(self.track, ContBallastedSingleRailTrack):
             # Properties are assigned to each grid point
             self.vec_sp += self.track.pad.sp_z
             self.vec_dp += self.track.pad.dp_z
-            self.vec_ms += self.track.slab.ms
-            self.vec_sb += self.track.ballast.sb_z
-            self.vec_db += self.track.ballast.db_z
+            self.vec_ms += self.track.slab.ms * Ez
+            self.vec_sb += self.track.ballast.sb_z * Ez
+            self.vec_db += self.track.ballast.db_z * Ez
 
         elif isinstance(self.track, SimplePeriodicBallastedSingleRailTrack | ArrangedBallastedSingleRailTrack):
-            self.build_discrete_ballasted_track()
+            self.build_discrete_ballasted_track(Ez)
 
         else:
             msg = "Track type not recognized!"
             raise ValueError(msg)
 
-    def build_discrete_slab_track(self):
+    def build_discrete_slab_track(self, Ez):
         """
         Build discrete slab track.
 
@@ -380,7 +382,8 @@ class DiscretizationStampka:
 
         Parameters
         ----------
-        None
+        Ez : float
+            Equivalent track foundation stiffness parameter.
 
         Returns
         -------
@@ -392,16 +395,17 @@ class DiscretizationStampka:
             x_ind = int(i / self.dx)
             self.vec_sp[x_ind] = self.track.mount_prop[i][0].sp_z / self.dx
             self.vec_dp[x_ind] = self.track.mount_prop[i][0].dp_z / self.dx
-            self.vec_ms[x_ind] = self.track.slab.ms / self.dx
+            self.vec_ms[x_ind] = (self.track.slab.ms * Ez) / self.dx
 
-    def build_discrete_ballasted_track(self):
+    def build_discrete_ballasted_track(self, Ez):
         """Build discrete ballasted track.
 
         Properties are assigned to the corresponding mounting positions.
 
         Parameters
         ----------
-        None
+        Ez : float
+            Equivalent track foundation stiffness parameter.
 
         Returns
         -------
@@ -413,9 +417,9 @@ class DiscretizationStampka:
             x_ind = int(i / self.dx)
             self.vec_sp[x_ind] = self.track.mount_prop[i][0].sp_z / self.dx
             self.vec_dp[x_ind] = self.track.mount_prop[i][0].dp_z / self.dx
-            self.vec_ms[x_ind] = self.track.mount_prop[i][1].ms / self.dx
-            self.vec_sb[x_ind] = self.track.mount_prop[i][2].sb_z / self.dx
-            self.vec_db[x_ind] = self.track.mount_prop[i][2].db_z / self.dx
+            self.vec_ms[x_ind] = (self.track.mount_prop[i][1].ms * Ez) / self.dx
+            self.vec_sb[x_ind] = (self.track.mount_prop[i][2].sb_z * Ez) / self.dx
+            self.vec_db[x_ind] = (self.track.mount_prop[i][2].db_z * Ez) / self.dx
 
 #---deflection.py---
 @dataclass(kw_only=True)
