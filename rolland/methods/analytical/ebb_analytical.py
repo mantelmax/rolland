@@ -41,7 +41,8 @@ class EBBCont(ABC):
     x : float | list[float] | numpy.ndarray
         Distances to the excitation point :math:`[m]`.
     damp_type : Literal['viscous', 'hysteretic']
-        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping
+        approach is an adopted version of :cite:t:`heckl1995`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/N]`.
     """
@@ -114,7 +115,8 @@ class EBBCont1L(EBBCont):
     track : ContSlabSingleRailTrack
         Track instance.
     damp_type : Literal['viscous', 'hysteretic']
-        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping
+        approach is an adopted version of :cite:t:`heckl1995`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     """
@@ -141,7 +143,7 @@ class EBBCont1L(EBBCont):
 
         # Eq. 3.5
         self.omega_0 = float(sqrt(sp / mr))
-        
+
         if self.damp_type == "viscous":
             sp_tot = sp + 1j * self.omega * dp
         else:
@@ -175,7 +177,8 @@ class EBBCont2L(EBBCont):
     track : ContBallastedSingleRailTrack
         Track instance.
     damp_type : Literal['viscous', 'hysteretic']
-        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping
+        approach is an adopted version of :cite:t:`heckl1995`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     omega_1 : float
@@ -202,13 +205,13 @@ class EBBCont2L(EBBCont):
         This method calculates the mobility of the track using the given parameters
         and the analytical solution for a continuous ballasted single rail track.
         """
-        Ez = self.track.E[1]
+        e_z = self.track.E[1]
         mr = self.track.rail.mr
         sp = self.track.pad.sp_z
-        sb = self.track.ballast.sb_z * Ez
+        sb = self.track.ballast.sb_z * e_z
         dp = getattr(self.track.pad, "dp_z", 0.0)
-        db = getattr(self.track.ballast, "db_z", 0.0) * Ez
-        ms = getattr(self.track, "slab", getattr(self.track, "sleeper", None)).ms * Ez
+        db = getattr(self.track.ballast, "db_z", 0.0) * e_z
+        ms = getattr(self.track, "slab", getattr(self.track, "sleeper", None)).ms * e_z
 
         self.omega_0 = float(sqrt(sp / mr))            # Eq. 3.47
         self.omega_1 = float(sqrt(sb / ms))            # Eq. 3.44

@@ -41,7 +41,8 @@ class TSBDiscr(ABC):
     x : float | list[float] | numpy.ndarray
         Distances to the excitation point :math:`[m]`.
     damp_type : Literal['viscous', 'hysteretic']
-        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping
+        approach is an adopted version of :cite:t:`heckl1995`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/(s \cdot N)]`.
     """
@@ -133,10 +134,10 @@ class TSBDiscr(ABC):
             self.mobility = array([])
             return
 
-        Ez = track.E[1]
-        ms = ms * Ez
-        sb = sb * Ez
-        db = db * Ez
+        e_z = track.E[1]
+        ms = ms * e_z
+        sb = sb * e_z
+        db = db * e_z
 
         mr = track.rail.mr
         rho = track.rail.rho
@@ -286,7 +287,8 @@ class TSBDiscr1L(TSBDiscr):
     track : DiscrSlabSingleRailTrack
         Track instance.
     damp_type : Literal['viscous', 'hysteretic']
-        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping
+        approach is an adopted version of :cite:t:`heckl1995`.
     f_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     """
@@ -331,7 +333,8 @@ class TSBDiscr2L(TSBDiscr):
     track : DiscrBallastedSingleRailTrack
         Track instance.
     damp_type : Literal['viscous', 'hysteretic']
-        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping
+        approach is an adopted version of :cite:t:`heckl1995`.
     f_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     f_1 : float
