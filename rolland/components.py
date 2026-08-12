@@ -20,6 +20,7 @@ from numpy import array, ndarray
 
 
 def _damping_mode(eta_values, viscous_values, eta_name, viscous_name):
+    """Determine the damping mode (viscous or hysteretic) based on provided values."""
     missing_eta = np.sum(array([value is None for value in eta_values]))
     missing_d = np.sum(array([value is None for value in viscous_values]))
 
@@ -210,6 +211,8 @@ class DiscrPad:
         Longitudinal pad damping coefficient (viscous) :math:`[Ns/m]`.
     dp_xr : float, optional, default: None
         Rotational pad damping coefficient (viscous) :math:`[Nms/rad]`.
+    damping_mode : Literal["viscous", "hysteretic"], internal (automatically calculated)
+        Damping model type.
     wdthp : float
         Pad width in x-direction :math:`[m]`.
     """
@@ -284,6 +287,8 @@ class ContPad:
         Longitudinal pad damping coefficient (viscous) :math:`[Ns/m^2]`.
     dp_xr : float, optional, default: None
         Rotational pad damping coefficient (viscous) :math:`[Ns/m^2]`.
+    damping_mode : Literal["viscous", "hysteretic"], internal (automatically calculated)
+        Damping model type.
     wdthp : float
         Equivalent pad width in x- and y-direction :math:`[m]`.
     """
@@ -344,7 +349,7 @@ class Sleeper:
     wdths : float
         Sleeper width in x-direction :math:`[m]`.
     heights : float
-        Sleeper hight in z-direction :math:`[m]`.
+        Sleeper height in z-direction :math:`[m]`.
     z_st : float
         Vertical distance from sleeper centroid to top of sleeper :math:`[m]`.
     z_sb : float
@@ -403,7 +408,7 @@ class Slab:
     equ_wdths : float
         Equivalent slab width in x-direction :math:`[m]`.
     heights : float
-        Slab hight in z-direction :math:`[m]`.
+        Slab height in z-direction :math:`[m]`.
     z_st : float
         Vertical distance from slab centroid to top of slab :math:`[m]`.
     z_sb : float
@@ -416,7 +421,7 @@ class Slab:
     f_z : float, optional, default: 1.0
         Equivalent slab factor (z-direction) :math:`[-]`.
     equi_sm : bool, optional, default: True
-        If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
+        If True the model uses the equivalent slab model, otherwise the real slab model is
         used.
     """
 
@@ -457,11 +462,11 @@ class Ballast:
     sb_x : float
         Longitudinal ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
     sb_zr : float, internal (automatically calculated)
-        Vertical rotational ballast stiffness.
+        Vertical rotational ballast stiffness :math:`[Nm/rad]`.
     sb_yr : float, internal (automatically calculated)
-        Lateral rotational ballast stiffness.
+        Lateral rotational ballast stiffness :math:`[Nm/rad]`.
     sb_xr : float, internal (automatically calculated)
-        Longitudinal rotational ballast stiffness.
+        Longitudinal rotational ballast stiffness :math:`[Nm/rad]`.
     etab_z : float, optional, default: None
         Vertical ballast loss factor :math:`[-]`.
     etab_y : float, optional, default: None
@@ -477,11 +482,13 @@ class Ballast:
     db_x : float, optional, default: None
         Longitudinal ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
     db_zr : float, optional, default: None
-        Rotational ballast damping coefficient for z-axis (viscous).
+        Rotational ballast damping coefficient for z-axis (viscous) :math:`[Nms/rad]`.
     db_yr : float, optional, default: None
-        Rotational ballast damping coefficient for y-axis (viscous).
+        Rotational ballast damping coefficient for y-axis (viscous) :math:`[Nms/rad]`.
     db_xr : float, optional, default: None
-        Rotational ballast damping coefficient for x-axis (viscous).
+        Rotational ballast damping coefficient for x-axis (viscous) :math:`[Nms/rad]`.
+    damping_mode : Literal["viscous", "hysteretic"], internal (automatically calculated)
+        Damping model type.
     """
 
     sb_z: float

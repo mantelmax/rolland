@@ -9,7 +9,7 @@ Rolland
    :width: 700px
    :class: light-mode-image
 
-.. image:: images/mwi_dark.png
+.. image:: images/mwi_animated_sphinx.gif
    :alt: MWI Image
    :width: 700px
    :class: dark-mode-image
@@ -47,7 +47,7 @@ Citation
 
 If you use **Rolland** in your research, please cite the following paper:
 
-.. code-block:: bibtex
+.. code-block::
 
    @inproceedings{mantel2026rolland,
      title     = {Rolland: A New Framework for Realistic and Computationally Efficient Rolling Noise Modeling in the Time Domain},
@@ -59,12 +59,13 @@ If you use **Rolland** in your research, please cite the following paper:
 
 .. toctree::
    :hidden:
-   :maxdepth: 1
+   :maxdepth: 2
    
    Installation <install/index>
    User Guide <user_guide/index>
    API Reference <api_ref/index>
    Examples <examples/index>
    What's New <whats_new/index>
+   Funding <funding/index>
    License <license/index>
    Literature <literature/index>

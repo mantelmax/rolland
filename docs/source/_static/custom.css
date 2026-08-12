@@ -1,44 +1,127 @@
-/* Default to light mode image */
+/* Always use dark mode image */
 .light-mode-image {
-    display: block;
+    display: none !important;
 }
 
 .dark-mode-image {
-    display: none;
+    display: block !important;
 }
 
-/* Override for dark mode */
-@media (prefers-color-scheme: dark) {
-    .light-mode-image {
-        display: none;
-    }
-
-    .dark-mode-image {
-        display: block;
-    }
+/* Force Dark Mode Theme Variables */
+:root {
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 215 20.2% 65.1%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 1.2%;
+    --ring: 216 34% 17%;
+    color-scheme: dark !important;
 }
 
 /* Enhancements for Code Blocks and Pygments syntax highlighting */
-div.highlight {
-    border-radius: 8px;
-    border: 1px solid var(--color-border, rgba(255, 255, 255, 0.1));
-    margin: 1.25em 0;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+.code-block-caption {
+    display: none !important;
+}
+
+.literal-block-wrapper {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+div.highlight,
+.highlight {
+    background-color: #181628 !important;
+    border-radius: 8px !important;
+    border: 1px solid #322b59 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.25rem !important;
+}
+
+div.highlight pre {
+    margin: 0 !important;
 }
 
 .highlight pre {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 0.875rem;
     line-height: 1.5;
+    padding: 1rem !important;
 }
 
-/* Sidebar Accordion Folding Behavior: Collapse inactive sub-trees (level-3 class listings) */
-#left-sidebar ul.current > li.current > ul {
+/* Admonitions / Note Callouts Styling */
+.admonition,
+div.admonition,
+.admonition.note,
+.note {
+    background-color: #181628 !important;
+    border: 1px solid #322b59 !important;
+    border-left: 4px solid #6366f1 !important;
+    border-radius: 8px !important;
+    color: hsl(213 31% 91%) !important;
+}
+
+/* Sidebar Active Category Highlighting */
+#left-sidebar a.current,
+#left-sidebar li.current > a {
+    background-color: #181628 !important;
+    border: 1px solid #322b59 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+}
+
+/* Sidebar Dropdown Behavior and Accordion Styling */
+#left-sidebar a > button:not(.sidebar-dropdown-toggle),
+#left-sidebar a > svg:first-child {
+    display: none !important;
+}
+
+#left-sidebar li.has-dropdown > a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+}
+
+#left-sidebar .sidebar-dropdown-toggle {
+    background: transparent;
+    border: none;
+    color: var(--muted-foreground, #94a3b8);
+    cursor: pointer;
+    padding: 2px 6px;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: transform 0.2s ease, background-color 0.15s ease;
+}
+
+#left-sidebar .sidebar-dropdown-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--foreground, #ffffff);
+}
+
+#left-sidebar li.has-dropdown > ul {
+    display: none !important;
+    padding-left: 0.75rem !important;
+    margin-top: 0.25rem !important;
+}
+
+#left-sidebar li.has-dropdown.expanded > ul {
     display: block !important;
 }
 
-#left-sidebar ul.current > li:not(.current) > ul {
-    display: none !important;
+#left-sidebar li.has-dropdown.expanded > a .sidebar-dropdown-toggle svg {
+    transform: rotate(180deg);
 }
 
 /* Tiny Header Logo next to "Rolland Documentation" */

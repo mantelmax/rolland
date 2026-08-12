@@ -41,7 +41,7 @@ def test_domsetup_build_grid():
     mock_slab.z_st = 0.25
     mock_slab.z_sb = 0.25
     mock_track.slab = mock_slab
-    
+
     mock_rail = MagicMock()
     mock_rail.G = 1.0
     mock_rail.E = 1.0
