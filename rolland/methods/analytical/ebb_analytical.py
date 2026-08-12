@@ -16,6 +16,7 @@ and accelerance.
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import Literal
 
 from numpy import array, exp, ndarray, pi, sqrt, squeeze
 
@@ -39,6 +40,8 @@ class EBBCont(ABC):
         Excitation point :math:`[m]`.
     x : float | list[float] | numpy.ndarray
         Distances to the excitation point :math:`[m]`.
+    damp_type : Literal['viscous', 'hysteretic']
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/N]`.
     """
@@ -47,11 +50,15 @@ class EBBCont(ABC):
     force: ndarray = field(default_factory=lambda: array(1.0), metadata={"default_repr": "numpy.array([1.0])"})
     x_excit: float = 0.0
     x: float | list[float] | ndarray = 0.0
+    damp_type: Literal["viscous", "hysteretic"]
     mobility: ndarray = field(init=False, default_factory=lambda: array([]),
                               metadata={"default_repr": "numpy.array([])"})
 
     def __post_init__(self) -> None:
         """Post-initialization to set defaults, validate track and compute mobility."""
+        if self.damp_type not in ("viscous", "hysteretic"):
+            msg = f"Invalid damp_type: {self.damp_type}. Must be 'viscous' or 'hysteretic'."
+            raise ValueError(msg)
         self._validate_track()
         self._set_default_x()
         self.compute_mobility()
@@ -106,6 +113,8 @@ class EBBCont1L(EBBCont):
     ----------
     track : ContSlabSingleRailTrack
         Track instance.
+    damp_type : Literal['viscous', 'hysteretic']
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     """
@@ -128,13 +137,19 @@ class EBBCont1L(EBBCont):
         """
         mr = self.track.rail.mr
         sp = self.track.pad.sp_z
-        dp = self.track.pad.dp_z
+        dp = getattr(self.track.pad, "dp_z", 0.0)
 
         # Eq. 3.5
         self.omega_0 = float(sqrt(sp / mr))
+        
+        if self.damp_type == "viscous":
+            sp_tot = sp + 1j * self.omega * dp
+        else:
+            etap = getattr(self.track.pad, "etap_z", 0.0)
+            sp_tot = sp * (1 + 1j * etap)
 
         # Eq. 3.6
-        k_p = ((self.omega ** 2 * mr - sp - 1j * self.omega * dp) /
+        k_p = ((self.omega ** 2 * mr - sp_tot) /
                (self.track.rail.E * self.track.rail.Iyr)) ** (1/4)
 
         abs_x = abs(array(self.x, ndmin=1)[:, None] - self.x_excit)  # Broadcast x over omega
@@ -159,6 +174,8 @@ class EBBCont2L(EBBCont):
     ----------
     track : ContBallastedSingleRailTrack
         Track instance.
+    damp_type : Literal['viscous', 'hysteretic']
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     omega_1 : float
@@ -189,17 +206,24 @@ class EBBCont2L(EBBCont):
         mr = self.track.rail.mr
         sp = self.track.pad.sp_z
         sb = self.track.ballast.sb_z * Ez
-        dp = self.track.pad.dp_z
-        db = self.track.ballast.db_z * Ez
-        ms = self.track.slab.ms * Ez
+        dp = getattr(self.track.pad, "dp_z", 0.0)
+        db = getattr(self.track.ballast, "db_z", 0.0) * Ez
+        ms = getattr(self.track, "slab", getattr(self.track, "sleeper", None)).ms * Ez
 
         self.omega_0 = float(sqrt(sp / mr))            # Eq. 3.47
         self.omega_1 = float(sqrt(sb / ms))            # Eq. 3.44
         self.omega_2 = float(sqrt((sp + sb) / ms))     # Eq. 3.44
 
         # Eq. 3.40
-        sp_tot = sp + 1j * self.omega * dp
-        sb_tot = sb + 1j * self.omega * db
+        if self.damp_type == "viscous":
+            sp_tot = sp + 1j * self.omega * dp
+            sb_tot = sb + 1j * self.omega * db
+        else:
+            etap = getattr(self.track.pad, "etap_z", 0.0)
+            etab = getattr(self.track.ballast, "etab_z", 0.0)
+            sp_tot = sp * (1 + 1j * etap)
+            sb_tot = sb * (1 + 1j * etab)
+
         s_tot = (sp_tot * (sb_tot - ms * self.omega ** 2)) / (sp_tot + sb_tot - ms * self.omega ** 2)
 
         # Eq. 3.6
