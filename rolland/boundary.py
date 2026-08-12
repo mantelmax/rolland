@@ -40,7 +40,20 @@ class CFSPML:
     l_bound: float = 10.0
 
     def _generate_damping_profile(self, dx: float, nx: int) -> np.ndarray:
-        """Calculate the 1D spatial damping array across the entire grid."""
+        """Calculate the 1D spatial damping array across the entire grid.
+
+        Parameters
+        ----------
+        dx : float
+            Spatial grid spacing.
+        nx : int
+            Number of grid points in the domain.
+
+        Returns
+        -------
+        numpy.ndarray
+            The 1D spatial damping profile array.
+        """
         n_pml = int(self.l_bound / dx)
         x_pml = linspace(0, self.l_bound, n_pml)
 
@@ -55,7 +68,22 @@ class CFSPML:
         return sigma
 
     def initialize_on_grid(self, grid: Grid, dx: float, nx: int) -> tuple[Function, Function]:
-        """Create Devito Functions for damping and populate them with data."""
+        """Create Devito Functions for damping and populate them with data.
+
+        Parameters
+        ----------
+        grid : Grid
+            The Devito computational grid.
+        dx : float
+            Spatial grid spacing.
+        nx : int
+            Number of grid points in the domain.
+
+        Returns
+        -------
+        tuple[Function, Function]
+            The Devito Functions (`sigma`, `alpha`) initialized with damping profiles.
+        """
         sigm = Function(name='sigma', grid=grid)
         alph = Function(name='alpha', grid=grid)
 
@@ -66,7 +94,29 @@ class CFSPML:
 
     def apply_pml(self, base_var: TimeFunction, name_suffix: str, grid: Grid, bound_dom, sigm: Function,
                   alph: Function) -> tuple[DevitoEq, DevitoEq, list[DevitoEq]]:
-        """Generate ADE-PML boundary auxiliary variables and DEVITO equations."""
+        """Generate ADE-PML boundary auxiliary variables and DEVITO equations.
+
+        Parameters
+        ----------
+        base_var : TimeFunction
+            The primary wavefield variable to apply PML to.
+        name_suffix : str
+            Suffix for naming the auxiliary variables (`psi`, `theta`).
+        grid : Grid
+            The Devito computational grid.
+        bound_dom : SubDomain
+            The subdomain representing the boundary regions where PML applies.
+        sigm : Function
+            The spatial damping profile `sigma`.
+        alph : Function
+            The spatial CFS profile `alpha`.
+
+        Returns
+        -------
+        tuple[DevitoEq, DevitoEq, list[DevitoEq]]
+            The modified spatial derivatives (`dx_pml`, `dx2_pml`) and a list
+            of forward update equations for the auxiliary variables.
+        """
         # Auxiliary fields
         psi = TimeFunction(
             name=f'psi_{name_suffix}', grid=grid, time_order=2, space_order=3, dtype=float64, save=None,

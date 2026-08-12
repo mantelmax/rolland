@@ -24,11 +24,13 @@ API Reference
 
 .. toctree::
    :hidden:
-   :caption: Other Models
+   :caption: Reference Models
    :maxdepth: 2
    :titlesonly:
 
    other_models/analyticalmethods
+   other_models/semi_analytical_methods
+   other_models/numerical_methods
 
 .. toctree::
    :hidden:
@@ -48,29 +50,95 @@ API Reference
 
       The **Build Track** section contains all classes and functions to create a track model.
 
-      * :doc:`Components <buildtrack/components>`
-      * :doc:`Track <buildtrack/track>`
-      * :doc:`Arrangement <buildtrack/arrangement>`
+      .. grid:: 1 2 3 3
+         :gutter: 3
+
+         .. grid-item-card:: Components
+            :link: buildtrack/components
+            :link-type: doc
+
+            Rail profiles, pads, sleepers, slabs, and ballast component definitions.
+
+         .. grid-item-card:: Track
+            :link: buildtrack/track
+            :link-type: doc
+
+            Track assembly classes for continuous and discrete single rail track structures.
+
+         .. grid-item-card:: Arrangement
+            :link: buildtrack/arrangement
+            :link-type: doc
+
+            Periodic and random support property and spacing arrangements.
 
    .. tab-item:: Rolland
 
       The **Rolland** section contains all classes and functions corresponding to the Rolland model.
 
-      * :doc:`Domain Setup <rolland/domainsetup>`
-      * :doc:`Boundary <rolland/boundary>`
-      * :doc:`Excitation <rolland/excitation>`
-      * :doc:`Deflection <rolland/deflection>`
+      .. grid:: 1 2 2 2
+         :gutter: 3
 
-   .. tab-item:: Other Models
+         .. grid-item-card:: Domain Setup
+            :link: rolland/domainsetup
+            :link-type: doc
 
-      This section contains several analytical and numerical models in order to compare the results of the
-      Rolland model.
+            Discretization, grid generation, and temporal/spatial numerical domain setup.
 
-      * :doc:`Analytical Methods <other_models/analyticalmethods>`
+         .. grid-item-card:: Boundary
+            :link: rolland/boundary
+            :link-type: doc
+
+            Complex Frequency-Shifted Perfectly Matched Layer (CFS-PML) absorbing boundaries.
+
+         .. grid-item-card:: Excitation
+            :link: rolland/excitation
+            :link-type: doc
+
+            Stationary impulse sources and moving force excitation models.
+
+         .. grid-item-card:: Deflection
+            :link: rolland/deflection
+            :link-type: doc
+
+            Time-domain finite difference wavefield deflection solvers and record stores.
+
+   .. tab-item:: Reference Models
+
+      The **Reference Models** section contains analytical, semi-analytical, and numerical reference models.
+
+      .. note:: 
+         These models are **strictly for reference and comparison**. They are provided to allow users to benchmark and validate the primary Rolland solvers against established classical theories.
+
+      .. grid:: 1 2 3 3
+         :gutter: 3
+
+         .. grid-item-card:: Analytical Methods
+            :link: other_models/analyticalmethods
+            :link-type: doc
+
+            Exact continuous beam analytical solutions.
+
+         .. grid-item-card:: Semi-Analytical Methods
+            :link: other_models/semi_analytical_methods
+            :link-type: doc
+
+            Timoshenko discrete beam and Kostovasilis continuous models.
+
+         .. grid-item-card:: Numerical Methods
+            :link: other_models/numerical_methods
+            :link-type: doc
+
+            1-DOF Euler-Bernoulli FDM time-domain reference solvers (Stampka).
 
    .. tab-item:: Postprocessing
 
-      The **Postprocessing** section contains all classes and functions to postprocess the results of
-      the Rolland model and the analytical methods.
+      The **Postprocessing** section contains classes and functions to evaluate simulation outputs.
 
-      * :doc:`Postprocessing <postprocessing>`
+      .. grid:: 1 2 2 2
+         :gutter: 3
+
+         .. grid-item-card:: Postprocessing
+            :link: postprocessing
+            :link-type: doc
+
+            FFT spectral analyses, mobility calculation, moving receptance, and plot utilities.
