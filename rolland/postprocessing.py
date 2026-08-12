@@ -31,6 +31,8 @@ from numpy.fft import fft, fftfreq
 from .track import (
     ArrangedBallastedSingleRailTrack,
     ArrangedSlabSingleRailTrack,
+    DiscrBallastedSingleRailTrack,
+    DiscrSlabSingleRailTrack,
 )
 
 
@@ -594,6 +596,10 @@ class TrackDecayRate(TrackResponse):
     addressed by spatial grid index, which the single observation points of
     ``store='observe'`` or ``store='excit'`` do not provide.
 
+    On a discretely supported track the excitation must sit in the centre of a
+    sleeper bay, since the measurement grid is built relative to that point --
+    see :meth:`validate_excitation_position`.
+
     .. note:: **On the reference index.**
 
         ``ind_excit`` selects the reference point :math:`x_0` against which all
@@ -637,6 +643,10 @@ class TrackDecayRate(TrackResponse):
         where the excitation spectrum vanishes and the mobility is meaningless.
     f_max : float | None, default=None
         Upper band limit, inclusive [Hz]. ``None`` keeps everything up to Nyquist.
+    tol_excit : float | None, default=None
+        Tolerance for the sleeper bay centre check of :meth:`validate_excitation_position` [m].
+        ``None`` uses half a grid spacing, i.e. the excitation has to be the grid point
+        closest to the centre. Only relevant for discretely supported tracks.
     tdr : numpy.ndarray
         Track-Decay-Rate vector [dB/m].
     ind_tdr : list[int]
@@ -657,6 +667,7 @@ class TrackDecayRate(TrackResponse):
     track: object
     f_min: float = 0.0
     f_max: float | None = None
+    tol_excit: float | None = None
     tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
     filter: str | None = None
     freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
@@ -664,10 +675,61 @@ class TrackDecayRate(TrackResponse):
     x_tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
 
     def __post_init__(self):
-        """Post-initialization to find TDR points, validate them and calculate TDR."""
+        """Post-initialization to check the excitation, find TDR points and calculate TDR."""
+        self.validate_excitation_position()
         self.find_tdr_points()
         self.validate_tdr_points()
         self.calculate_tdr()
+
+    def validate_excitation_position(self):
+        r"""Check that the TDR starts in the centre of a sleeper bay.
+
+        The excitation is accepted when its grid position lies within
+        ``tol_excit`` of the bay centre; the default of half a grid spacing
+        means it has to be the grid point closest to that centre. Continuously
+        supported tracks are skipped: their support layer is smeared out over
+        the length of the track, so there are no sleeper bays to be centred in.
+
+        Raises
+        ------
+        ValueError
+            If the excitation does not lie between two supports, or if it is
+            further than ``tol_excit`` from the centre of its sleeper bay.
+        """
+        if not isinstance(self.track, DiscrSlabSingleRailTrack | DiscrBallastedSingleRailTrack):
+            return
+
+        x_mp = array(list(self.track.mount_prop.keys()))
+        x_excit = self.ind_excit * self.dx
+
+        before = where(x_mp <= x_excit)[0]
+        after = where(x_mp > x_excit)[0]
+        if before.size == 0 or after.size == 0:
+            msg = (
+                f"The excitation at x = {x_excit:.4f} m (grid index {self.ind_excit}) does not lie "
+                f"between two supports, which span {x_mp[0]:.4f} m to {x_mp[-1]:.4f} m. The TDR "
+                f"starts in a sleeper bay, so the excitation must sit inside the supported track."
+            )
+            raise ValueError(msg)
+
+        x_left, x_right = x_mp[before[-1]], x_mp[after[0]]
+        x_centre = (x_left + x_right) / 2
+        tol = self.dx / 2 if self.tol_excit is None else self.tol_excit
+
+        # The epsilon keeps a centre falling exactly between two grid points from being
+        # rejected for both of its two equally close neighbours.
+        deviation = abs(x_excit - x_centre)
+        if deviation > tol + 1e-9:
+            msg = (
+                f"The excitation at x = {x_excit:.4f} m (grid index {self.ind_excit}) is not in a "
+                f"sleeper bay centre: it lies between the supports at {x_left:.4f} m and "
+                f"{x_right:.4f} m, whose centre is {x_centre:.4f} m -- a deviation of "
+                f"{deviation:.4f} m > {tol:.4f} m. The TDR is defined for an excitation in the bay "
+                f"centre, so move the excitation to {x_centre:.4f} m (grid index "
+                f"{round(x_centre / self.dx)}), refine dx so that the centre is met more closely, "
+                f"or widen tol_excit if the remaining deviation is acceptable."
+            )
+            raise ValueError(msg)
 
     def find_tdr_points(self):
         r"""Determine the TDR measurement positions x_n and their grid indices.
