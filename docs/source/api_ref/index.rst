@@ -29,8 +29,8 @@ API Reference
    :titlesonly:
 
    other_models/analyticalmethods
-   other_models/semianalyticalmethods
-   other_models/numericalmethods
+   other_models/semi_analytical_methods
+   other_models/numerical_methods
 
 .. toctree::
    :hidden:
@@ -104,12 +104,12 @@ API Reference
 
    .. tab-item:: Reference Models
 
-      The **Reference Models** section contains analytical, semi-analytical, and numerical models.
+      The **Reference Models** section contains analytical, semi-analytical, and numerical reference models.
 
       .. note:: 
          These models are **strictly for reference and comparison**. They are provided to allow users to benchmark and validate the primary Rolland solvers against established classical theories.
 
-      .. grid:: 1 2 2 2
+      .. grid:: 1 2 3 3
          :gutter: 3
 
          .. grid-item-card:: Analytical Methods
@@ -119,16 +119,16 @@ API Reference
             Exact continuous beam analytical solutions.
 
          .. grid-item-card:: Semi-Analytical Methods
-            :link: other_models/semianalyticalmethods
+            :link: other_models/semi_analytical_methods
             :link-type: doc
 
-            Discrete supports semi-analytical solutions.
+            Timoshenko discrete beam and Kostovasilis continuous models.
 
          .. grid-item-card:: Numerical Methods
-            :link: other_models/numericalmethods
+            :link: other_models/numerical_methods
             :link-type: doc
 
-            Purely numerical solvers for benchmark tracking.
+            1-DOF Euler-Bernoulli FDM time-domain reference solvers (Stampka).
 
    .. tab-item:: Postprocessing
 
