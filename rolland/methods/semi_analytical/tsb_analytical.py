@@ -15,6 +15,7 @@ responses such as mobility, receptance, and accelerance for both slab and ballas
 """
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from typing import Literal
 
 from numpy import array, exp, eye, lib, linalg, ndarray, newaxis, pi, real, sqrt, squeeze
 from numpy import errstate as np_errstate
@@ -39,6 +40,8 @@ class TSBDiscr(ABC):
         Excitation point :math:`[m]`.
     x : float | list[float] | numpy.ndarray
         Distances to the excitation point :math:`[m]`.
+    damp_type : Literal['viscous', 'hysteretic']
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/(s \cdot N)]`.
     """
@@ -47,11 +50,15 @@ class TSBDiscr(ABC):
     force: ndarray = field(default_factory=lambda: array(1.0), metadata={"default_repr": "numpy.array([1.0])"})
     x_excit: float = 0.0
     x: float | list[float] | ndarray = 0.0
+    damp_type: Literal["viscous", "hysteretic"]
     mobility: ndarray = field(init=False, default_factory=lambda: array([]),
                               metadata={"default_repr": "numpy.array([])"})
 
     def __post_init__(self):
         """Post-initialization to set defaults, validate track and compute mobility."""
+        if self.damp_type not in ("viscous", "hysteretic"):
+            msg = f"Invalid damp_type: {self.damp_type}. Must be 'viscous' or 'hysteretic'."
+            raise ValueError(msg)
         self._validate_track()
         self._set_default_x()
         self.compute_mobility()
@@ -105,7 +112,7 @@ class TSBDiscr(ABC):
         term2 = exp(-1j * k_d * dist)
         return f_p * term1 + f_d * term2
 
-    def compute_mobility_common(self, track, ms, sb, etab):
+    def compute_mobility_common(self, track, ms, sb, etab, db=0.0):
         """
         Compute common mobility for 1-layer and 2-layer support.
 
@@ -119,6 +126,8 @@ class TSBDiscr(ABC):
             Stiffness of the ballast [N/m^2].
         etab : float
             Damping coefficient of the ballast.
+        db : float, optional
+            Viscous damping coefficient of the ballast [Ns/m^2].
         """
         if self.f.size == 0:
             self.mobility = array([])
@@ -127,10 +136,10 @@ class TSBDiscr(ABC):
         Ez = track.E[1]
         ms = ms * Ez
         sb = sb * Ez
+        db = db * Ez
 
         mr = track.rail.mr
         rho = track.rail.rho
-        etap = track.pad.etap_z
         kap = track.rail.kapz
         youm = track.rail.E * (1 + 1j * track.rail.etar)
         shearm = track.rail.G * (1 + 1j * track.rail.etar)
@@ -138,6 +147,9 @@ class TSBDiscr(ABC):
         aream = track.rail.Iyr
         sp = track.pad.sp_z
         sb = sb
+
+        etap = getattr(track.pad, "etap_z", 0.0)
+        dp = getattr(track.pad, "dp_z", 0.0)
 
         # Positions of point forces [m]
         x_n = array(list(track.mount_prop.keys()))
@@ -148,8 +160,14 @@ class TSBDiscr(ABC):
         self.f_2 = real(sqrt(sp + sb)) / (2 * pi)
 
         # Dynamic stiffness (eq. 3.68)
-        impend = ((sp * (1 + (1j * etap)) * ((sb * (1 + (1j * etab))) - (ms * (self.omega ** 2)))) /
-                  ((sp * (1 + (1j * etap))) + (sb * (1 + (1j * etab))) - (ms * (self.omega ** 2))))
+        if self.damp_type == "viscous":
+            k_pad = sp + 1j * self.omega * dp
+            k_bal = sb + 1j * self.omega * db
+        else:
+            k_pad = sp * (1 + 1j * etap)
+            k_bal = sb * (1 + 1j * etab)
+
+        impend = (k_pad * (k_bal - (ms * (self.omega ** 2)))) / (k_pad + k_bal - (ms * (self.omega ** 2)))
 
         # Eq. 3.72
         c1 = ((shearm * kap * ar) / (youm * aream)) - ((rho * self.omega ** 2 * aream) / (youm * aream))
@@ -267,6 +285,8 @@ class TSBDiscr1L(TSBDiscr):
     ----------
     track : DiscrSlabSingleRailTrack
         Track instance.
+    damp_type : Literal['viscous', 'hysteretic']
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
     f_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     """
@@ -287,7 +307,7 @@ class TSBDiscr1L(TSBDiscr):
         This method calculates the mobility of the track using the given parameters
         and the analytical solution for a discrete slab track.
         """
-        self.compute_mobility_common(self.track, self.track.slab.ms, 1e20, 0)
+        self.compute_mobility_common(self.track, self.track.slab.ms, 1e20, 0, 0.0)
 
 
 @dataclass(kw_only=True)
@@ -310,6 +330,8 @@ class TSBDiscr2L(TSBDiscr):
     ----------
     track : DiscrBallastedSingleRailTrack
         Track instance.
+    damp_type : Literal['viscous', 'hysteretic']
+        Damping type, either 'viscous' or 'hysteretic'. The viscous damping approach is an adopted version of :cite:t:`heckl1995`.
     f_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
     f_1 : float
@@ -337,5 +359,6 @@ class TSBDiscr2L(TSBDiscr):
         and the analytical solution for a discrete ballasted track.
         """
         self.compute_mobility_common(self.track, self.track.sleeper.ms,
-                                     self.track.ballast.sb_z, self.track.ballast.etab_z)
+                                     self.track.ballast.sb_z, getattr(self.track.ballast, "etab_z", 0.0),
+                                     getattr(self.track.ballast, "db_z", 0.0))
 
