@@ -9,3 +9,4 @@ numpy
 scipy
 sphinx_docsearch
 matplotlib
+pygments-styles
