@@ -18,11 +18,11 @@ from rolland import (
     Sleeper,
 )
 from rolland.database.rail.db_rail import UIC60
-from rolland.methods.numerical import (
-    DeflectionEBBVertic,
-    DiscretizationEBBVerticConst,
-    GaussianImpulse,
-    PMLRailDampVertic,
+from rolland.methods.numerical.fdm_stampka import (
+    DeflectionStampka,
+    DiscretizationStampka,
+    GaussianImpulseStampka,
+    PMLStampka,
     Response,
 )
 
@@ -179,42 +179,42 @@ def tracks():
 def deflections(tracks):
     """Create deflection instances for testing."""
     bounds = {
-        'bound1': PMLRailDampVertic(l_bound=32.73),
-        'bound2': PMLRailDampVertic(l_bound=32.73),
-        'bound3': PMLRailDampVertic(l_bound=32.73),
-        'bound4': PMLRailDampVertic(l_bound=32.73),
+        'bound1': PMLStampka(l_bound=32.73),
+        'bound2': PMLStampka(l_bound=32.73),
+        'bound3': PMLStampka(l_bound=32.73),
+        'bound4': PMLStampka(l_bound=32.73),
     }
 
     forces = {
-        'force1': GaussianImpulse(x_excit=45.3),
-        'force2': GaussianImpulse(x_excit=45.3),
-        'force3': GaussianImpulse(x_excit=45.3),
-        'force4': GaussianImpulse(x_excit=45.3),
+        'force1': GaussianImpulseStampka(x_excit=45.3),
+        'force2': GaussianImpulseStampka(x_excit=45.3),
+        'force3': GaussianImpulseStampka(x_excit=45.3),
+        'force4': GaussianImpulseStampka(x_excit=45.3),
     }
 
     discretizations = {
-        'discr1': DiscretizationEBBVerticConst(
+        'discr1': DiscretizationStampka(
             track=tracks['track_cont_slab'],
             bound=bounds['bound1'],
             dt=2e-5,
             req_simt=0.4,
             bx=1,
         ),
-        'discr2': DiscretizationEBBVerticConst(
+        'discr2': DiscretizationStampka(
             track=tracks['track_cont_ball'],
             bound=bounds['bound2'],
             dt=2e-5,
             req_simt=0.4,
             bx=1,
         ),
-        'discr3': DiscretizationEBBVerticConst(
+        'discr3': DiscretizationStampka(
             track=tracks['track_discr_slab'],
             bound=bounds['bound3'],
             dt=2e-5,
             req_simt=0.4,
             bx=1,
         ),
-        'discr4': DiscretizationEBBVerticConst(
+        'discr4': DiscretizationStampka(
             track=tracks['track_discr_ball'],
             bound=bounds['bound4'],
             dt=2e-5,
@@ -223,24 +223,29 @@ def deflections(tracks):
         ),
     }
 
-    return {
-        'mob_cont_slab': DeflectionEBBVertic(
+    deflections_dict = {
+        'mob_cont_slab': DeflectionStampka(
             discr=discretizations['discr1'],
             excit=forces['force1'],
         ),
-        'mob_cont_ball': DeflectionEBBVertic(
+        'mob_cont_ball': DeflectionStampka(
             discr=discretizations['discr2'],
             excit=forces['force2'],
         ),
-        'mob_discr_slab': DeflectionEBBVertic(
+        'mob_discr_slab': DeflectionStampka(
             discr=discretizations['discr3'],
             excit=forces['force3'],
         ),
-        'mob_discr_ball': DeflectionEBBVertic(
+        'mob_discr_ball': DeflectionStampka(
             discr=discretizations['discr4'],
             excit=forces['force4'],
         ),
     }
+
+    for defl in deflections_dict.values():
+        defl.solve()
+
+    return deflections_dict
 
 
 @pytest.fixture(scope='module')

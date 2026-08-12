@@ -6,50 +6,17 @@
 
 
 from .analytical import (
-    AnalyticalMethods,
-    EBBCont1LSupp,
-    EBBCont2LSupp,
-    TSDiscr1LSupp,
-    TSDiscr2LSupp,
+    EBBCont1L,
+    EBBCont2L,
 )
-from .numerical import (
-    TDR,
-    AnalyticPP,
-    Deflection,
-    DeflectionEBBVertic,
-    Discretization,
-    DiscretizationEBBVertic,
-    DiscretizationEBBVerticConst,
-    DiscretizationEBBVerticTimeDepend,
-    Excitation,
-    GaussianImpulse,
-    PMLRailDampVertic,
-    PostProcessing,
-    Response,
-    RollandPP,
-    StationaryExcitation,
+from .semi_analytical import (
+    TSBDiscr1L,
+    TSBDiscr2L,
 )
 
-__all__ = ["AnalyticalMethods",
-           "EBBCont1LSupp",
-           "TSDiscr2LSupp",
-           "TSDiscr1LSupp",
-           "EBBCont2LSupp",
-           "TDR",
-           "AnalyticPP",
-           "Deflection",
-           "DeflectionEBBVertic",
-           "Discretization",
-           "DiscretizationEBBVertic",
-           "DiscretizationEBBVerticConst",
-           "DiscretizationEBBVerticTimeDepend",
-           "Excitation",
-           "GaussianImpulse",
-           "PMLRailDampVertic",
-           "PostProcessing",
-           "Response",
-           "RollandPP",
-           "StationaryExcitation"]
-
-
+__all__ = ["EBBCont1L",
+           "EBBCont2L",
+           "TSBDiscr1L",
+           "TSBDiscr2L",
+           ]
 
