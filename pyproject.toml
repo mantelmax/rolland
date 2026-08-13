@@ -1,7 +1,7 @@
 [project]
 name = "rolland"
 version = "0.1"
-description = "Time-domain simulation of rolling noise for railway applications"
+description = "Time-domain simulation framework for coupled wave propagation and dynamics in railway tracks"
 authors = [
     { name = "Maximilian Mantel", email = "maximilian.mantel@tu-berlin.de" },
     { name = "Benjamin Wagner", email = "b.wagner@tu-berlin.de"},

@@ -124,6 +124,11 @@ html_last_updated_fmt = ""
 html_logo = "images/logo_rolland_white_small.svg"
 html_favicon = "images/logo_rolland_white_small.svg"
 
+html_sidebars = {
+    "changelog": [],
+    "about": [],
+}
+
 
 from dataclasses import asdict
 
@@ -132,7 +137,11 @@ from sphinxawesome_theme import ThemeOptions
 theme_options = ThemeOptions(
 
     # Add your theme options. For example:
-    main_nav_links={"About": "/about"},
+    main_nav_links={
+        "Docs": "index",
+        "About": "about",
+        "Changelog": "changelog",
+    },
     show_scrolltop=True,
     show_prev_next=False,
     show_breadcrumbs=True,

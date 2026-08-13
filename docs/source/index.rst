@@ -84,7 +84,4 @@ and our software:
    User Guide <user_guide/index>
    API Reference <api_ref/index>
    Examples <examples/index>
-   What's New <whats_new/index>
-   Funding <funding/index>
-   License <license/index>
    Literature <literature/index>
