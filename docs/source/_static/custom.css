@@ -33,8 +33,8 @@
 }
 
 .literal-block-wrapper {
-    margin-top: 1.5rem !important;
-    margin-bottom: 1.25rem !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 div.highlight,
@@ -42,8 +42,8 @@ div.highlight,
     background-color: #181628 !important;
     border-radius: 8px !important;
     border: 1px solid #322b59 !important;
-    margin-top: 1.5rem !important;
-    margin-bottom: 1.25rem !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
 }
 
 div.highlight pre {

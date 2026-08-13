@@ -9,7 +9,10 @@ In this section, you can find various examples that demonstrate the capabilities
    :maxdepth: 2
    :titlesonly:
 
-   track_response/index
+   track_response/quick_start
+   track_response/different_tracks_vertical
+   track_response/different_tracks_lateral
+   track_response/variation
 
 .. toctree::
    :hidden:
@@ -17,7 +20,7 @@ In this section, you can find various examples that demonstrate the capabilities
    :maxdepth: 2
    :titlesonly:
 
-   moving_excitation/index
+   moving_excitation/moving_random_force
 
 .. toctree::
    :hidden:
