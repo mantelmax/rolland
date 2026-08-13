@@ -119,7 +119,7 @@ def build_rail_matrices(rail, damp_type="hysteretic"):
 
 
 def build_transfm_matrices(z_f, y_f, z_st=0, z_sb=0, chi_f=0):
-    """Build transformation matrices.
+    """Build transformation matrices according to :cite:p:`kostovasilis_semi-analytical_2017`.
 
     Attributes
     ----------
@@ -188,7 +188,7 @@ def build_transfm_matrices(z_f, y_f, z_st=0, z_sb=0, chi_f=0):
 
 
 def build_equ_sleeper_matrix(track, seclay=None):
-    """Build equivalent sleeper matrix.
+    """Build equivalent sleeper matrix based on :cite:p:`kostovasilis_analytical_2017`.
 
     Attributes
     ----------

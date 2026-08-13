@@ -117,7 +117,7 @@ class SingleRailTrack(Track):
         return sum(patterns.values())
 
     def calc_equiv_sleeper_factors(self, sleeper=None):
-        """Calculate equivalent sleeper factors according to Kostovasilis."""
+        """Calculate equivalent sleeper factors according to :cite:p:`kostovasilis_analytical_2017`."""
         s = sleeper if sleeper is not None else self.sleeper
         if not s.equi_sm:
             pass
@@ -126,7 +126,7 @@ class SingleRailTrack(Track):
             s.f_x = 1 + 12 * s.y_sc**2 / (s.lengs**2 + s.wdths**2)
 
     def calc_equiv_slab_factors(self, slab=None):
-        """Calculate equivalent slab factors according to Kostovasilis."""
+        """Calculate equivalent slab factors according to :cite:p:`kostovasilis_analytical_2017`."""
         s = slab if slab is not None else self.slab
         if not s.equi_sm:
             pass
@@ -136,7 +136,8 @@ class SingleRailTrack(Track):
             s.f_x = 1 + 12 * s.y_sc ** 2 / (s.lengs ** 2 + s.equ_wdths ** 2)
 
     def calc_ballast_rotational_stiffn(self, sleeper=None, slab=None, ballast=None):
-        """Calculate rotational stiffnesses from ballast stiffnesses and sleeper/slab dimensions."""
+        """Calculate rotational stiffnesses from ballast stiffnesses and sleeper/slab dimensions
+        according to :cite:p:`thompson_developments_1998`."""
         b = ballast if ballast is not None else self.ballast
         if sleeper is not None or hasattr(self, 'sleeper'):
             s = sleeper if sleeper is not None else self.sleeper

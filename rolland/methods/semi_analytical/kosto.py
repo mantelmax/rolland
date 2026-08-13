@@ -223,7 +223,7 @@ class AnalyticalMethodsKosto(ABC):
 
 @dataclass(kw_only=True)
 class TBCont1LKosto(AnalyticalMethodsKosto):
-    r"""Single-layer continuous support model (Kostovasilis).
+    r"""Timoshenko beam on continuous 1-layer foundation according to :cite:p:`kostovasilis_semi-analytical_2017`.
 
     Utilizes a single-layer support with continuous track properties, applying Timoshenko
     beam theory. The excitation is stationary. This method calculates the track's mobility
@@ -275,7 +275,7 @@ class TBCont1LKosto(AnalyticalMethodsKosto):
 
 @dataclass(kw_only=True)
 class TBCont2LKosto(AnalyticalMethodsKosto):
-    r"""Double-layer continuous support model (Kostovasilis Dissertation).
+    r"""Timoshenko beam on continuous 2-layer foundation according to :cite:p:`kostovasilis_analytical_2017`.
 
     Utilizes a double-layer support (rail and sleeper/slab masses) with continuous track
     properties. Considers 14 degrees of freedom (7 for rail, 7 for sleeper) to account for

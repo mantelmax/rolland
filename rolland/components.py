@@ -177,7 +177,8 @@ class Rail:
 class DiscrPad:
     r"""Discrete Pad Class.
 
-    Contains the properties of a discrete pad.
+    Contains the properties of a discrete pad. The rotational pad stiffnesses are
+    calculated automatically according to :cite:p:`thompson_developments_1998`.
 
     Attributes
     ----------
@@ -253,7 +254,8 @@ class DiscrPad:
 class ContPad:
     r"""Cont Pad Class.
 
-    Contains the properties of a continuous pad.
+    Contains the properties of a continuous pad. The rotational pad stiffnesses are
+    calculated automatically according to :cite:p:`thompson_developments_1998`.
 
     Attributes
     ----------
@@ -328,6 +330,8 @@ class ContPad:
 class Sleeper:
     r"""Sleeper Class.
 
+    Equivalent sleeper model formulation based on :cite:p:`kostovasilis_analytical_2017`.
+
     Contains the properties of a sleeper.
 
     Attributes
@@ -386,6 +390,8 @@ class Sleeper:
 @dataclass(kw_only=True)
 class Slab:
     r"""Slab class.
+
+    Equivalent slab model formulation based on :cite:p:`kostovasilis_analytical_2017`.
 
     Contains the properties of the slab.
 

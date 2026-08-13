@@ -30,7 +30,8 @@ class DomSetup:
 
     This class manages the translation of physical track properties into a finite-difference
     computational grid. It builds the DEVITO grids, applies Perfectly Matched Layer (PML)
-    boundaries, and constructs the explicit update equations (operators) for the simulation.
+    boundaries, and constructs the explicit update equations (operators) for the simulation
+    using the Devito framework :cite:p:`louboutin_devito_2019`, :cite:p:`luporini_architecture_2020`.
 
     Attributes
     ----------
