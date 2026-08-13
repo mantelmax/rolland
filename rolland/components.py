@@ -112,7 +112,8 @@ class Rail:
     J : float
         Torsional constant :math:`[m^4]`.
     J_t : float, internal (automatically calculated)
-        Secondary torsional constant, accounting for effective shear area due to restrained warping shear stresses and geometric eccentricities :math:`[m^4]`.
+        Secondary torsional constant, accounting for effective shear area due to
+        restrained warping shear stresses and geometric eccentricities :math:`[m^4]`.
     J_rs : float, internal (automatically calculated)
         Effective shear area due to restrained torsional warping :math:`[m^4]`.
     chi : float, optional, default: None
@@ -189,7 +190,8 @@ class DiscrPad:
     sp_x : float
         Longitudinal pad stiffness (total value) :math:`[N/m]`.
     sp_w : float, internal (automatically calculated)
-        Warping pad stiffness based on foundation resistance to warping (total value) :math:`[Nm/m]`.
+        Warping pad stiffness based on foundation resistance to
+        warping (total value) :math:`[Nm/m]`.
     sp_xr : float, internal (automatically calculated)
         Longitudinal rotational pad stiffness (total value) :math:`[Nm/rad]`.
     sp_yr : float, internal (automatically calculated)

@@ -66,7 +66,10 @@ class SingleRailTrack(Track):
         return any(c.damping_mode == "hysteretic" for c in components)
 
     def calc_pad_warping_stiffn(self, pad=None):
-        """Calculate the pad's foundation resistance to rail warping based on the vertical eccentricity from the rail shear center."""
+        """Calculate the pad's foundation resistance to rail warping.
+
+        Based on the vertical eccentricity from the rail shear center.
+        """
         p = pad if pad is not None else self.pad
         e_s = self.rail.shearc[1] - self.z_f
         p.sp_w = (self.rail.k_w * e_s) ** 2 * p.wdthp**2 / 12 * p.sp_y
@@ -117,7 +120,10 @@ class SingleRailTrack(Track):
         return sum(patterns.values())
 
     def calc_equiv_sleeper_factors(self, sleeper=None):
-        """Calculate equivalent sleeper factors according to :cite:p:`kostovasilis_analytical_2017`."""
+        """Calculate equivalent sleeper factors.
+
+        According to :cite:p:`kostovasilis_analytical_2017`.
+        """
         s = sleeper if sleeper is not None else self.sleeper
         if not s.equi_sm:
             pass
@@ -136,8 +142,9 @@ class SingleRailTrack(Track):
             s.f_x = 1 + 12 * s.y_sc ** 2 / (s.lengs ** 2 + s.equ_wdths ** 2)
 
     def calc_ballast_rotational_stiffn(self, sleeper=None, slab=None, ballast=None):
-        """Calculate rotational stiffnesses from ballast stiffnesses and sleeper/slab dimensions
-        according to :cite:p:`thompson_developments_1998`.
+        """Calculate rotational stiffnesses from ballast and sleeper dimensions.
+
+        Calculated according to :cite:p:`thompson_developments_1998`.
         """
         b = ballast if ballast is not None else self.ballast
         if sleeper is not None or hasattr(self, 'sleeper'):

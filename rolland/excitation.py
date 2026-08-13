@@ -76,8 +76,8 @@ class StationaryExcitation(Excitation, ABC):
 class GaussianImpulse(StationaryExcitation):
     """Gaussian impulse excitation class.
 
-    Gaussian impulse according to :cite:p:`stampka_time-domain_2022`. This excitation type is used for
-    non-moving sources.
+    Gaussian impulse according to :cite:p:`stampka_time-domain_2022`. This
+    excitation type is used for non-moving sources.
 
     Attributes
     ----------
@@ -242,6 +242,7 @@ class MovingExcitation(Excitation, ABC):
 @dataclass(kw_only=True)
 class RandomForce(MovingExcitation):
     """A moving random excitation source for finite-difference track simulations.
+
     Based on the moving source model according to :cite:p:`nordborg_wheelrail_2002`.
 
     Applies a moving force along the track with a random dynamic component

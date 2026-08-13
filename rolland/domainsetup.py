@@ -30,13 +30,15 @@ class DomSetup:
 
     This class manages the translation of physical track properties into a finite-difference
     computational grid. It builds the DEVITO grids, applies Perfectly Matched Layer (PML)
-    boundaries, and constructs the explicit update equations (operators) for the simulation
-    using the Devito framework :cite:p:`louboutin_devito_2019`, :cite:p:`luporini_architecture_2020`.
+    boundaries, and constructs the explicit update equations (operators) for the
+    simulation using the Devito framework :cite:p:`louboutin_devito_2019`,
+    :cite:p:`luporini_architecture_2020`.
 
     The spatial and temporal discretization parameters (`dx` and `dt`) must satisfy the
     Courant–Friedrichs–Lewy (CFL) condition governed by the longitudinal wave propagation
-    speed. Default grid parameters are empirically selected to guarantee absolute numerical
-    stability for the coupled Timoshenko-based multi-DOF system while maintaining low computational costs.
+    speed. Default grid parameters are empirically selected to guarantee absolute
+    numerical stability for the coupled Timoshenko-based multi-DOF system while
+    maintaining low computational costs.
 
     Attributes
     ----------

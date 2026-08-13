@@ -27,7 +27,8 @@ class Deflection:
     This class simulates and records track deflection by constructing and executing
     the explicit finite-difference time-domain (FDTD) update sequence (operators)
     derived by the `DomSetup` instance. It handles conditional sub-sampling and
-    extracts the resulting structural wavefields either at specific points or across the entire grid.
+    extracts the resulting structural wavefields either at specific points or
+    across the entire grid.
 
     Attributes
     ----------

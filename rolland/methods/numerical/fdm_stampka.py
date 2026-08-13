@@ -87,8 +87,8 @@ class PMLStampka:
 class GaussianImpulseStampka:
     """Gaussian impulse excitation class.
 
-    Gaussian impulse according to :cite:p:`stampka_time-domain_2022`. This excitation type is used for
-    non-moving sources.
+    Gaussian impulse according to :cite:p:`stampka_time-domain_2022`. This
+    excitation type is used for non-moving sources.
 
     Attributes
     ----------
