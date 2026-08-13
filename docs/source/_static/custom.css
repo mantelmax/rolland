@@ -138,3 +138,8 @@ header a img {
 header a img.dark\:invert {
     filter: none !important;
 }
+
+/* Hide theme toggle button (sun/moon icon) */
+button[title="Toggle color scheme"] {
+    display: none !important;
+}
