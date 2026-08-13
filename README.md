@@ -36,22 +36,11 @@ By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solv
 
 # Installation
 
-To install **Rolland** via `pip`, run:
+To install **Rolland**, run:
 
 ```bash
-pip install --pre rolland
+pip install rolland
 ```
-
-Or specify the exact alpha pre-release version:
-
-```bash
-pip install rolland==26.08a0
-```
-
-To install directly from the development repository:
-
-```bash
-pip install git+https://github.com/mantelmax/rolland.git
 ```
 
 # Documentation
