@@ -1,6 +1,18 @@
 Installation
 ========================
-To install Rolland, you can use pip. It is recommended to create a virtual environment first.
+To install **Rolland** via ``pip``, run:
+
+.. code-block:: bash
+
+   pip install --pre rolland
+
+Or specify the exact alpha pre-release version:
+
+.. code-block:: bash
+
+   pip install rolland==26.08a0
+
+To install directly from the development repository:
 
 .. code-block:: bash
 
