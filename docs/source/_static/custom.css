@@ -143,3 +143,24 @@ header a img.dark\:invert {
 button[title="Toggle color scheme"] {
     display: none !important;
 }
+
+/* Fix vertical alignment for citations */
+div.citation-list {
+    margin-top: 2.5rem !important;
+}
+
+div.citation {
+    display: flex !important;
+    gap: 1rem !important;
+    align-items: baseline !important;
+    margin-bottom: 1.5rem !important;
+}
+
+div.citation > .label {
+    min-width: 2.5rem !important;
+    flex-shrink: 0 !important;
+}
+
+div.citation > p {
+    margin: 0 !important;
+}
