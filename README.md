@@ -41,7 +41,6 @@ To install **Rolland**, run:
 ```bash
 pip install rolland
 ```
-```
 
 # Documentation
 
