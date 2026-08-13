@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'Rolland'
-copyright = '2025, Maximilian Mantel, Ennes Sarradj'
+copyright = '2026, Maximilian Mantel, Ennes Sarradj'
 author = 'Maximilian Mantel, Ennes Sarradj'
 release = '0.1'
 
