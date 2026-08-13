@@ -4,6 +4,8 @@
 
 """The Rolland library: several classes for the implementation of rolling noise calculation."""
 
+__version__ = "26.08a0"
+
 from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
 from .boundary import CFSPML
 from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, WheelGreensfunc

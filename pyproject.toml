@@ -1,6 +1,6 @@
 [project]
 name = "rolland"
-version = "0.1"
+version = "26.08a0"
 description = "Time-domain simulation framework for coupled wave propagation and dynamics in railway tracks"
 authors = [
     { name = "Maximilian Mantel", email = "maximilian.mantel@tu-berlin.de" },
