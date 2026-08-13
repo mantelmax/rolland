@@ -119,6 +119,16 @@ class EBBCont1L(EBBCont):
         approach is an adopted version of :cite:t:`heckl1995`.
     omega_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
+    force : numpy.ndarray
+        Excitation force array.
+    f : numpy.ndarray
+        Frequency array.
+    x_excit : float
+        Excitation position.
+    x : float | list[float] | numpy.ndarray
+        Response positions.
+    mobility : numpy.ndarray
+        Calculated mobility.
     """
 
     track: ContSlabSingleRailTrack
@@ -185,6 +195,16 @@ class EBBCont2L(EBBCont):
         Resonance frequency ballast <--> slab :math:`[Hz]`.
     omega_2 : float
         Resonance frequency rail <--> slab :math:`[Hz]`.
+    force : numpy.ndarray
+        Excitation force array.
+    f : numpy.ndarray
+        Frequency array.
+    x_excit : float
+        Excitation position.
+    x : float | list[float] | numpy.ndarray
+        Response positions.
+    mobility : numpy.ndarray
+        Calculated mobility.
     """
 
     track: ContBallastedSingleRailTrack

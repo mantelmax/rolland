@@ -291,6 +291,16 @@ class TSBDiscr1L(TSBDiscr):
         approach is an adopted version of :cite:t:`heckl1995`.
     f_0 : float
         Resonance frequency rail <--> foundation :math:`[Hz]`.
+    force : numpy.ndarray
+        Excitation force array.
+    f : numpy.ndarray
+        Frequency array.
+    x_excit : float
+        Excitation position.
+    x : float | list[float] | numpy.ndarray
+        Response positions.
+    mobility : numpy.ndarray
+        Calculated mobility.
     """
 
     track: DiscrSlabSingleRailTrack
@@ -341,6 +351,16 @@ class TSBDiscr2L(TSBDiscr):
         Resonance frequency ballast <--> slab :math:`[Hz]`.
     f_2 : float
         Resonance frequency rail <--> slab :math:`[Hz]`.
+    force : numpy.ndarray
+        Excitation force array.
+    f : numpy.ndarray
+        Frequency array.
+    x_excit : float
+        Excitation position.
+    x : float | list[float] | numpy.ndarray
+        Response positions.
+    mobility : numpy.ndarray
+        Calculated mobility.
     """
 
     track: DiscrBallastedSingleRailTrack

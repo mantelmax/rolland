@@ -237,6 +237,24 @@ class TBCont1LKosto(AnalyticalMethodsKosto):
         Track instance containing rail and pad properties.
     damp_type : str
         Damping type, either 'viscous' or 'hysteretic'.
+    f : numpy.ndarray
+        Frequency array :math:`[Hz]`.
+    force_dir : str
+        Direction of the excitation force.
+    x_excit : float
+        Excitation position :math:`[m]`.
+    x_resp : float | list[float] | numpy.ndarray
+        Response positions :math:`[m]`.
+    z_e : float
+        Excitation z-coordinate :math:`[m]`.
+    y_e : float
+        Excitation y-coordinate :math:`[m]`.
+    z_f : float
+        Response z-coordinate :math:`[m]`.
+    y_f : float
+        Response y-coordinate :math:`[m]`.
+    mobility : numpy.ndarray
+        Calculated mobility.
     """
 
     track: ContSlabSingleRailTrack
@@ -295,6 +313,24 @@ class TBCont2LKosto(AnalyticalMethodsKosto):
         If True, an equivalent sleeper model is applied to distribute discrete support.
     y_sc : float
         Lateral distance from excitation point to sleeper center :math:`[m]`.
+    f : numpy.ndarray
+        Frequency array :math:`[Hz]`.
+    force_dir : str
+        Direction of the excitation force.
+    x_excit : float
+        Excitation position :math:`[m]`.
+    x_resp : float | list[float] | numpy.ndarray
+        Response positions :math:`[m]`.
+    z_e : float
+        Excitation z-coordinate :math:`[m]`.
+    y_e : float
+        Excitation y-coordinate :math:`[m]`.
+    z_f : float
+        Response z-coordinate :math:`[m]`.
+    y_f : float
+        Response y-coordinate :math:`[m]`.
+    mobility : numpy.ndarray
+        Calculated mobility.
     """
 
     track: ContBallastedSingleRailTrack

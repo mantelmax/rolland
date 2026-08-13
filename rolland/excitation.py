@@ -91,6 +91,10 @@ class GaussianImpulse(StationaryExcitation):
         Force direction ('vertical' or 'lateral').
     force : SparseTimeFunction
         The Devito SparseTimeFunction representing the excitation force.
+    z_e : float, default=0.0
+        Excitation z-coordinate :math:`[m]`.
+    y_e : float, default=0.0
+        Excitation y-coordinate :math:`[m]`.
     """
 
     sigma: float = 0.7e-4
@@ -263,6 +267,10 @@ class RandomForce(MovingExcitation):
         Calculated vertical random force time series (automatically calculated).
     force_y : numpy.ndarray
         Calculated lateral random force time series (automatically calculated).
+    z_e : float, default=0.0
+        Excitation z-coordinate :math:`[m]`.
+    y_e : float, default=0.0
+        Excitation y-coordinate :math:`[m]`.
     """
 
     v: float

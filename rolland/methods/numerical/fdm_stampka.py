@@ -690,6 +690,10 @@ class Response(RollandPP):
         Mobility vector :math:`[m/Ns]`.
     accel : numpy.ndarray
         Accelerance vector :math:`[m/Ns^2]`.
+    f_min : float
+        Minimum frequency :math:`[Hz]`.
+    f_max : float
+        Maximum frequency :math:`[Hz]`.
     """
 
     x_resp: list[float] | None = None
@@ -763,6 +767,10 @@ class TDR(RollandPP):
         Filter type (default is '1/3 Octave').
     freq : numpy.ndarray
         Frequency vector :math:`[Hz]`.
+    f_min : float
+        Minimum frequency :math:`[Hz]`.
+    f_max : float
+        Maximum frequency :math:`[Hz]`.
     """
 
     tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
