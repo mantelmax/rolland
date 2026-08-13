@@ -246,7 +246,9 @@ class RandomForce(MovingExcitation):
 
     Applies a moving force along the track with a random dynamic component
     superimposed on a static load. The force ramps up smoothly over the first
-    40% of the simulation to prevent shock artifacts.
+    40% of the simulation to prevent shock artifacts. To simulate smooth, continuous
+    motion across the discrete grid nodes, the applied load is spatially distributed
+    to neighboring nodes using a Hanning window interpolation.
 
     Attributes
     ----------

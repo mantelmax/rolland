@@ -11,11 +11,11 @@
 
 Rolling Noise and Dynamics (**Rolland**) is an open-source, high-performance time-domain simulation framework designed to analyze, predict, and optimize the dynamic and acoustic properties of railway tracks.
 
-By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solves 27 coupled differential equations to capture full 3D track dynamics—including coupled vertical bending, lateral bending, axial torsion, cross-sectional warping, and sleeper movement under eccentric excitation and support conditions. The framework incorporates Complex Frequency-Shifted Perfectly Matched Layers (CFS-PML) for infinite track modeling and supports spatially varying track properties as well as moving excitation sources.
+By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solves 13 differential equations of motion alongside 14 additional auxiliary differential equations corresponding to the boundary domain. This captures full track dynamics—including coupled vertical and lateral bending, longitudinal waves, axial torsion, cross-sectional warping, and sleeper movement under eccentric excitation and support conditions. The framework incorporates Complex Frequency-Shifted Perfectly Matched Layers (CFS-PML) for infinite track modeling and supports spatially varying track properties as well as moving excitation sources.
 
 # Key Features
 
-- **Full Track Dynamics:** Solves 27 coupled differential equations to capture vertical and lateral bending waves, torsional waves, and warping effects together with sleeper movement and eccentric support reactions.
+- **Full Track Dynamics:** Solves 13 differential equations of motion alongside 14 additional auxiliary differential equations to capture vertical and lateral bending waves, longitudinal waves, torsional waves, and warping effects together with sleeper movement and eccentric support reactions.
 - **Fast Time-Domain Solver:** Uses explicit Finite Difference Method (FDM) schemes with high-order stencils for fast simulations.
 - **Infinite Track Boundary (CFS-PML):** Uses absorbing boundary layers to eliminate artificial wave reflections.
 - **Flexible Track Structures:** Supports ballasted and slab tracks with continuous or discrete supports, including spatial (periodic/stochastic) track property variations.

@@ -24,9 +24,10 @@ from .excitation import Excitation
 class Deflection:
     r"""Simulates and records track deflection.
 
-    This class manages the finite-difference simulation of a track under excitation.
-    It handles operator building, conditional sub-sampling to manage memory, and
-    extracting the resulting wavefields either at specific points or across the entire grid.
+    This class simulates and records track deflection by constructing and executing
+    the explicit finite-difference time-domain (FDTD) update sequence (operators)
+    derived by the `DomSetup` instance. It handles conditional sub-sampling and
+    extracts the resulting structural wavefields either at specific points or across the entire grid.
 
     Attributes
     ----------

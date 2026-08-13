@@ -82,9 +82,9 @@ class Rail:
     centr : list[float]
         Coordinates of centroid :math:`[m]`.
     ez : float, internal (automatically calculated)
-        Vertical shear center eccentricity :math:`[m]`.
+        Vertical eccentricity between the rail centroid and rail shear center :math:`[m]`.
     ey : float, internal (automatically calculated)
-        Lateral shear center eccentricity :math:`[m]`.
+        Lateral eccentricity between the rail centroid and rail shear center :math:`[m]`.
     Iyr : float
         Second moment of area around y-axis :math:`[m^4]`.
     Izr : float
@@ -112,9 +112,9 @@ class Rail:
     J : float
         Torsional constant :math:`[m^4]`.
     J_t : float, internal (automatically calculated)
-        Secondary torsional constant :math:`[m^4]`.
+        Secondary torsional constant, accounting for effective shear area due to restrained warping shear stresses and geometric eccentricities :math:`[m^4]`.
     J_rs : float, internal (automatically calculated)
-        Effective shear area :math:`[m^4]`.
+        Effective shear area due to restrained torsional warping :math:`[m^4]`.
     chi : float, optional, default: None
         Warping function of the cross-section :math:`[m^2]`.
 
@@ -151,7 +151,6 @@ class Rail:
     Iyr: float
     Izr: float
     Iyz: float
-    Itr: float
     Ipr: float
     Ar: float
     Asr: float | None=None
@@ -178,7 +177,8 @@ class DiscrPad:
     r"""Discrete Pad Class.
 
     Contains the properties of a discrete pad. The rotational pad stiffnesses are
-    calculated automatically according to :cite:p:`thompson_developments_1998`.
+    derived automatically from the translational stiffnesses and the pad geometry
+    according to :cite:p:`thompson_developments_1998`.
 
     Attributes
     ----------
@@ -189,7 +189,7 @@ class DiscrPad:
     sp_x : float
         Longitudinal pad stiffness (total value) :math:`[N/m]`.
     sp_w : float, internal (automatically calculated)
-        Warping pad stiffness (total value) :math:`[Nm/m]`.
+        Warping pad stiffness based on foundation resistance to warping (total value) :math:`[Nm/m]`.
     sp_xr : float, internal (automatically calculated)
         Longitudinal rotational pad stiffness (total value) :math:`[Nm/rad]`.
     sp_yr : float, internal (automatically calculated)
@@ -255,7 +255,8 @@ class ContPad:
     r"""Cont Pad Class.
 
     Contains the properties of a continuous pad. The rotational pad stiffnesses are
-    calculated automatically according to :cite:p:`thompson_developments_1998`.
+    derived automatically from the translational stiffnesses and the pad geometry
+    according to :cite:p:`thompson_developments_1998`.
 
     Attributes
     ----------
@@ -266,7 +267,7 @@ class ContPad:
     sp_x : float
         Longitudinal pad stiffness (per meter) :math:`[N/m^2]`.
     sp_w : float, internal (automatically calculated)
-        Warping pad stiffness (per meter) :math:`[N/m^2]`.
+        Warping pad stiffness based on foundation resistance to warping (per meter) :math:`[N/m^2]`.
     sp_zr : float, internal (automatically calculated)
         Vertical rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
     sp_yr : float, internal (automatically calculated)

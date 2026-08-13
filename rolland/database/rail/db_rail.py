@@ -54,7 +54,6 @@ UIC60 = Rail(
     Izr=5.127e-06,
     Iyz=0.0,
     Ipr=3.55e-05,
-    Itr=0.0, # arbitrary value, check
     Ar=76.70e-4,
     Asr=0.688,
     Vr=7670.00e-6,
