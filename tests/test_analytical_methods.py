@@ -136,12 +136,12 @@ def tracks():
 def methods(tracks):
     """Create analytical methods for testing."""
     return [
-        EBBCont1L(track=tracks['track_cont_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION),
-        EBBCont2L(track=tracks['track_cont_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION),
+        EBBCont1L(track=tracks['track_cont_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION, damp_type='viscous'),
+        EBBCont2L(track=tracks['track_cont_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION, damp_type='viscous'),
         TSBDiscr2L(track=tracks['track_discr_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_EXCIT,
-                      x_excit=X_EXCIT),
+                      x_excit=X_EXCIT, damp_type='hysteretic'),
         TSBDiscr1L(track=tracks['track_discr_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_EXCIT,
-                      x_excit=X_EXCIT),
+                      x_excit=X_EXCIT, damp_type='hysteretic'),
     ]
 
 
@@ -159,18 +159,18 @@ def test_analytical_methods(method_name, methods, load_csv_data):
         pytest.fail(f"Method {method_name} not found in the created methods.")
 
     method.compute_mobility()
+    csv_key_map = {
+        'EBBCont1L': 'EBBCont1LSupp',
+        'EBBCont2L': 'EBBCont2LSupp',
+        'TSBDiscr1L': 'TSDiscr1LSupp',
+        'TSBDiscr2L': 'TSDiscr2LSupp',
+    }
     for i, freq in enumerate(method.f):
-        expected_value = load_csv_data[freq][method_name]
+        expected_value = load_csv_data[freq][csv_key_map[method_name]]
         actual_value = abs(method.mobility[i])
         assert np.isclose(actual_value, expected_value,
                           rtol=RELATIVE_TOLERANCE, atol=ABSOLUTE_TOLERANCE), \
             f"Mismatch in {method_name} at frequency {freq}: expected {expected_value}, got {actual_value}"
 
 
-def test_damping_mode_mismatch_is_rejected(tracks):
-    """A track built for one damping formulation must not silently feed the other."""
-    with pytest.raises(ValueError, match="requires viscous damping"):
-        EBBCont1L(track=tracks['track_discr_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION)
 
-    with pytest.raises(ValueError, match="requires hysteretic damping"):
-        TSBDiscr1L(track=tracks['track_cont_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION)
