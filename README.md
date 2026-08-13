@@ -4,6 +4,7 @@
 </picture>
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mantelmax/rolland)
+[![DOI](https://zenodo.org/badge/913379186.svg)](https://doi.org/10.5281/zenodo.21920225)
 [![Documentation Status](https://readthedocs.org/projects/rolland-rolling-noise-and-dynamics/badge/?version=latest)](https://rolland-rolling-noise-and-dynamics.readthedocs.io/en/latest/?badge=latest)
 [![Python Version](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
 
@@ -77,7 +78,7 @@ If you use **Rolland** for academic work, please consider citing both our public
 
 and our software:
 
-> Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise. https://github.com/mantelmax/rolland
+> Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise. https://doi.org/10.5281/zenodo.21920225
 
 ```bibtex
 @software{mantel2026rolland_api,
@@ -85,6 +86,6 @@ and our software:
   author = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
   year   = {2026},
   url    = {https://github.com/mantelmax/rolland},
-  doi    = {}
+  doi    = {10.5281/zenodo.21920225}
 }
 ```

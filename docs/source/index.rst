@@ -63,7 +63,7 @@ If you use **Rolland** for academic work, please consider citing both our public
 
 and our software:
 
-   Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise. https://github.com/mantelmax/rolland
+   Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise. https://doi.org/10.5281/zenodo.21920225
 
 .. code-block:: bibtex
 
@@ -72,7 +72,7 @@ and our software:
      author = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
      year   = {2026},
      url    = {https://github.com/mantelmax/rolland},
-     doi    = {}
+     doi    = {10.5281/zenodo.21920225}
    }
 
 
