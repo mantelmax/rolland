@@ -164,3 +164,27 @@ div.citation > .label {
 div.citation > p {
     margin: 0 !important;
 }
+
+/* Remove underlines from stretched links */
+.sd-card a,
+a.sd-stretched-link {
+    text-decoration: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove the long horizontal line under the card/tab sets */
+.sd-tab-set,
+.sd-tab-content {
+    border-bottom: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+hr {
+    display: none !important;
+}
+
+footer {
+    border-top: none !important;
+}
