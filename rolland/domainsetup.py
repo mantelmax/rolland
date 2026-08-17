@@ -440,6 +440,15 @@ class DomSetup:
             upd_warp,
         ] + pml_updates
 
+        # Dirichlet boundary conditions (rigid boundaries)
+        (x,) = self.grid.dimensions
+        nx_last = self.nx - 1
+        bcs = []
+        for var in [u_x, u_y, u_z, phi_x, phi_y, phi_z, u_w]:
+            bcs.append(Eq(var.forward.subs(x, 0), 0))
+            bcs.append(Eq(var.forward.subs(x, nx_last), 0))
+        op_track.extend(bcs)
+
         if not is_slab:
             # Translational Sleeper Equation (x-direction)
             slep_trans_x = Eq(
