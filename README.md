@@ -63,29 +63,28 @@ This project is licensed under the **BSD 3-Clause License**. See the `pyproject.
 
 If you use **Rolland** for academic work, please consider citing both our publication:
 
-> Mantel, M., & Sarradj, E. (2026). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. *Computers & Structures* (Accepted for publication on August 12, 2026).
+> Mantel, M., & Sarradj, E. (in press). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures.
 
 ```bibtex
 @article{mantel2026timedomain,
-  title   = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
-  author  = {Mantel, Maximilian and Sarradj, Ennes},
-  journal = {Computers \& Structures},
-  year    = {2026},
-  note    = {Accepted for publication on August 12, 2026},
-  doi     = {}
+  author   = {Mantel, Maximilian and Sarradj, Ennes},
+  title    = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
+  journal  = {Computers \& Structures},
+  pubstate = {inpress}
 }
 ```
 
 and our software:
 
-> Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise. https://doi.org/10.5281/zenodo.21920225
+> Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A time-domain simulation framework for railway track dynamics and rolling noise (Version 26.08a0) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21920225
 
 ```bibtex
 @software{mantel2026rolland_api,
-  title  = {Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise},
-  author = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
-  year   = {2026},
-  url    = {https://github.com/mantelmax/rolland},
-  doi    = {10.5281/zenodo.21920225}
+  author  = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
+  title   = {Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise},
+  year    = {2026},
+  version = {v26.08a0},
+  doi     = {10.5281/zenodo.21920225},
+  url     = {https://github.com/mantelmax/rolland}
 }
 ```
