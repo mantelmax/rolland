@@ -12,7 +12,7 @@ from .components import Ballast, ContPad, DiscrPad, Rail, Slab, Sleeper, Wheel, 
 from .deflection import Deflection
 from .domainsetup import DomSetup
 from .excitation import Excitation, GaussianImpulse
-from .postprocessing import PointResponse, TrackDecayRate, TrackResponse, TransferResponse, VehicleResponse
+from .postprocessing import TrackDecayRate, TrackResponse, VehicleResponse
 from .track import (
                     ArrangedBallastedSingleRailTrack,
                     ArrangedSlabSingleRailTrack,
@@ -45,8 +45,8 @@ __all__ = ["Arrangement",
            "DomSetup",
            "GaussianImpulse",
            "TrackResponse",
-           "PointResponse",
-           "TransferResponse",
+           
+           
            "TrackDecayRate",
            "VehicleResponse",
            ]
