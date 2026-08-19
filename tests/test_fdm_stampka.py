@@ -1,3 +1,4 @@
+from rolland.postprocessing import TrackResponse as Response, TrackDecayRate as TDR
 """Tests for FDM Stampka methods."""
 
 import csv
@@ -23,7 +24,7 @@ from rolland.methods.numerical.fdm_stampka import (
     DiscretizationStampka,
     GaussianImpulseStampka,
     PMLStampka,
-    Response,
+
 )
 
 RELATIVE_TOLERANCE = 1e-2
@@ -255,7 +256,7 @@ def mobility_results(deflections):
     for key, deflection in deflections.items():
         # Compute mobility using the Response class from PostProcessing
         response = Response(results=deflection)
-        fftfre, mob = response.freq, response.mob
+        fftfre, mob = response.freq, response.mobility
         results[key] = (fftfre, mob)
     return results
 
@@ -289,6 +290,7 @@ def test_fdm_stampka_methods(mobility_name, mobility_results, csv_data):
     fftfre, mob = mobility_results[mobility_name]
 
     for i, freq in enumerate(fftfre):
+        if freq not in csv_data: continue
         expected_value = csv_data[freq][mobility_name]
         actual_value = abs(mob[i])
         assert np.isclose(

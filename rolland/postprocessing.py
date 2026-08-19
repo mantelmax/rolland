@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
+import warnings
 from numpy import (
     array,
     asarray,
@@ -174,528 +175,200 @@ class PostProcessing(ABC):
         plt.grid(True)
         plt.show()
 
+
 class TrackResponse(PostProcessing):
-    r"""Postprocessing class for track response results."""
+    """Unified Track Response class supporting Rolland (Devito), Stampka (FDM), and Analytical models."""
+    
+    def __init__(self, result=None, position_index=None, direction='z', coupled_rotation=None, offset=0.0, results=None):
+        """Initialize the TrackResponse from a simulation result.
 
-    @staticmethod
-    def calculate_recep(signal, excitation, dt):
-        r"""Calculate the receptance of the system.
-
-        Attributes
+        Parameters
         ----------
-        signal : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the receptance.
-        receptance : ndarray
-            Receptance of the system.
+        result : object
+            The simulation result object (Devito `Deflection`, FDM `DeflectionStampka`, or Analytical).
+        position_index : int, optional
+            The spatial index at which to evaluate the response. If None, it defaults to the excitation position.
+        direction : str, default 'z'
+            The primary direction of deflection to extract ('z' or 'y').
+        coupled_rotation : str, optional
+            If provided (e.g., 'x'), coupled rotational mobility is added to the response.
+        offset : float, default 0.0
+            The lateral or vertical offset [m] for computing coupled mobility (used with `coupled_rotation`).
+        results : object, optional
+            Alias for `result`, provided for backwards compatibility.
         """
-        signal = PostProcessing.as_array(signal)
-        excitation = PostProcessing.as_array(excitation)
-        return PostProcessing.frequency_response(signal, excitation, dt)
+        if result is None and results is not None:
+            result = results
+            
+        self.freq = None
+        self.receptance = None
+        self.mobility = None
+        self.accelerance = None
+        
+        if result is not None:
+            self._parse_result(result, position_index, direction, coupled_rotation, offset)
+        
+    def _parse_result(self, result, position_index, direction, coupled_rotation, offset):
+        # 1. Rolland Model (Devito)
+        if hasattr(result, "u_z_obs"):
+            signal = getattr(result, f"u_{direction}_obs")
+            if signal.ndim == 2:
+                idx = position_index if position_index is not None else (round(result.excit.x_excit / result.discr.dx) if result.store == 'full' else 0)
+                signal = signal[:, idx]
+            
+            if coupled_rotation:
+                phi_signal = getattr(result, f"phi_{coupled_rotation}_obs")
+                if phi_signal.ndim == 2:
+                    idx = position_index if position_index is not None else (round(result.excit.x_excit / result.discr.dx) if result.store == 'full' else 0)
+                    phi_signal = phi_signal[:, idx]
+                signal = signal + phi_signal * offset
+                
+            excitation = result.excit.force.data[::result.skip]
+            dt = result.discr.dt * result.skip
+            self._compute_frf(signal, excitation, dt)
+            
+        # 2. Numerical FDM (Stampka)
+        elif hasattr(result, "deflection") and hasattr(result, "force"):
+            idx = position_index if position_index is not None else result.ind_excit
+            signal = result.deflection[idx]
+            # Stampka doesn't have coupled rotation implemented yet, but we allow future proofing
+            if coupled_rotation and hasattr(result, "rotation"):
+                phi_signal = result.rotation[idx]
+                signal = signal + phi_signal * offset
+                
+            excitation = result.force
+            dt = result.discr.dt
+            self._compute_frf(signal, excitation, dt)
+            
+        # 3. Analytical Methods
+        elif hasattr(result, "mobility"):
+            self.freq = result.f
+            self.mobility = result.mobility
+            # Receptance and accelerance can be derived from mobility
+            omega = 2 * pi * self.freq
+            self.receptance = self.mobility / (1j * omega)
+            self.accelerance = self.mobility * (1j * omega)
+            
+        else:
+            raise TypeError("Unsupported result type for TrackResponse.")
 
-    @staticmethod
-    def calculate_mobility(signal, excitation, dt):
-        r"""Calculate the mobility of the system.
-
-        Attributes
-        ----------
-        signal : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the mobility.
-        mobility : ndarray
-            Complex mobility of the system. The phase is retained so that
-            results stay comparable to the complex mobility of
-            :class:`~rolland.methods.analytical.AnalyticalMethods` and can be
-            superposed with other mobilities; take ``abs`` at the point of use.
-        """
-        frequency, receptance = TrackResponse.calculate_recep(signal, excitation, dt)
-        mobility = (1j * 2 * pi * frequency) * receptance
-        return frequency, mobility
-
-    @staticmethod
-    def calculate_accelerance(signal, excitation, dt):
-        r"""Calculate the accelerance of the system.
-
-        Attributes
-        ----------
-        signal : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the accelerance.
-        accelerance : ndarray
-            Complex accelerance of the system; take ``abs`` at the point of use.
-        """
-        frequency, receptance = TrackResponse.calculate_recep(signal, excitation, dt)
-        omega = 2 * pi * frequency
-        accelerance = -(omega**2) * receptance
-        return frequency, accelerance
-
-    @staticmethod
-    def calc_coupled_mobility(u, phi, offset, excit, pd):
-        # Tudo: make more general, [:, 0] is not always clear
-        r"""Calculate the coupled mobility of the system.
-
-        Attributes
-        ----------
-        u : ndarray | object
-            Deflection signal of the system.
-        phi : ndarray | object
-            Torsional rotation signal of the system.
-        offset : float
-            Offset distance for the coupled mobility calculation.
-        excit : ndarray | object
-            Time-domain signal of the system's excitation.
-        pd : object
-            Object containing the time step (dt) attribute.
-
-        Returns
-        -------
-        frequ : ndarray
-            Frequencies corresponding to the coupled mobility.
-        mob : ndarray
-            Complex coupled mobility of the system; take ``abs`` at the point of use.
-        """
-        # TUDO: Implement tranformation Matrix, for lateral excentricity
-        displ_exc = PostProcessing.as_signal_1d(u) + PostProcessing.as_signal_1d(phi) * offset
-        exc = PostProcessing.as_signal_1d(excit)
-        frequ, recep = PostProcessing.frequency_response(displ_exc, exc, pd.dt)
-        mob = (1j * 2 * pi * frequ) * recep
-        return frequ, mob
-
-    @staticmethod
-    def calc_coupled_recep(u, phi, offset, excit, pd):
-        # Tudo: make more general, [:, 0] is not always clear
-        r"""Calculate the coupled receptance of the system.
-
-        Attributes
-        ----------
-        u : ndarray | object
-            Deflection signal of the system.
-        phi : ndarray | object
-            Torsional rotation signal of the system.
-        offset : float
-            Offset distance for the coupled receptance calculation.
-        excit : ndarray | object
-            Time-domain signal of the system's excitation.
-        pd : object
-            Object containing the time step (dt) attribute.
-
-        Returns
-        -------
-        frequ : ndarray
-            Frequencies corresponding to the coupled receptance.
-        recep : ndarray
-            Coupled receptance of the system.
-        """
-        displ_exc = PostProcessing.as_signal_1d(u) + PostProcessing.as_signal_1d(phi) * offset
-        exc = PostProcessing.as_signal_1d(excit)
-        return PostProcessing.frequency_response(displ_exc, exc, pd.dt)
-
-    @staticmethod
-    def calculate_mov_recep(u, excit, pd, skip):
-        # Tudo: make more general, [:, 0] is not always clear
-        r"""Calculate the mobility and receptance of the system.
-
-        Attributes
-        ----------
-        u : ndarray | object
-            Deflection signal of the system.
-        excit : ndarray | object
-            Time-domain signal of the system's excitation.
-        pd : object
-            Object containing the time step (dt) attribute.
-        skip : int
-            Number of samples to skip.
-
-        Returns
-        -------
-        frequ : ndarray
-            Frequencies corresponding to the mobility/receptance.
-        recep : ndarray
-            Receptance of the system.
-        """
-        signal = PostProcessing.as_signal_1d(u)[skip:]
-        exc = PostProcessing.as_signal_1d(excit)[skip:]
-        return PostProcessing.frequency_response(signal, exc, pd.dt)
-
-    @staticmethod
-    def calc_coupled_mov_recep(u, phi, offset, excit, pd, skip):
-        # Tudo: make more general, [:, 0] is not always clear
-        r"""Calculate the coupled mobility and receptance of the system.
-
-        Attributes
-        ----------
-        u : ndarray | object
-            Deflection signal of the system.
-        phi : ndarray | object
-            Torsional rotation signal of the system.
-        offset : float
-            Offset distance for the coupled receptance calculation.
-        excit : ndarray | object
-            Time-domain signal of the system's excitation.
-        pd : object
-            Object containing the time step (dt) attribute.
-        skip : int
-            Number of samples to skip.
-
-        Returns
-        -------
-        frequ : ndarray
-            Frequencies corresponding to the coupled receptance.
-        recep : ndarray
-            Coupled receptance of the system.
-        """
-        signal = PostProcessing.as_signal_1d(u)[skip:] + PostProcessing.as_signal_1d(phi)[skip:] * offset
-        exc = PostProcessing.as_signal_1d(excit)[skip:]
-        return PostProcessing.frequency_response(signal, exc, pd.dt)
-
-
-class PointResponse(TrackResponse):
-    r"""Postprocessing class for point response results."""
+    def _compute_frf(self, signal, excitation, dt):
+        """Internal method to compute FRF from time-domain signals."""
+        import numpy as np
+        signal = np.asarray(signal).flatten()
+        excitation = np.asarray(excitation).flatten()
+        
+        n_samples = min(signal.shape[0], excitation.shape[0])
+        n_freq = n_samples // 2
+        
+        resp_fft = fft(signal[:n_samples])
+        exc_fft = fft(excitation[:n_samples])
+        freq = fftfreq(n_samples, dt)
+        
+        self.freq = freq[:n_freq]
+        
+        # Robust Error Handling (Division by Zero)
+        exc_fft_mag = np.abs(exc_fft[:n_freq])
+        epsilon = 1e-12
+        exc_fft_safe = np.where(exc_fft_mag < epsilon, epsilon, exc_fft[:n_freq])
+        
+        self.receptance = resp_fft[:n_freq] / exc_fft_safe
+        
+        omega = 2 * pi * self.freq
+        self.mobility = (1j * omega) * self.receptance
+        self.accelerance = -(omega**2) * self.receptance
+        
+    def to_octave_bands(self, fraction=3):
+        """Convert narrow-band mobility to fractional octave bands."""
+        import numpy as np
+        if self.freq is None or self.mobility is None:
+            return None, None
+            
+        f_min, f_max = self.freq[self.freq > 0].min(), self.freq.max()
+        if f_min == f_max: return self.freq, self.mobility
+        
+        bands = []
+        band_mobs = []
+        
+        f = f_min
+        factor = 2 ** (1.0 / (2.0 * fraction))
+        
+        while f < f_max:
+            f_lower = f / factor
+            f_upper = f * factor
+            mask = (self.freq >= f_lower) & (self.freq < f_upper)
+            if np.any(mask):
+                bands.append(f)
+                band_mobs.append(np.mean(np.abs(self.mobility[mask])))
+            f = f * (2 ** (1.0 / fraction))
+            
+        return np.array(bands), np.array(band_mobs)
 
     def _abstract(self) -> None:
         pass
 
-    @classmethod
-    def calculate_recep_1d(cls, response, excitation, dt):
-        r"""
-        Calculate the Point response receptance.
 
-        The point response receptance is calculated as the receptance between the excitation and
-        response at the same position.
+class TrackDecayRate(PostProcessing):
+    """Unified Track-Decay-Rate class supporting Devito and Numerical FDM simulations."""
+    
+    def __init__(self, result=None, f_min=0.0, f_max=None, tol_excit=None, results=None):
+        """Initialize TrackDecayRate and calculate the TDR per DIN EN 15461.
 
-        Attributes
+        Parameters
         ----------
-        response : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the receptance.
-        receptance : ndarray
-            Point ResponseReceptance of the system.
+        result : object
+            The simulation result object (Devito or FDM) containing deflection and excitation.
+        f_min : float, default 0.0
+            Minimum frequency [Hz] for the resulting TDR spectrum.
+        f_max : float, optional
+            Maximum frequency [Hz] for the resulting TDR spectrum.
+        tol_excit : float, optional
+            Tolerance [m] for verifying the excitation point lies in the sleeper bay center.
+        results : object, optional
+            Alias for `result`, provided for backwards compatibility.
         """
-        #Tudo: Difference in data structure of time between methods
-        response = PostProcessing.as_signal_1d(response)
-        excitation = PostProcessing.as_signal_1d(excitation)
-        return cls.calculate_recep(response, excitation, dt)
+        if result is None and results is not None:
+            result = results
+            
+        self.f_min = f_min
+        self.f_max = f_max
+        self.tol_excit = tol_excit
+        self.tdr = array([])
+        self.freq = array([])
+        self.ind_tdr = []
+        self.x_tdr = array([])
+        
+        if result is not None:
+            if hasattr(result, "u_z_obs"):
+                # Devito Extraction
+                if result.store != 'full':
+                    raise ValueError("Devito simulation must be run with store='full' for TDR.")
+                self.response_matrix = result.u_z_obs
+                self.excitation = result.excit.force.data[::result.skip]
+                self.dt = result.discr.dt * result.skip
+                self.dx = result.discr.dx
+                self.ind_excit = round(result.excit.x_excit / self.dx)
+                self.track = result.track
+                
+            elif hasattr(result, "deflection"):
+                # Stampka Extraction
+                self.response_matrix = result.deflection.T  # Transpose to match (time, space)
+                self.excitation = result.force
+                self.dt = result.discr.dt
+                self.dx = result.discr.dx
+                self.ind_excit = result.ind_excit
+                self.track = result.track
+                
+            else:
+                raise TypeError("Unsupported result type for TrackDecayRate.")
 
-    @classmethod
-    def calculate_mobility_1d(cls, response, excitation, dt):
-        r"""
-        Calculate the Point response mobility.
-
-        The point response mobility is calculated as the mobility between the excitation and
-        response at the same position.
-
-        Attributes
-        ----------
-        response : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the mobility.
-        mobility : ndarray
-            Point Response Mobility of the system.
-        """
-        response = PostProcessing.as_signal_1d(response)
-        excitation = PostProcessing.as_signal_1d(excitation)
-        return cls.calculate_mobility(response, excitation, dt)
-
-    @classmethod
-    def calculate_accelerance_1d(cls, response, excitation, dt):
-        r"""Calculate the Point response accelerance.
-
-        The point response accelerance is calculated as the accelerance between the excitation and
-        response at the same position.
-
-        Attributes
-        ----------
-        response : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the accelerance.
-        accelerance : ndarray
-            Point ResponseAccelerance of the system.
-        """
-        response = PostProcessing.as_signal_1d(response)
-        excitation = PostProcessing.as_signal_1d(excitation)
-        return cls.calculate_accelerance(response, excitation, dt)
-
-class TransferResponse(TrackResponse):
-    r"""Postprocessing class for transfer response results."""
-
-    def _abstract(self) -> None:
-        pass
-
-    @classmethod
-    def calculate_recep_transfer(cls, response, excitation, dt, position=0):
-        r"""
-        Calculate the Transfer receptance.
-
-        The transfer response receptance is calculated as the receptance between the excitation and
-        response at a defined position.
-
-        Attributes
-        ----------
-        response : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-        position : int, optional, default=0
-            Index of the position in the response signal to calculate the transfer receptance.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the receptance.
-        receptance : ndarray
-            Point Response Receptance of the system.
-        """
-        excitation = PostProcessing.as_signal_1d(excitation)
-        response = cls.as_signal_1d(response, index=position)
-        return cls.calculate_recep(response, excitation, dt)
-
-    @classmethod
-    def calculate_mobility_transfer(cls, response, excitation, dt, position=0):
-        r"""Calculate the transfer mobility.
-
-        The transfer mobility is calculated as the mobility between the excitation and
-        response at a defined position.
-
-        Attributes
-        ----------
-        response : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-        position : int, optional, default=0
-            Index of the position in the response signal to calculate the transfer mobility.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the mobility.
-        mobility : ndarray
-            Point Response Mobility of the system.
-        """
-        excitation = PostProcessing.as_signal_1d(excitation)
-        response = cls.as_signal_1d(response, index=position)
-        return cls.calculate_mobility(response, excitation, dt)
-
-    @classmethod
-    def calculate_accelerance_transfer(cls, response, excitation, dt, position=0):
-        r"""Calculate the transfer accelerance.
-
-        The transfer accelerance is calculated as the accelerance between the excitation and
-        response at a defined position.
-
-        Attributes
-        ----------
-        response : ndarray | object
-            Time-domain signal of the system's response.
-        excitation : ndarray | object
-            Time-domain signal of the system's excitation.
-        dt : float
-            Time step between samples.
-        position : int, optional, default=0
-            Index of the position in the response signal to calculate the transfer accelerance.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the accelerance.
-        accelerance : ndarray
-            Point Response Accelerance of the system.
-        """
-        excitation = PostProcessing.as_signal_1d(excitation)
-        response = cls.as_signal_1d(response, index=position)
-        return cls.calculate_accelerance(response, excitation, dt)
-
-@dataclass(kw_only=True)
-class TrackDecayRate(TrackResponse):
-    r"""Postprocessing class for TDR (Track-Decay-Rate).
-
-    This class calculates and stores the Track-Decay-Rate (TDR) based on :cite:`EN15461:2008`.
-
-    The decay rate is derived from a ratio of mobilities, so the shape of the
-    excitation cancels out and any excitation signal may be used -- as long as it
-    is stationary, since the TDR is defined relative to a fixed reference point.
-
-    All inputs are plain arrays and scalars, taken from the simulation objects at
-    the call site. For the numerical FDM methods::
-
-        tdr = TrackDecayRate(
-            response_matrix=defl.deflection,
-            excitation=defl.force,
-            dt=defl.discr.dt,
-            dx=defl.discr.dx,
-            ind_excit=defl.ind_excit,   # see note on the reference index below
-            track=defl.track,
-        )
-
-    For a :class:`~rolland.deflection.Deflection` simulation, note that it stores
-    only every ``skip``-th time step, so both the time step and the excitation
-    have to account for it::
-
-        tdr = TrackDecayRate(
-            response_matrix=defl.u_z_obs,
-            excitation=defl.excit.force.data[:: defl.skip],
-            dt=defl.discr.dt * defl.skip,
-            dx=defl.discr.dx,
-            ind_excit=round(defl.excit.x_excit / defl.discr.dx),
-            track=defl.track,
-        )
-
-    The simulation must have been run with ``store='full'``: the TDR points are
-    addressed by spatial grid index, which the single observation points of
-    ``store='observe'`` or ``store='excit'`` do not provide.
-
-    On a discretely supported track the excitation must sit in the centre of a
-    sleeper bay, since the measurement grid is built relative to that point --
-    see :meth:`validate_excitation_position`.
-
-    .. note:: **On the reference index.**
-
-        ``ind_excit`` selects the reference point :math:`x_0` against which all
-        mobilities are normalised. That is the point mobility and hence the
-        largest value of the whole series, so an index off by one grid cell
-        distorts the entire TDR curve rather than a single summand -- which is
-        why the two examples above derive it differently.
-
-        A devito simulation injects its force through
-        ``force.inject(coordinates=x_excit)``, i.e. interpolated onto the exact
-        physical position, so no single grid point is the "true" one and the
-        nearest one is the best approximation: ``round(x_excit / dx)``. Grid point
-        *i* sits at :math:`i \cdot dx` because :class:`~rolland.domainsetup.DomSetup`
-        fixes the grid origin at 0.0; for a shifted origin the offset would have to
-        be subtracted first.
-
-        The numerical FDM methods instead compute their own index by truncation,
-        ``int(x_excit / dx)``, and write the force into exactly that cell. Their
-        ``ind_excit`` must therefore be reused as-is -- rounding it independently
-        could point at a neighbouring cell of the actual force application.
-
-    Attributes
-    ----------
-    response_matrix : numpy.ndarray
-        Deflection over time and the full spatial grid, shape (n_time, n_positions).
-        Time is axis 0, matching the output of both :class:`~rolland.deflection.Deflection`
-        and the numerical methods. The spatial axis must span the whole grid, since the
-        TDR points are addressed by grid index.
-    excitation : numpy.ndarray
-        Time-domain excitation signal at the excitation location ("direct FRF", x_0 = 0).
-    dt : float
-        Time step of ``response_matrix`` [s].
-    dx : float
-        Spatial grid spacing [m].
-    ind_excit : int
-        Spatial grid index of the excitation. Must be supplied explicitly by the caller.
-    track : object
-        Track object (only used to select the point layout scheme per clause 6.7 of the standard).
-    f_min : float, default=0.0
-        Lower band limit, exclusive [Hz]. The default of 0.0 discards the DC line,
-        where the excitation spectrum vanishes and the mobility is meaningless.
-    f_max : float | None, default=None
-        Upper band limit, inclusive [Hz]. ``None`` keeps everything up to Nyquist.
-    tol_excit : float | None, default=None
-        Tolerance for the sleeper bay centre check of :meth:`validate_excitation_position` [m].
-        ``None`` uses half a grid spacing, i.e. the excitation has to be the grid point
-        closest to the centre. Only relevant for discretely supported tracks.
-    tdr : numpy.ndarray
-        Track-Decay-Rate vector [dB/m].
-    ind_tdr : list[int]
-        Spatial indices of the TDR measurement points x_n.
-    x_tdr : numpy.ndarray
-        Distances x_n of the TDR points from the excitation point [m] (x_0 = 0).
-    filter : str | None
-        Filter type.
-    freq : numpy.ndarray
-        Frequency vector [Hz].
-    """
-
-    response_matrix: ndarray
-    excitation: ndarray
-    dt: float
-    dx: float
-    ind_excit: int
-    track: object
-    f_min: float = 0.0
-    f_max: float | None = None
-    tol_excit: float | None = None
-    tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
-    filter: str | None = None
-    freq: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
-    ind_tdr: list[int] = field(default_factory=list)
-    x_tdr: ndarray = field(default_factory=lambda: array([]), metadata={"default_repr": "numpy.array([])"})
-
-    def __post_init__(self):
-        """Post-initialization to check the excitation, find TDR points and calculate TDR."""
-        self.validate_excitation_position()
-        self.find_tdr_points()
-        self.validate_tdr_points()
-        self.calculate_tdr()
+            self.validate_excitation_position()
+            self.find_tdr_points()
+            self.validate_tdr_points()
+            self.calculate_tdr()
 
     def validate_excitation_position(self):
-        r"""Check that the TDR starts in the centre of a sleeper bay.
-
-        The excitation is accepted when its grid position lies within
-        ``tol_excit`` of the bay centre; the default of half a grid spacing
-        means it has to be the grid point closest to that centre. Continuously
-        supported tracks are skipped: their support layer is smeared out over
-        the length of the track, so there are no sleeper bays to be centred in.
-
-        Raises
-        ------
-        ValueError
-            If the excitation does not lie between two supports, or if it is
-            further than ``tol_excit`` from the centre of its sleeper bay.
-        """
+        r"""Check that the TDR starts in the centre of a sleeper bay."""
         if not isinstance(self.track, (DiscrSlabSingleRailTrack, DiscrBallastedSingleRailTrack)):
             return
 
@@ -705,74 +378,33 @@ class TrackDecayRate(TrackResponse):
         before = where(x_mp <= x_excit)[0]
         after = where(x_mp > x_excit)[0]
         if before.size == 0 or after.size == 0:
-            msg = (
-                f"The excitation at x = {x_excit:.4f} m (grid index {self.ind_excit}) does not lie "
-                f"between two supports, which span {x_mp[0]:.4f} m to {x_mp[-1]:.4f} m. The TDR "
-                f"starts in a sleeper bay, so the excitation must sit inside the supported track."
-            )
-            raise ValueError(msg)
+            raise ValueError(f"The excitation at x = {x_excit:.4f} m does not lie between two supports.")
 
         x_left, x_right = x_mp[before[-1]], x_mp[after[0]]
         x_centre = (x_left + x_right) / 2
         tol = self.dx / 2 if self.tol_excit is None else self.tol_excit
 
-        # The epsilon keeps a centre falling exactly between two grid points from being
-        # rejected for both of its two equally close neighbours.
         deviation = abs(x_excit - x_centre)
         if deviation > tol + 1e-9:
-            msg = (
-                f"The excitation at x = {x_excit:.4f} m (grid index {self.ind_excit}) is not in a "
-                f"sleeper bay centre: it lies between the supports at {x_left:.4f} m and "
-                f"{x_right:.4f} m, whose centre is {x_centre:.4f} m -- a deviation of "
-                f"{deviation:.4f} m > {tol:.4f} m. The TDR is defined for an excitation in the bay "
-                f"centre, so move the excitation to {x_centre:.4f} m (grid index "
-                f"{round(x_centre / self.dx)}), refine dx so that the centre is met more closely, "
-                f"or widen tol_excit if the remaining deviation is acceptable."
-            )
-            raise ValueError(msg)
+            raise ValueError(f"Excitation not in sleeper bay centre. Deviation {deviation:.4f} > {tol:.4f}.")
 
     def find_tdr_points(self):
-        r"""Determine the TDR measurement positions x_n and their grid indices.
-
-        Implements the near-field/far-field measurement grid described in
-        clause 6.7 of the standard: for an arranged (discretely supported)
-        track, positions are derived from the actual fastener spacing
-        (``track.mount_prop``); otherwise a fixed 29-point grid is used,
-        scaled by an assumed sleeper spacing of 0.6 m.
-
-        Sets
-        ----
-        x_tdr : numpy.ndarray
-            Distances of the 29 TDR points from the excitation point [m].
-        ind_tdr : list[int]
-            Corresponding spatial grid indices, offset by ``ind_excit``.
-        """
+        r"""Determine the TDR measurement positions x_n and their grid indices."""
         if isinstance(self.track, (ArrangedSlabSingleRailTrack, ArrangedBallastedSingleRailTrack)):
             x_mp = array(list(self.track.mount_prop.keys()))
             ind_mp = (x_mp / self.dx).astype(int)
 
             before = where(ind_mp < self.ind_excit)[0]
             if before.size == 0:
-                msg = (
-                    f"No mounting position found before the excitation index {self.ind_excit}. "
-                    f"The excitation must lie behind the first fastener of the track."
-                )
-                raise ValueError(msg)
+                raise ValueError("No mounting position found before the excitation index.")
             idx_s = int(before[-1])
 
             x_s = x_mp[idx_s:] - x_mp[idx_s]
             x_sc = convolve(x_s, ones(2) / 2, mode='valid')
 
-            # The farthest point of the standard grid is x_sc[66], i.e. the centre
-            # between the 67th and 68th fastener behind the excitation.
             n_required = 68
             if x_s.size < n_required:
-                msg = (
-                    f"Only {x_s.size} mounting positions lie at or behind the excitation, "
-                    f"but {n_required} are required to place all 29 TDR measurement points. "
-                    f"Extend the track or move the excitation closer to its start."
-                )
-                raise ValueError(msg)
+                raise ValueError(f"Only {x_s.size} mounting positions lie at or behind the excitation, required {n_required}.")
 
             def tdr_points_betw1(idx):
                 return ((x_s[idx + 1] - x_sc[idx]) / 2) + x_sc[idx]
@@ -802,28 +434,7 @@ class TrackDecayRate(TrackResponse):
 
     @staticmethod
     def _interval_weights(x):
-        r"""Compute the summation weights :math:`\Delta x_n` per Annex A.
-
-        :math:`\Delta x_n` is the local length of track that point n
-        represents in the summation, not its distance from the excitation:
-        for interior points it is the symmetric midpoint distance
-        :math:`(x_{n+1} - x_{n-1}) / 2`; for the first point (:math:`x_0 = 0`,
-        at the excitation) it only extends forward to the midpoint with its
-        neighbour, since distance cannot be negative; for the last point it
-        is mirrored symmetrically outward, i.e. equal to its distance from
-        the previous point.
-
-        Parameters
-        ----------
-        x : ndarray
-            Monotonically increasing measurement-point distances from the
-            excitation, x[0] == 0.
-
-        Returns
-        -------
-        ndarray
-            Interval weights :math:`\Delta x_n`, same shape as ``x``.
-        """
+        r"""Compute the summation weights."""
         x = asarray(x, dtype=float)
         dx = zeros_like(x)
         dx[0] = (x[1] - x[0]) / 2
@@ -832,68 +443,27 @@ class TrackDecayRate(TrackResponse):
         return dx
 
     def validate_tdr_points(self):
-        r"""Check that all TDR measurement points lie inside the simulated domain.
-
-        The points are addressed by spatial grid index, so ``response_matrix``
-        must cover the whole grid and must reach at least ``x_tdr[-1]`` beyond
-        the excitation. Without this check an out-of-range index would either
-        raise an opaque ``IndexError`` or, for negative indices, silently wrap
-        around and produce a plausible but wrong decay rate.
-
-        Raises
-        ------
-        ValueError
-            If ``response_matrix`` is not two-dimensional or does not contain
-            all TDR measurement points.
-        """
+        r"""Check that all TDR measurement points lie inside the simulated domain."""
         response = self.as_array(self.response_matrix)
         if response.ndim != 2:
-            msg = (
-                f"response_matrix must be two-dimensional with shape (n_time, n_positions), "
-                f"got ndim={response.ndim}. The TDR needs the deflection over the full "
-                f"spatial grid, so a simulation storing only single observation points "
-                f"cannot be used."
-            )
-            raise ValueError(msg)
+            raise ValueError("response_matrix must be two-dimensional with shape (n_time, n_positions).")
 
         n_positions = response.shape[1]
         ind_min, ind_max = min(self.ind_tdr), max(self.ind_tdr)
         if ind_min < 0 or ind_max >= n_positions:
-            # Far too few positions means the response is a handful of observation
-            # points rather than the spatial grid the indices refer to.
-            cause = (
-                "The response does not cover the spatial grid at all -- run the simulation "
-                "with store='full' instead of single observation points."
-                if n_positions < len(self.ind_tdr) else
-                f"The farthest point is {self.x_tdr[-1]:.2f} m behind the excitation, so the "
-                f"track must extend at least that far beyond it."
-            )
-            msg = (
-                f"TDR measurement points lie outside the simulated domain: required grid "
-                f"index range [{ind_min}, {ind_max}], available [0, {n_positions - 1}]. {cause}"
-            )
-            raise ValueError(msg)
+            raise ValueError(f"TDR measurement points lie outside the simulated domain.")
 
     def _calculate_mobility_spectra(self):
-        r"""Calculate the mobility spectrum at every TDR measurement point.
-
-        Restricts the spectra to the band ``(f_min, f_max]``, which also
-        removes the DC line where the excitation spectrum vanishes.
-
-        Returns
-        -------
-        frequency : ndarray
-            Frequencies corresponding to the mobility spectra.
-        mobility : ndarray
-            Complex mobility at each TDR point, shape (n_points, n_freq), with
-            row 0 corresponding to the reference point at the excitation (x_0 = 0).
-        """
+        r"""Calculate the mobility spectrum at every TDR measurement point."""
         mobility_rows = []
         frequency = None
         for ind in self.ind_tdr:
-            # Time is axis 0 of the response matrix, position is axis 1.
             defl = self.response_matrix[:, ind]
-            frequency, mobility = TrackResponse.calculate_mobility(defl, self.excitation, self.dt)
+            
+            # Compute FRF directly without dummy result objects
+            tr = TrackResponse.__new__(TrackResponse)
+            tr._compute_frf(defl, self.excitation, self.dt)
+            frequency, mobility = tr.freq, tr.mobility
             mobility_rows.append(mobility)
 
         mask = frequency > self.f_min
@@ -903,46 +473,17 @@ class TrackDecayRate(TrackResponse):
         return frequency[mask], array(mobility_rows)[:, mask]
 
     def calculate_tdr(self):
-        r"""Calculate the Track-Decay-Rate (TDR) per DIN EN 15461, Annex A, Eq. (A.3).
-
-        .. math::
-            DR \approx \dfrac{4.343}
-            {\sum_{n=0}^{n_{max}} \dfrac{|A(x_n)|^2}{|A(x_0)|^2}\,\Delta x_n}
-
-        The summation runs over all measurement points including the
-        reference point itself (n = 0, where the ratio is 1), each weighted
-        by its local interval :math:`\Delta x_n` from :meth:`_interval_weights`.
-
-        Sets
-        ----
-        tdr : numpy.ndarray
-            Track-Decay-Rate [dB/m] for every frequency line in the band.
-        freq : numpy.ndarray
-            Corresponding frequency vector [Hz].
-        """
+        r"""Calculate the Track-Decay-Rate (TDR) per DIN EN 15461."""
         freq, mob = self._calculate_mobility_spectra()
         dx_n = self._interval_weights(self.x_tdr)
 
-        ratio_sq = abs(mob) ** 2 / abs(mob[0]) ** 2      # |A(xn)/A(x0)|^2, all n
-        sum_tdr = (ratio_sq * dx_n[:, None]).sum(axis=0)  # Σ_{n=0}^{nmax} ... Δx_n
+        ratio_sq = abs(mob) ** 2 / abs(mob[0]) ** 2
+        sum_tdr = (ratio_sq * dx_n[:, None]).sum(axis=0)
 
         self.tdr = 4.343 / sum_tdr
         self.freq = freq
 
     def dr_min(self):
-        r"""Calculate the minimum measurable decay rate per Eq. (2) of the standard.
-
-        Used as an acceptance check (clause 7/8): a value from
-        :meth:`calculate_tdr` in a given band is considered unreliable if it
-        is less than twice this minimum, since the true decay could not have
-        been fully resolved within the measured distance ``x_max``.
-
-        Returns
-        -------
-        float
-            Minimum decay rate :math:`DR_{min} = 4.343 / x_{max}` [dB/m],
-            where :math:`x_{max}` is the distance of the farthest TDR point.
-        """
         return 4.343 / self.x_tdr[-1]
 
     def _abstract(self) -> None:
