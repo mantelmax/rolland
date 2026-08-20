@@ -166,7 +166,7 @@ class DiscretizationStampka:
     track: Track
     bound: PMLStampka
     dt: float = 2e-5
-    req_simt: float = 0.4
+    req_simt: float = 0.7
     bx: float = 1.0
 
     def calc_grid(self):
