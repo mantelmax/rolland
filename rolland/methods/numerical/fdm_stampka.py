@@ -29,7 +29,6 @@ Acoustics, January 2022. Num Pages: 18. doi:10.3390/acoustics4040052.
 import warnings
 from dataclasses import dataclass, field
 
-import matplotlib.pyplot as plt
 from numpy import (  # noqa: A004
     empty,
     exp,
@@ -38,7 +37,6 @@ from numpy import (  # noqa: A004
     ones,
     zeros,
 )
-from numpy.fft import fft, fftfreq
 from scipy.sparse import SparseEfficiencyWarning, bmat, diags, eye
 from scipy.sparse.linalg import splu
 
