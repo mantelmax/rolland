@@ -45,8 +45,8 @@ __all__ = ["Arrangement",
            "DomSetup",
            "GaussianImpulse",
            "TrackResponse",
-           
-           
+
+
            "TrackDecayRate",
            "VehicleResponse",
            ]
