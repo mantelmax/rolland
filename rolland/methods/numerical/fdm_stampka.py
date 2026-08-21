@@ -17,11 +17,6 @@ Acoustics, January 2022. Num Pages: 18. doi:10.3390/acoustics4040052.
     GaussianImpulseStampka
     DiscretizationStampka
     DeflectionStampka
-    PostProcessing
-    AnalyticPP
-    RollandPP
-    Response
-    TDR
 """
 
 # ruff: noqa: N806
