@@ -1,5 +1,4 @@
-"""Postprocessing operations.
-"""
+"""Postprocessing operations."""
 
 from dataclasses import dataclass, field
 from typing import Any, Protocol
