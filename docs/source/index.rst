@@ -84,3 +84,5 @@ and our software:
    API Reference <api_ref/index>
    Examples <examples/index>
    Literature <literature/index>
+   About <about>
+   Changelog <changelog>
