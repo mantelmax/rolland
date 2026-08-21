@@ -8,20 +8,14 @@
     TrackDecayRate
     VehicleResponse
 """
+
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import numpy as np
 from numpy import (
-    array,
-    asarray,
-    convolve,
     ndarray,
-    ones,
     pi,
-    rint,
-    where,
-    zeros_like,
 )
 from numpy.fft import fft, fftfreq
 
@@ -29,7 +23,6 @@ from .track import (
     DiscrBallastedSingleRailTrack,
     DiscrSlabSingleRailTrack,
 )
-
 
 # Constants
 DB_CONVERSION_FACTOR = 4.343
@@ -39,11 +32,11 @@ EPSILON_FRF = 1e-12
 
 class SimulationResult(Protocol):
     """Protocol defining a generic simulation result."""
-    pass
 
 
 class RollandResult(SimulationResult, Protocol):
     """Protocol defining a Rolland-based simulation result."""
+
     u_z_obs: ndarray
     store: str
     excit: Any
@@ -54,6 +47,7 @@ class RollandResult(SimulationResult, Protocol):
 
 class StampkaResult(SimulationResult, Protocol):
     """Protocol defining an Stampka-based simulation result."""
+
     deflection: ndarray
     force: ndarray
     discr: Any
@@ -63,6 +57,7 @@ class StampkaResult(SimulationResult, Protocol):
 
 class AnalyticalResult(SimulationResult, Protocol):
     """Protocol defining an analytical simulation result."""
+
     mobility: ndarray
     f: ndarray
 
@@ -109,14 +104,28 @@ class PostProcessing:
     freq: ndarray = field(default=None, init=False)
 
     def __post_init__(self):
+        """Initialize base attributes."""
         if self.result is None and self.results is not None:
             self.result = self.results
 
-    def _plot_base(self, x, y, quantity: str, title: str | None = None, ax=None, label=None, plot_type='loglog', octave_fraction=None, **kwargs):
+    def _plot_base(  # noqa: C901
+
+        self,
+        x,
+        y,
+        quantity: str,
+        title: str | None = None,
+        ax=None,
+        label=None,
+        plot_type='loglog',
+        octave_fraction=None,
+        **kwargs,
+    ):
         try:
             import matplotlib.pyplot as plt
         except ImportError as e:
-            raise ImportError("matplotlib is required for plotting.") from e
+            msg = 'matplotlib is required for plotting.'
+            raise ImportError(msg) from e
 
         if ax is None:
             fig, ax = plt.subplots(figsize=(10, 6))
@@ -170,7 +179,7 @@ class PostProcessing:
         ax.set_xlabel('Frequency [Hz]')
         ax.set_ylabel(quantity)
         ax.set_title(title or f'Track Response ({quantity})')
-        ax.grid(True, which="both", ls="-", alpha=0.5)
+        ax.grid(True, which='both', ls='-', alpha=0.5)
         if label:
             ax.legend()
 
@@ -221,22 +230,25 @@ class TrackResponse(PostProcessing):
     accelerance: ndarray = field(default=None, init=False)
 
     def __post_init__(self):
+        """Initialize TrackResponse."""
         super().__post_init__()
         if self.result is not None:
             self._parse_result(self.result, self.position_index, self.direction, self.coupled_rotation, self.offset)
 
     def _parse_result(self, result, position_index, direction, coupled_rotation, offset):
-        if hasattr(result, "u_z_obs"):
+        if hasattr(result, 'u_z_obs'):
             self._parse_rolland(result, position_index, direction, coupled_rotation, offset)
-        elif hasattr(result, "deflection") and hasattr(result, "force"):
+        elif hasattr(result, 'deflection') and hasattr(result, 'force'):
             self._parse_stampka(result, position_index, direction, coupled_rotation, offset)
-        elif hasattr(result, "mobility"):
+        elif hasattr(result, 'mobility'):
             self._parse_analytical(result)
         else:
-            raise TypeError("Unsupported result type for TrackResponse.")
+            msg = 'Unsupported result type for TrackResponse.'
+            raise TypeError(msg)
 
     def _parse_rolland(self, result, position_index, direction, coupled_rotation, offset):
         from rolland.excitation import StationaryExcitation
+
         if isinstance(result.excit, StationaryExcitation):
             if getattr(result.excit, 'force_dir', 'vertical') == 'vertical':
                 direction = direction or 'z'
@@ -250,26 +262,30 @@ class TrackResponse(PostProcessing):
             direction = direction or 'z'
             offset = offset if offset is not None else 0.0
 
-        signal = getattr(result, f"u_{direction}_obs")
+        signal = getattr(result, f'u_{direction}_obs')
         if signal.ndim == 2:
-            idx = position_index if position_index is not None else (
-                round(result.excit.x_excit / result.discr.dx) if result.store == 'full' else 0
+            idx = (
+                position_index
+                if position_index is not None
+                else (round(result.excit.x_excit / result.discr.dx) if result.store == 'full' else 0)
             )
             signal = signal[:, idx]
 
         if coupled_rotation:
-            phi_signal = getattr(result, f"phi_{coupled_rotation}_obs")
+            phi_signal = getattr(result, f'phi_{coupled_rotation}_obs')
             if phi_signal.ndim == 2:
-                idx = position_index if position_index is not None else (
-                    round(result.excit.x_excit / result.discr.dx) if result.store == 'full' else 0
+                idx = (
+                    position_index
+                    if position_index is not None
+                    else (round(result.excit.x_excit / result.discr.dx) if result.store == 'full' else 0)
                 )
                 phi_signal = phi_signal[:, idx]
             signal = signal + phi_signal * offset
 
         if hasattr(result.excit, 'force'):
-            excitation = result.excit.force.data[::result.skip]
+            excitation = result.excit.force.data[:: result.skip]
         else:
-            excitation = getattr(result.excit, f'force_{direction}')[::result.skip]
+            excitation = getattr(result.excit, f'force_{direction}')[:: result.skip]
         dt = result.discr.dt * result.skip
 
         self.freq, self.receptance, self.mobility, self.accelerance = compute_frf(signal, excitation, dt)
@@ -281,7 +297,7 @@ class TrackResponse(PostProcessing):
 
         signal = result.deflection[idx]
 
-        if coupled_rotation and hasattr(result, "rotation"):
+        if coupled_rotation and hasattr(result, 'rotation'):
             phi_signal = result.rotation[idx]
             signal = signal + phi_signal * offset
 
@@ -317,18 +333,24 @@ class TrackResponse(PostProcessing):
         if octave_fraction is not None:
             x, y = self.to_octave_bands(fraction=octave_fraction, quantity=quantity)
             if label:
-                label = f"{label} (1/{octave_fraction} Octave)"
+                label = f'{label} (1/{octave_fraction} Octave)'
         else:
             x = self.freq
             y = getattr(self, quantity)
 
         if y is None:
-            raise ValueError(f"Quantity '{quantity}' is not available.")
+            msg = f"Quantity '{quantity}' is not available."
+            raise ValueError(msg)
 
         return self._plot_base(
-            x, y, quantity.capitalize(),
-            ax=ax, label=label, plot_type=plot_type,
-            octave_fraction=octave_fraction, **kwargs
+            x,
+            y,
+            quantity.capitalize(),
+            ax=ax,
+            label=label,
+            plot_type=plot_type,
+            octave_fraction=octave_fraction,
+            **kwargs,
         )
 
     def to_octave_bands(self, fraction=3, quantity='mobility'):
@@ -371,9 +393,9 @@ class TrackDecayRate(PostProcessing):
 
     **Measurement Grid and Spatial Summation**
 
-    The TDR is determined by spatially summing the responses at measurement positions :math:`x_n`. 
-    The intervals :math:`\Delta x_n` (`dx_n`) are centered between adjacent positions using midpoints `M_n` 
-    as integration boundaries:
+    The TDR is determined by spatially summing the responses at measurement positions :math:`x_n`.
+    The intervals :math:`\Delta x_n` (`dx_n`) are centered between adjacent positions
+    using midpoints `M_n` as integration boundaries:
 
     .. code-block:: text
 
@@ -408,7 +430,8 @@ class TrackDecayRate(PostProcessing):
     results : SimulationResult, optional
         Alias for `result`, provided for backwards compatibility.
     octave_fraction : int or None, default 3
-        Fraction for octave band averaging (e.g., 3 for 1/3-octave bands). If None, calculates narrowband TDR.
+        Fraction for octave band averaging (e.g., 3 for 1/3-octave bands).
+        If None, calculates narrowband TDR.
     f_min : float, default 0.0
         Minimum frequency for the resulting TDR spectrum :math:`[Hz]`.
     f_max : float, optional
@@ -453,14 +476,16 @@ class TrackDecayRate(PostProcessing):
     x_tdr: ndarray = field(default_factory=lambda: np.array([]), init=False)
 
     def __post_init__(self):
+        """Initialize TrackDecayRate."""
         super().__post_init__()
         if self.result is not None:
-            if hasattr(self.result, "u_z_obs"):
+            if hasattr(self.result, 'u_z_obs'):
                 self._parse_rolland(self.result)
-            elif hasattr(self.result, "deflection"):
+            elif hasattr(self.result, 'deflection'):
                 self._parse_stampka(self.result)
             else:
-                raise TypeError("Unsupported result type for TrackDecayRate.")
+                msg = 'Unsupported result type for TrackDecayRate.'
+                raise TypeError(msg)
 
             self.validate_excitation_position()
             self.find_tdr_points()
@@ -469,9 +494,11 @@ class TrackDecayRate(PostProcessing):
 
     def _parse_rolland(self, result):
         if result.store != 'full':
-            raise ValueError("Rolland simulation must be run with store='full' for TDR.")
+            msg = "Rolland simulation must be run with store='full' for TDR."
+            raise ValueError(msg)
 
         from rolland.excitation import StationaryExcitation
+
         direction = self.direction
         if isinstance(result.excit, StationaryExcitation):
             if getattr(result.excit, 'force_dir', 'vertical') == 'vertical':
@@ -481,12 +508,12 @@ class TrackDecayRate(PostProcessing):
         else:
             direction = direction or 'z'
 
-        self.response_matrix = getattr(result, f"u_{direction}_obs")
+        self.response_matrix = getattr(result, f'u_{direction}_obs')
 
         if hasattr(result.excit, 'force'):
-            self.excitation = result.excit.force.data[::result.skip]
+            self.excitation = result.excit.force.data[:: result.skip]
         else:
-            self.excitation = getattr(result.excit, f'force_{direction}')[::result.skip]
+            self.excitation = getattr(result.excit, f'force_{direction}')[:: result.skip]
         self.dt = result.discr.dt * result.skip
         self.dx = result.discr.dx
         self.ind_excit = round(result.excit.x_excit / self.dx)
@@ -511,7 +538,8 @@ class TrackDecayRate(PostProcessing):
         before = np.where(x_mp <= x_excit)[0]
         after = np.where(x_mp > x_excit)[0]
         if before.size == 0 or after.size == 0:
-            raise ValueError(f"The excitation at x = {x_excit:.4f} m does not lie between two supports.")
+            msg = f'The excitation at x = {x_excit:.4f} m does not lie between two supports.'
+            raise ValueError(msg)
 
         x_left, x_right = x_mp[before[-1]], x_mp[after[0]]
         x_centre = (x_left + x_right) / 2
@@ -519,7 +547,8 @@ class TrackDecayRate(PostProcessing):
 
         deviation = abs(x_excit - x_centre)
         if deviation > tol + 1e-9:
-            raise ValueError(f"Excitation not in sleeper bay centre. Deviation {deviation:.4f} > {tol:.4f}.")
+            msg = f'Excitation not in sleeper bay centre. Deviation {deviation:.4f} > {tol:.4f}.'
+            raise ValueError(msg)
 
     def find_tdr_points(self):
         r"""Determine the TDR measurement positions x_n and their grid indices."""
@@ -529,7 +558,8 @@ class TrackDecayRate(PostProcessing):
 
             before = np.where(ind_mp < self.ind_excit)[0]
             if before.size == 0:
-                raise ValueError("No mounting position found before the excitation index.")
+                msg = 'No mounting position found before the excitation index.'
+                raise ValueError(msg)
             idx_s = int(before[-1])
 
             x_s = x_mp[idx_s:] - x_mp[idx_s]
@@ -537,9 +567,9 @@ class TrackDecayRate(PostProcessing):
 
             n_required = 68
             if x_s.size < n_required:
+                msg = f'Only {x_s.size} mounting positions lie at or behind the excitation, required {n_required}.'
                 raise ValueError(
-                    f"Only {x_s.size} mounting positions lie at or "
-                    f"behind the excitation, required {n_required}."
+                    msg,
                 )
 
             def tdr_points_betw1(idx):
@@ -548,22 +578,84 @@ class TrackDecayRate(PostProcessing):
             def tdr_points_betw2(idx):
                 return ((x_sc[idx] - x_s[idx]) / 2) + x_s[idx]
 
-            self.x_tdr = np.array([
-                x_sc[0], tdr_points_betw1(0), x_s[1], tdr_points_betw2(1), x_sc[1], tdr_points_betw1(1),
-                x_s[2], tdr_points_betw2(2), x_sc[2], tdr_points_betw1(2), x_s[3], x_sc[3], x_s[4], x_sc[4],
-                x_sc[5], x_sc[6], x_sc[7], x_sc[8], x_sc[10], x_sc[12], x_sc[16], x_sc[20], x_sc[24], x_sc[30],
-                x_sc[36], x_sc[42], x_sc[48], x_sc[54], x_sc[66],
-            ]) - x_sc[0]
+            self.x_tdr = (
+                np.array(
+                    [
+                        x_sc[0],
+                        tdr_points_betw1(0),
+                        x_s[1],
+                        tdr_points_betw2(1),
+                        x_sc[1],
+                        tdr_points_betw1(1),
+                        x_s[2],
+                        tdr_points_betw2(2),
+                        x_sc[2],
+                        tdr_points_betw1(2),
+                        x_s[3],
+                        x_sc[3],
+                        x_s[4],
+                        x_sc[4],
+                        x_sc[5],
+                        x_sc[6],
+                        x_sc[7],
+                        x_sc[8],
+                        x_sc[10],
+                        x_sc[12],
+                        x_sc[16],
+                        x_sc[20],
+                        x_sc[24],
+                        x_sc[30],
+                        x_sc[36],
+                        x_sc[42],
+                        x_sc[48],
+                        x_sc[54],
+                        x_sc[66],
+                    ],
+                )
+                - x_sc[0]
+            )
 
             ind_tdr = np.rint(self.x_tdr.round(5) / self.dx) + self.ind_excit
             self.ind_tdr = list(ind_tdr.astype(int))
 
         else:
             l_s = 0.6
-            x_tdr = np.array([
-                0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.5, 4, 4.5, 5.5, 6.5, 7.5, 8.5,
-                10.5, 12.5, 16.5, 20.5, 24.5, 30.5, 36.5, 42.5, 48.5, 54.5, 66.5,
-            ]) * l_s
+            x_tdr = (
+                np.array(
+                    [
+                        0.5,
+                        0.75,
+                        1,
+                        1.25,
+                        1.5,
+                        1.75,
+                        2,
+                        2.25,
+                        2.5,
+                        2.75,
+                        3,
+                        3.5,
+                        4,
+                        4.5,
+                        5.5,
+                        6.5,
+                        7.5,
+                        8.5,
+                        10.5,
+                        12.5,
+                        16.5,
+                        20.5,
+                        24.5,
+                        30.5,
+                        36.5,
+                        42.5,
+                        48.5,
+                        54.5,
+                        66.5,
+                    ],
+                )
+                * l_s
+            )
             self.x_tdr = x_tdr - l_s / 2
             ind_tdr = np.rint(self.x_tdr / self.dx) + self.ind_excit
             self.ind_tdr = list(ind_tdr.astype(int))
@@ -581,13 +673,15 @@ class TrackDecayRate(PostProcessing):
     def validate_tdr_points(self):
         r"""Check that all TDR measurement points lie inside the simulated domain."""
         response = self.response_matrix
-        if getattr(response, "ndim", 2) != 2:
-            raise ValueError("response_matrix must be two-dimensional with shape (n_time, n_positions).")
+        if getattr(response, 'ndim', 2) != 2:
+            msg = 'response_matrix must be two-dimensional with shape (n_time, n_positions).'
+            raise ValueError(msg)
 
         n_positions = response.shape[1]
         ind_min, ind_max = min(self.ind_tdr), max(self.ind_tdr)
         if ind_min < 0 or ind_max >= n_positions:
-            raise ValueError("TDR measurement points lie outside the simulated domain.")
+            msg = 'TDR measurement points lie outside the simulated domain.'
+            raise ValueError(msg)
 
     def _calculate_mobility_spectra(self):
         r"""Calculate the mobility spectrum at every TDR measurement point."""
@@ -605,7 +699,10 @@ class TrackDecayRate(PostProcessing):
         return frequency[mask], np.array(mobility_rows)[:, mask]
 
     def calculate_tdr(self, fraction=3):
-        r"""Calculate the Track-Decay-Rate (TDR) per DIN EN 15461 in fractional octave bands or narrowband."""
+        r"""Calculate the Track-Decay-Rate (TDR) per DIN EN 15461.
+
+        Calculates TDR in fractional octave bands or narrowband.
+        """
         freq, mob = self._calculate_mobility_spectra()
         dx_n = self._interval_weights(self.x_tdr)
 
@@ -666,9 +763,15 @@ class TrackDecayRate(PostProcessing):
             kwargs.setdefault('drawstyle', 'steps-mid')
 
         return self._plot_base(
-            x, y, "TDR [dB/m]", title='Track Decay Rate',
-            ax=ax, label=label, plot_type=plot_type,
-            octave_fraction=self.octave_fraction, **kwargs
+            x,
+            y,
+            'TDR [dB/m]',
+            title='Track Decay Rate',
+            ax=ax,
+            label=label,
+            plot_type=plot_type,
+            octave_fraction=self.octave_fraction,
+            **kwargs,
         )
 
     def dr_min(self):
