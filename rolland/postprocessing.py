@@ -1,12 +1,4 @@
-"""Postprocessing classes.
-
-.. autosummary::
-    :toctree: postprocessing
-
-    PostProcessing
-    TrackResponse
-    TrackDecayRate
-    VehicleResponse
+"""Postprocessing operations.
 """
 
 from dataclasses import dataclass, field
