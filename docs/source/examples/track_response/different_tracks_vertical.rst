@@ -24,50 +24,65 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast, ContPad, Slab
     from rolland.database.rail.db_rail import UIC60
-    from rolland.track import (
+    from rolland import (
         ContSlabSingleRailTrack,
         ContBallastedSingleRailTrack,
         SimplePeriodicSlabSingleRailTrack,
         SimplePeriodicBallastedSingleRailTrack,
     )
-    from rolland.boundary import CFSPML
-    from rolland.excitation import GaussianImpulse
-    from rolland.deflection import Deflection
-    from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import PointResponse
+    from rolland import CFSPML
+    from rolland import GaussianImpulse
+    from rolland import Deflection
+    from rolland import DomSetup
+    from rolland.postprocessing import TrackResponse
 
     # 1. PARAMETERS DEFINITION -----------------------------------------------------
     slep_dist = 0.6
     rail = UIC60
 
     contpad = ContPad(
+        # Stiffness [N/m^2]
         sp_z=120e6 / slep_dist,
         sp_y=40e6 / slep_dist,
         sp_x=40e6 / slep_dist,
+        
+        # Damping loss factors [-]
         etap_z=0.2,
         etap_y=0.2,
         etap_x=0.2,
         etap_r=0.2,
+        
+        # Geometry [m]
         wdthp=0.15,
     )
 
     discrpad = DiscrPad(
+        # Stiffness [N/m]
         sp_z=120e6,
         sp_y=40e6,
         sp_x=40e6,
+        
+        # Damping loss factors [-]
         etap_z=0.2,
         etap_y=0.2,
         etap_x=0.2,
         etap_r=0.2,
+        
+        # Geometry [m]
         wdthp=0.15,
     )
 
     sleeper = Sleeper(
+        # Mass [kg] and Density [kg/m^3]
         ms=300.05,
         rhos=2648,
+        
+        # Inertia [kg*m^2]
         Is_x=0.0593,
         Is_y=0.00089,
         Is_z=0.0596,
+        
+        # Geometry [m]
         lengs=2.5,
         wdths=0.245,
         heights=0.185,
@@ -76,12 +91,19 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     )
 
     slab = Slab(
+        # Mass per unit length [kg/m]
         ms=300.05 / slep_dist,
+        
+        # Inertia per unit length [kg*m^2/m]
         Is_x=0.0593 / slep_dist,
         Is_y=0.00089 / slep_dist,
         Is_z=0.0596 / slep_dist,
-        lengs=2.5,
+        
+        # Density [kg/m^3]
         rhos=2648,
+        
+        # Geometry [m]
+        lengs=2.5,
         equ_wdths=0.245,
         heights=0.185,
         z_st=-0.0925,
@@ -89,9 +111,12 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     )
 
     contballast = Ballast(
+        # Stiffness [N/m^2]
         sb_z=120e6 / slep_dist,
         sb_y=120e6 / slep_dist,
         sb_x=120e6 / slep_dist,
+        
+        # Damping loss factors [-]
         etab_z=1.0,
         etab_y=2.0,
         etab_x=2.0,
@@ -99,9 +124,12 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
     )
 
     discrballast = Ballast(
+        # Stiffness [N/m]
         sb_z=120e6,
         sb_y=120e6,
         sb_x=120e6,
+        
+        # Damping loss factors [-]
         etab_z=1.0,
         etab_y=2.0,
         etab_x=2.0,
@@ -141,40 +169,32 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
         ("2L Discr. Ballast", track_2l_discr),
     ]
 
-    plt.figure(figsize=(12, 10))
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 10))
 
-    # Plot 1: Response at excitation point
-    plt.subplot(2, 1, 1)
     for label, trk in tracks:
+        # 4.1 Set up simulation domain and discretization
         discr = DomSetup(track=trk, bound=bound, req_simt=0.5)
-        defl = Deflection(discr=discr, excit=exc_vert, store="excit")
-        freq, mob_z = PointResponse.calculate_mobility_1d(defl.u_z_obs, exc_vert.force, discr.dt)
-        plt.loglog(freq[:discr.nt // 2], abs(mob_z[:discr.nt // 2]), label=label)
+        
+        # 4.2 Run the deflection simulation for excitation point
+        defl_excit = Deflection(discr=discr, excit=exc_vert, store="excit")
+        
+        # 4.3 Compute frequency response and plot on ax1
+        response_excit = TrackResponse(result=defl_excit)
+        response_excit.show(ax=ax1, label=label)
+        
+        # 4.4 Run the deflection simulation observing at 10m distance
+        defl_obs = Deflection(discr=discr, excit=exc_vert, store="observe", obs_pos=40.3)
+        
+        # 4.5 Compute frequency response and plot on ax2
+        response_obs = TrackResponse(result=defl_obs)
+        response_obs.show(ax=ax2, label=label)
 
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Mobility [m/sN]")
-    plt.title("Vertical Mobility at Excitation Point (x = 30.3 m)")
-    plt.xlim(50, 6000)
-    plt.grid(True, which="both")
-    plt.legend()
-
-    # Plot 2: Response at 10 m distance
-    plt.subplot(2, 1, 2)
-    for label, trk in tracks:
-        discr = DomSetup(track=trk, bound=bound, req_simt=0.5)
-        defl = Deflection(discr=discr, excit=exc_vert, store="observe", obs_pos=40.3)
-        freq, mob_z = PointResponse.calculate_mobility_1d(defl.u_z_obs, exc_vert.force, discr.dt)
-        plt.loglog(freq[:discr.nt // 2], abs(mob_z[:discr.nt // 2]), label=label)
-
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Mobility [m/sN]")
-    plt.title("Vertical Mobility at 10 m Distance (x = 40.3 m)")
-    plt.xlim(50, 6000)
-    plt.grid(True, which="both")
-    plt.legend()
+    ax1.set_title("Vertical Mobility at Excitation Point (x = 30.3 m)")
+    ax2.set_title("Vertical Mobility at 10 m Distance (x = 40.3 m)")
 
     plt.tight_layout()
     plt.show()
+
 
 
 .. image:: ../../images/example_different_tracks.png

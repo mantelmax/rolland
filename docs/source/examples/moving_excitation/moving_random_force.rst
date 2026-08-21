@@ -26,12 +26,12 @@ and evaluate the moving receptance spectrum using the Rolland library.
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast
     from rolland.database.rail.db_rail import UIC60
-    from rolland.track import SimplePeriodicBallastedSingleRailTrack
-    from rolland.boundary import CFSPML
+    from rolland import SimplePeriodicBallastedSingleRailTrack
+    from rolland import CFSPML
     from rolland.excitation import RandomForce
-    from rolland.deflection import Deflection
-    from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import PointResponse
+    from rolland import Deflection
+    from rolland import DomSetup
+    from rolland.postprocessing import TrackResponse
 
     # 1. TRACK DEFINITION ----------------------------------------------------------
     track = SimplePeriodicBallastedSingleRailTrack(
@@ -78,20 +78,19 @@ and evaluate the moving receptance spectrum using the Rolland library.
         store="excit",
     )
 
-    # 4. POSTPROCESSING & VISUALIZATION -------------------------------------------c
+    # 4. POSTPROCESSING & VISUALIZATION -------------------------------------------
+    # 4.1 Remove transient phase from simulation arrays
     # Skip initial 30% of time steps to exclude transient effects
     skip = int(0.3 * discr.nt)
-    freq, mov_recep = PointResponse.calculate_mov_recep(defl.u_z_obs, exc.force_z, discr, skip=skip)
+    defl.u_z_obs = defl.u_z_obs[skip:]
+    exc.force_z = exc.force_z[skip:]
 
-    plt.figure(figsize=(10, 6))
-    plt.loglog(freq[1:discr.nt // 2-1], abs(mov_recep[1:discr.nt // 2-1]), "g", label="Moving Receptance")
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Receptance [m/N]")
+    # 4.2 Process frequency response and display results
+    response = TrackResponse(result=defl)
+    response.show(quantity='receptance', label="Moving Receptance")
     plt.title("Moving Receptance Spectrum")
-    plt.xlim(60, 3000)
-    plt.grid(True, which="both")
-    plt.legend()
     plt.show()
+
 
 
 .. image:: ../../images/example_mov_rnd_source.png
