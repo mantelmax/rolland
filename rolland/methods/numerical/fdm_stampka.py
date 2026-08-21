@@ -31,17 +31,11 @@ from dataclasses import dataclass, field
 
 import matplotlib.pyplot as plt
 from numpy import (  # noqa: A004
-    array,
-    convolve,
     empty,
     exp,
     linspace,
     ndarray,
     ones,
-    pi,
-    rint,
-    squeeze,
-    where,
     zeros,
 )
 from numpy.fft import fft, fftfreq
@@ -541,129 +535,5 @@ class DeflectionStampka:
 
             defl[:, t + 1] = u[0 : 2 * self.discr.nx]
         return defl
-
-#---postprocessing.py---
-class PostProcessing:
-    r"""Abstract base class for postprocessing classes."""
-
-    @staticmethod
-    def fast_fourier_tr(tsignal, dt):
-        """Calculate the Fast Fourier Transform (FFT) of a time signal.
-
-        Parameters
-        ----------
-        tsignal : numpy.ndarray
-            Time signal to transform.
-        dt : float
-            Time step between samples.
-
-        Returns
-        -------
-        tuple
-            Frequencies and FFT of the signal.
-        """
-        samples = len(tsignal)
-        window = ones(samples)
-        fftrans = 2.0 / samples * fft(tsignal[:samples] * window)
-        fftfre = fftfreq(samples, dt)
-        return fftfre[0 : samples // 2], fftrans[0 : samples // 2]
-
-    @staticmethod
-    def plot(
-        arrays, labels, title='Universal Plot', x_label='X-axis', y_label='Y-axis', colors=None, plot_type='loglog',
-    ):
-        """Universal plot function for multiple data sets.
-
-        Parameters
-        ----------
-        arrays : list of tuple
-            List of tuples, where each tuple contains two numpy.ndarray (x and y data).
-        labels : list of str
-            List of labels for each array.
-        title : str, optional
-            Title of the plot. Default is 'Universal Plot'.
-        x_label : str, optional
-            Label for the x-axis. Default is 'X-axis'.
-        y_label : str, optional
-            Label for the y-axis. Default is 'Y-axis'.
-        colors : list of str, optional
-            List of colors for each array. Default is None.
-        plot_type : str, optional
-            Type of plot (e.g., 'loglog', 'plot'). Default is 'loglog'.
-        """
-        plt.figure(figsize=(10, 6))
-        if colors is None:
-            colors = ['k', 'r', 'b', 'g', 'c', 'm', 'y']
-
-        for (x, y), label, color in zip(arrays, labels, colors, strict=False):
-            if plot_type == 'loglog':
-                plt.loglog(x, y, label=label, color=color)
-            else:
-                plt.plot(x, y, label=label, color=color)
-
-        plt.xlabel(x_label)
-        plt.ylabel(y_label)
-        plt.title(title)
-        plt.legend()
-        plt.grid(True)
-        plt.show()
-
-
-class AnalyticPP(PostProcessing):
-    r"""Analytic postprocessing class.
-
-    This class is used to perform postprocessing on analytical methods.
-
-    Attributes
-    ----------
-    results : Any
-        Instance containing analytical results (must have .f, .mobility, .force, .omega).
-    """
-
-    def __init__(self, results):
-        """Initialize AnalyticPP.
-
-        Parameters
-        ----------
-        results : Any
-            Instance containing analytical results.
-        """
-        self.results = results
-
-    @property
-    def f(self):
-        """Frequency vector."""
-        return self.results.f
-
-    @property
-    def vb(self):
-        """Velocity vector."""
-        return self.results.mobility * self.results.force
-
-    @property
-    def ub(self):
-        """Displacement vector."""
-        return self.vb / (self.results.omega * 1j)
-
-
-@dataclass(kw_only=True)
-class RollandPP(PostProcessing):
-    r"""Rolland postprocessing base class.
-
-    This class is used to perform postprocessing on Rolland methods.
-
-    Attributes
-    ----------
-    results : DeflectionStampka
-        Instance of the Deflection class containing the results.
-    f_min : float
-        Minimum frequency for response calculation :math:`[Hz]`.
-    f_max : float
-        Maximum frequency for response calculation :math:`[Hz]`.
-    """
-
-    results: DeflectionStampka
-    f_min: float = 100.0
-    f_max: float = 3000.0
 
 
