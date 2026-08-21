@@ -20,8 +20,3 @@ Finite Difference Time-Domain (Stampka)
    GaussianImpulseStampka
    DiscretizationStampka
    DeflectionStampka
-   PostProcessing
-   AnalyticPP
-   RollandPP
-   Response
-   TDR

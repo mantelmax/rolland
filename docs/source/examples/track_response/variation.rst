@@ -19,40 +19,54 @@ and lateral frequency responses of a track model with structural irregularity.
     Track Vibration Analysis with Custom Support Arrangement using Rolland API
 
     This example demonstrates how to set up and analyze a ballasted track with
-    periodic support arrangements (alternating sleeper distances and pad stiffnesses).
+    periodic support arrangements (alternating sleeper distances and pad stiffness).
     """
 
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast
     from rolland.database.rail.db_rail import UIC60
-    from rolland.track import ArrangedBallastedSingleRailTrack
-    from rolland.arrangement import PeriodicArrangement
-    from rolland.boundary import CFSPML
-    from rolland.excitation import GaussianImpulse
-    from rolland.deflection import Deflection
-    from rolland.domainsetup import DomSetup
-    from rolland.postprocessing import PointResponse
+    from rolland import ArrangedBallastedSingleRailTrack
+    from rolland import PeriodicArrangement
+    from rolland import CFSPML
+    from rolland import GaussianImpulse
+    from rolland import Deflection
+    from rolland import DomSetup
+    from rolland.postprocessing import TrackResponse
 
     # 1. TRACK & ARRANGEMENT DEFINITION -------------------------------------------
     rail = UIC60
 
     pad_A = DiscrPad(
+        # Stiffness [N/m]
         sp_z=120e6, sp_y=40e6, sp_x=40e6,
-        etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2, wdthp=0.15
+        # Damping loss factors [-]
+        etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+        # Geometry [m]
+        wdthp=0.15
     )
 
     pad_B = DiscrPad(
+        # Stiffness [N/m]
         sp_z=60e6, sp_y=20e6, sp_x=20e6,
-        etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2, wdthp=0.15
+        # Damping loss factors [-]
+        etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+        # Geometry [m]
+        wdthp=0.15
     )
 
     sleeper = Sleeper(
-        ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
+        # Mass [kg] and Density [kg/m^3]
+        ms=300.05, rhos=2648,
+        # Inertia [kg*m^2]
+        Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
+        # Geometry [m]
         lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925
     )
 
     ballast = Ballast(
+        # Stiffness [N/m]
         sb_z=120e6, sb_y=120e6, sb_x=120e6,
+        # Damping loss factors [-]
         etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0
     )
 
@@ -79,69 +93,45 @@ and lateral frequency responses of a track model with structural irregularity.
         req_simt=0.5,
     )
 
-    # Vertical deflection simulations
+    # 3.1 Run vertical deflection simulations
     defl_vert_excit = Deflection(discr=discr, excit=exc_vert, store="excit")
     defl_vert_dist = Deflection(discr=discr, excit=exc_vert, store="observe", obs_pos=40.3)
 
-    # Lateral deflection simulations
+    # 3.2 Run lateral deflection simulations
     defl_lat_excit = Deflection(discr=discr, excit=exc_lat, store="excit")
     defl_lat_dist = Deflection(discr=discr, excit=exc_lat, store="observe", obs_pos=40.3)
 
     # 4. POSTPROCESSING & VISUALIZATION -------------------------------------------
-    freq, mob_z_excit = PointResponse.calculate_mobility_1d(defl_vert_excit.u_z_obs, exc_vert.force, discr.dt)
-    _, mob_z_dist = PointResponse.calculate_mobility_1d(defl_vert_dist.u_z_obs, exc_vert.force, discr.dt)
-
-    _, mob_y_excit = PointResponse.calc_coupled_mobility(
-        defl_lat_excit.u_y_obs, defl_lat_excit.phi_x_obs, exc_lat.z_e, exc_lat.force, discr
-    )
-    _, mob_y_dist = PointResponse.calc_coupled_mobility(
-        defl_lat_dist.u_y_obs, defl_lat_dist.phi_x_obs, exc_lat.z_e, exc_lat.force, discr
-    )
-
     plt.figure(figsize=(12, 10))
 
-    # Subplot 1: Vertical Mobility at Excitation Point
-    plt.subplot(2, 2, 1)
-    plt.loglog(freq[:discr.nt // 2], abs(mob_z_excit[:discr.nt // 2]), label="Vertical (x = 30.3 m)")
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Mobility [m/sN]")
-    plt.title("Vertical Mobility (Excitation Point)")
-    plt.xlim(50, 6000)
-    plt.grid(True, which="both")
-    plt.legend()
+    # 4.1 Process & Plot Vertical Mobility at Excitation Point
+    ax1 = plt.subplot(2, 2, 1)
+    response_vert_excit = TrackResponse(result=defl_vert_excit)
+    response_vert_excit.show(ax=ax1, label="Vertical (x = 30.3 m)")
+    ax1.set_title("Vertical Mobility (Excitation Point)")
 
-    # Subplot 2: Vertical Mobility at 10 m Distance
-    plt.subplot(2, 2, 2)
-    plt.loglog(freq[:discr.nt // 2], abs(mob_z_dist[:discr.nt // 2]), "r", label="Vertical (x = 40.3 m)")
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Mobility [m/sN]")
-    plt.title("Vertical Mobility (10 m Distance)")
-    plt.xlim(50, 6000)
-    plt.grid(True, which="both")
-    plt.legend()
+    # 4.2 Process & Plot Vertical Mobility at 10 m Distance
+    ax2 = plt.subplot(2, 2, 2)
+    response_vert_dist = TrackResponse(result=defl_vert_dist)
+    response_vert_dist.show(ax=ax2, label="Vertical (x = 40.3 m)")
+    ax2.set_title("Vertical Mobility (10 m Distance)")
 
-    # Subplot 3: Lateral Mobility at Excitation Point
-    plt.subplot(2, 2, 3)
-    plt.loglog(freq[:discr.nt // 2], abs(mob_y_excit[:discr.nt // 2]), "g", label="Lateral (x = 30.3 m)")
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Mobility [m/sN]")
-    plt.title("Lateral Mobility at Rail Head (Excitation Point)")
-    plt.xlim(50, 6000)
-    plt.grid(True, which="both")
-    plt.legend()
+    # 4.3 Process & Plot Lateral Mobility at Excitation Point
+    ax3 = plt.subplot(2, 2, 3)
+    response_lat_excit = TrackResponse(result=defl_lat_excit)
+    response_lat_excit.show(ax=ax3, label="Lateral (x = 30.3 m)")
+    ax3.set_title("Lateral Mobility at Rail Head (Excitation Point)")
 
-    # Subplot 4: Lateral Mobility at 10 m Distance
-    plt.subplot(2, 2, 4)
-    plt.loglog(freq[:discr.nt // 2], abs(mob_y_dist[:discr.nt // 2]), "m", label="Lateral (x = 40.3 m)")
-    plt.xlabel("Frequency [Hz]")
-    plt.ylabel("Mobility [m/sN]")
-    plt.title("Lateral Mobility at Rail Head (10 m Distance)")
-    plt.xlim(50, 6000)
-    plt.grid(True, which="both")
-    plt.legend()
+    # 4.4 Process & Plot Lateral Mobility at 10 m Distance
+    ax4 = plt.subplot(2, 2, 4)
+    response_lat_dist = TrackResponse(result=defl_lat_dist)
+    response_lat_dist.show(ax=ax4, label="Lateral (x = 40.3 m)")
+    ax4.set_title("Lateral Mobility at Rail Head (10 m Distance)")
 
     plt.tight_layout()
     plt.show()
+
+
 
 .. image:: ../../images/example_variation.png
    :width: 700px
