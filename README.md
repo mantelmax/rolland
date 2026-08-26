@@ -14,6 +14,11 @@ Rolling Noise and Dynamics (**Rolland**) is an open-source, high-performance tim
 
 By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solves 13 differential equations of motion alongside 14 additional auxiliary differential equations corresponding to the boundary domain. This captures full track dynamics—including coupled vertical and lateral bending, longitudinal waves, axial torsion, cross-sectional warping, and sleeper movement under eccentric excitation and support conditions. The framework incorporates Complex Frequency-Shifted Perfectly Matched Layers (CFS-PML) for infinite track modeling and supports spatially varying track properties as well as moving excitation sources.
 
+<picture>
+  <source srcset="docs/source/images/mwi_animated_github_dark.gif" media="(prefers-color-scheme: dark)">
+  <img src="docs/source/images/mwi_animated_github_white.gif">
+</picture>
+
 # Key Features
 
 - **Full Track Dynamics:** Solves 13 differential equations of motion alongside 14 additional auxiliary differential equations to capture vertical and lateral bending waves, longitudinal waves, torsional waves, and warping effects together with sleeper movement and eccentric support reactions.
@@ -30,8 +35,8 @@ By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solv
 - Rail acoustic radiation modeling.
 
 <picture>
-  <source srcset="docs/source/images/mwi_animated_github_dark.gif" media="(prefers-color-scheme: dark)">
-  <img src="docs/source/images/mwi_animated_github_white.gif">
+  <source srcset="docs/source/images/displ_sum_animated_github_dark.gif" media="(prefers-color-scheme: dark)">
+  <img src="docs/source/images/displ_sum_animated_github_white.gif">
 </picture>
 
 # Installation

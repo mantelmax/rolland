@@ -42,6 +42,9 @@ Planned Features
 * Multi-wheel vehicle pass-by excitation models.
 * Rail acoustic radiation modeling.
 
+.. image:: images/displ_sum_animated_sphinx.gif
+   :width: 1000px
+   :class: dark-mode-image
 
 Citation
 --------
