@@ -50,15 +50,18 @@ Citation
 --------
 If you use **Rolland** for academic work, please consider citing both our publication:
 
-   Mantel, M., & Sarradj, E. (in press). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures.
+   Mantel, M., & Sarradj, E. (2026). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures, 332, 108432. https://doi.org/10.1016/j.compstruc.2026.108432
 
 .. code-block:: bibtex
 
     @article{mantel2026timedomain,
-      author   = {Mantel, Maximilian and Sarradj, Ennes},
-      title    = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
-      journal  = {Computers \& Structures},
-      pubstate = {inpress}
+      author  = {Mantel, Maximilian and Sarradj, Ennes},
+      title   = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
+      journal = {Computers \& Structures},
+      volume  = {332},
+      pages   = {108432},
+      year    = {2026},
+      doi     = {https://doi.org/10.1016/j.compstruc.2026.108432},
     }
 
 
