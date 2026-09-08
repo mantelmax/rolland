@@ -1,0 +1,47 @@
+# UIC60 rail profile.
+#
+# File format
+# -----------
+# Every table except [meta] contributes its keys directly as arguments to
+# ``rolland.components.Rail``; the grouping into [material], [geometry] and
+# [cross_section] is documentation only and carries no meaning for the loader.
+# The special key ``outline`` names a CSV file (columns ``Y,Z``, in metres)
+# located next to this file, which is loaded into ``Rail.rl_geo``.
+
+[meta]
+name = "UIC60"                 # must match the file name
+standard = "EN 13674-1 (60E1)"
+description = "Standard 60 kg/m mainline rail, used as the default profile in rolland."
+# source = ""                  # TODO: add the reference the values below were taken from
+
+[material]
+E = 210e9                      # Young's modulus [Pa]
+G = 80.769e9                   # shear modulus [Pa]
+nu = 0.3                       # Poisson's ratio [-]
+rho = 7860.0                   # density [kg/m^3]
+etar = 0.02                    # loss factor [-]
+dr = 1000.0                    # viscous damping coefficient [Ns/m]
+
+[geometry]
+outline = "UIC60.csv"          # rail outline coordinates [m]
+mr = 60.2                      # mass per unit length [kg/m]
+Ar = 76.70e-4                  # cross-section area [m^2]
+Asr = 0.688                    # surface area per unit length [m^2/m]
+Vr = 7670.00e-6                # volume per unit length [m^3/m]
+shearc = [0.0, 33e-3]          # shear centre [m]
+centr = [0.0, 0.0]             # centroid [m]
+
+[cross_section]
+Iyr = 3.037e-05                # second moment of area about y (vertical bending) [m^4]
+Izr = 5.127e-06                # second moment of area about z (lateral bending) [m^4]
+Iyz = 0.0                      # product moment of area [m^4]
+Ipr = 3.55e-05                 # polar moment of area [m^4]
+J = 2.212e-6                   # torsional constant [m^4]
+kapz = 0.393                   # Timoshenko shear correction factor, vertical [-]
+kapy = 0.538                   # Timoshenko shear correction factor, lateral [-]
+kapp_s = 1.0                   # correction factor for effective shear from restrained warping [-]
+Iw = 2.161e-8                  # warping constant [m^6]
+Iwz = 1.6971e-7                # warping product moment of area [m^5]
+Iwy = 0.0                      # warping product moment of area [m^5]
+k_w = -0.6016                  # warping factor for the rail foot [-]
+chi = 0.0                      # warping function; placeholder, see TODO in rolland.components.Rail
