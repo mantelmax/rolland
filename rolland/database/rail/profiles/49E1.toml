@@ -1,4 +1,4 @@
-# UIC60 rail profile.
+# 49E1 rail profile.
 #
 # File format
 # -----------
@@ -9,39 +9,39 @@
 # located next to this file, which is loaded into ``Rail.rl_geo``.
 
 [meta]
-name = "49E1"                 # must match the file name
-standard = "EN 13674-1 (49E1)"
-description = "Standard 49E1 Profile"
-# source = ""                  # TODO: add the reference the values below were taken from
+name = "49E1"                  # must match the file name
+standard = "EN 13674-1 (49E1, S49)"
+description = "49 kg/m rail for regional and secondary lines."
+# source = ""                  # TODO: add the reference
 
 [material]
 E = 210e9                      # Young's modulus [Pa]
 G = 80.769e9                   # shear modulus [Pa]
 nu = 0.3                       # Poisson's ratio [-]
-rho = 7860.0                   # density [kg/m^3]
-etar = 0.02                    # loss factor [-] #TODO
-dr = 1000.0                    # viscous damping coefficient [Ns/m]
+rho = 7860.0                   # density [kg/m^3]; the EN mass table implies 7850
+etar = 0.02                    # loss factor [-]  # TODO: not from the calculation, copied from UIC60
+dr = 1000.0                    # viscous damping coefficient [Ns/m]  # TODO: as above
 
 [geometry]
 outline = "49E1.csv"           # rail outline coordinates [m]
-mr = 60.2                      # mass per unit length [kg/m] #TODO
-Ar = 62.92e-4                  # cross-section area [m^2]
-Asr = 0.688                    # surface area per unit length [m^2/m] #TODO
-Vr = 7670.00e-6                # volume per unit length [m^3/m] #TODO
-shearc = [0.0, 33e-3]          # shear centre [m] #TODO
+mr = 49.66977                  # mass per unit length [kg/m]; EN nominal 49.39 (+0.566 %)
+Ar = 6.31931e-03               # cross-section area [m^2]; EN nominal 62.92e-4 (+0.434 %)
+Asr = 5.90338e-01              # surface area per unit length [m^2/m]
+Vr = 6.31931e-03               # volume per unit length [m^3/m]
+shearc = [0.0, 22.4e-03]       # shear centre [m]
 centr = [0.0, 0.0]             # centroid [m]
 
 [cross_section]
 Iyr = 1.83086e-05              # second moment of area about y (vertical bending) [m^4]
 Izr = 3.21079e-06              # second moment of area about z (lateral bending) [m^4]
-Iyz = 4.89773e-11              # product moment of area [m^4]
+Iyz = 0.0                      # product moment of area [m^4]
 Ipr = 2.15194e-05              # polar moment of area [m^4]
-J = 1.77870e-06                # torsional constant [m^4]
-kapz = 0.35509                 # Timoshenko shear correction factor, vertical [-]
-kapy = 0.60808                 # Timoshenko shear correction factor, lateral [-]
-kapp_s = 1.0                   # correction factor for effective shear from restrained warping [-]
-Iw = 1.04849e-08               # warping constant [m^6]
-Iwz = -7.74601e-08             # warping product moment of area [m^5]
-Iwy = -4.22482e-12             # warping product moment of area [m^5]
-k_w = 3.68936e-02              # warping factor for the rail foot [-]
-chi = 0.0                      # warping function; placeholder, see TODO in rolland.components.Rail #TODO
+J = 1.77871e-06                # torsional constant [m^4]
+kapz = 0.35508                 # Timoshenko shear correction factor, vertical [-]
+kapy = 0.59374                 # Timoshenko shear correction factor, lateral [-]
+kapp_s = 1.0                   # correction factor for effective shear from restrained warping [-]  # TODO: not from the calculation
+Iw = 1.03581e-08               # warping constant [m^6]
+Iwz = 7.17913e-08              # warping product moment of area [m^5]
+Iwy = 0.0                      # warping product moment of area [m^5]
+k_w = 5.39888e-02              # warping factor for the rail foot [-]  # TODO: differs from UIC60.toml (-0.6016) by a factor of ~10
+chi = 0.0                      # warping function  # TODO: placeholder, see TODO in rolland.components.Rail

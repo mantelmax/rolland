@@ -1,0 +1,47 @@
+# 54E4 rail profile.
+#
+# File format
+# -----------
+# Every table except [meta] contributes its keys directly as arguments to
+# ``rolland.components.Rail``; the grouping into [material], [geometry] and
+# [cross_section] is documentation only and carries no meaning for the loader.
+# The special key ``outline`` names a CSV file (columns ``Y,Z``, in metres)
+# located next to this file, which is loaded into ``Rail.rl_geo``.
+
+[meta]
+name = "54E4"                  # must match the file name
+standard = "EN 13674-1 (54E4)"
+description = "54 kg/m rail, variant of the 54 kg/m family."
+# source = ""                  # TODO: add the reference for the material and damping values
+
+[material]
+E = 210e9                      # Young's modulus [Pa]
+G = 80.769e9                   # shear modulus [Pa]
+nu = 0.3                       # Poisson's ratio [-]
+rho = 7860.0                   # density [kg/m^3]; the EN mass table implies 7850
+etar = 0.02                    # loss factor [-]  # TODO: not from the calculation, copied from UIC60
+dr = 1000.0                    # viscous damping coefficient [Ns/m]  # TODO: as above
+
+[geometry]
+outline = "54E4.csv"           # rail outline coordinates [m]
+mr = 54.37510                  # mass per unit length [kg/m]; EN nominal 54.31 (+0.120 %)
+Ar = 6.91795e-03               # cross-section area [m^2]; EN nominal 69.19e-4 (-0.015 %)
+Asr = 5.87146e-01              # surface area per unit length [m^2/m]
+Vr = 6.91795e-03               # volume per unit length [m^3/m]
+shearc = [0.0, 22.7e-03]       # shear centre [m]
+centr = [0.0, 0.0]             # centroid [m]
+
+[cross_section]
+Iyr = 2.05577e-05              # second moment of area about y (vertical bending) [m^4]
+Izr = 3.52523e-06              # second moment of area about z (lateral bending) [m^4]
+Iyz = 0.0                      # product moment of area [m^4]
+Ipr = 2.40829e-05              # polar moment of area [m^4]
+J = 2.21973e-06                # torsional constant [m^4]
+kapz = 0.38919                 # Timoshenko shear correction factor, vertical [-]
+kapy = 0.58435                 # Timoshenko shear correction factor, lateral [-]
+kapp_s = 1.0                   # correction factor for effective shear from restrained warping [-]  # TODO: not from the calculation
+Iw = 1.14627e-08               # warping constant [m^6]
+Iwz = 8.01442e-08              # warping product moment of area [m^5]
+Iwy = 0.0                      # warping product moment of area [m^5]
+k_w = 5.29010e-02              # warping factor for the rail foot [-]  # TODO: differs from UIC60.toml (-0.6016) by a factor of ~10
+chi = 0.0                      # warping function  # TODO: placeholder, see TODO in rolland.components.Rail
