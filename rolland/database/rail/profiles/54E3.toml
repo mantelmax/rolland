@@ -42,6 +42,6 @@ kapy = 0.58606                 # Timoshenko shear correction factor, lateral [-]
 kapp_s = 1.0                   # correction factor for effective shear from restrained warping [-]  # TODO: not from the calculation
 Iw = 1.15977e-08               # warping constant [m^6]
 Iwz = 8.00539e-08              # warping product moment of area [m^5]
-Iwy =                          # warping product moment of area [m^5]
+Iwy = 0.0                      # warping product moment of area [m^5]
 k_w = 5.32701e-02              # warping factor for the rail foot [-]  # TODO: differs from UIC60.toml (-0.6016) by a factor of ~10
 chi = 0.0                      # warping function  # TODO: placeholder, see TODO in rolland.components.Rail
