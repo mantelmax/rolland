@@ -19,6 +19,7 @@ from .track import (
 DB_CONVERSION_FACTOR = 4.343
 DEFAULT_PLOT_FREQ_RANGE = (100, 5000)
 EPSILON_FRF = 1e-12
+TOL_POSITION = 1e-6
 
 
 class SimulationResult(Protocol):
@@ -378,7 +379,7 @@ class TrackResponse(PostProcessing):
 
 @dataclass(kw_only=True)
 class TrackDecayRate(PostProcessing):
-    r"""Unified Track-Decay-Rate class supporting Rolland and Numerical Stampka simulations.
+    r"""Unified Track-Decay-Rate class supporting Rolland, Stampka and analytical simulations.
 
     The evaluation method is based on :cite:p:`EN15461:2008`.
 
@@ -409,7 +410,13 @@ class TrackDecayRate(PostProcessing):
     Attributes
     ----------
     result : SimulationResult, optional
-        The simulation result object (Rolland or Stampka) containing deflection and excitation.
+        The simulation result object (Rolland, Stampka or analytical method). Analytical results
+        must be computed at the measurement positions ``x_excit + x_n``, passed as ``x_resp``
+        (Kostovasilis) or ``x`` (EBB, TSB). For continuous tracks,
+        x_n = 0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.5, 1.8, 2.1, 2.4, 3.0, 3.6,
+        4.2, 4.8, 6.0, 7.2, 9.6, 12.0, 14.4, 18.0, 21.6, 25.2, 28.8, 32.4, 39.6 :math:`[m]`.
+        For discrete tracks, x_n depends on the sleeper positions; missing positions are listed
+        in the error message.
     position_index : int, optional
         The spatial index at which to evaluate the response.
     direction : str, optional
@@ -451,6 +458,9 @@ class TrackDecayRate(PostProcessing):
     >>> tdr_calc = TrackDecayRate(result=deflection_results)
     >>> # Narrowband (raw frequencies):
     >>> tdr_narrow = TrackDecayRate(result=deflection_results, octave_fraction=None)
+    >>> # Analytical method (here Kostovasilis), evaluated at the measurement positions:
+    >>> kosto = TBCont1LKosto(track=track, f=f, x_excit=10.0, x_resp=10.0 + x_n)
+    >>> tdr_kosto = TrackDecayRate(result=kosto)
     """
 
     position_index: int | None = None
@@ -474,6 +484,8 @@ class TrackDecayRate(PostProcessing):
                 self._parse_rolland(self.result)
             elif hasattr(self.result, 'deflection'):
                 self._parse_stampka(self.result)
+            elif hasattr(self.result, 'mobility'):
+                self._parse_analytical(self.result)
             else:
                 msg = 'Unsupported result type for TrackDecayRate.'
                 raise TypeError(msg)
@@ -508,6 +520,7 @@ class TrackDecayRate(PostProcessing):
         self.dt = result.discr.dt * result.skip
         self.dx = result.discr.dx
         self.ind_excit = round(result.excit.x_excit / self.dx)
+        self.x_excit = self.ind_excit * self.dx
         self.track = result.track
 
     def _parse_stampka(self, result):
@@ -516,7 +529,33 @@ class TrackDecayRate(PostProcessing):
         self.dt = result.discr.dt
         self.dx = result.discr.dx
         self.ind_excit = result.ind_excit
+        self.x_excit = self.ind_excit * self.dx
         self.track = result.track
+
+    def _parse_analytical(self, result):
+        # response_matrix: shape (n_freq, n_resp), analogous to (n_time, n_positions) for Rolland
+        n_freq = np.size(result.f)
+        mobility = np.asarray(result.mobility)
+        if hasattr(result, 'x_resp'):
+            # Kostovasilis: mobility with shape (n_freq, n_resp)
+            self.x_resp = np.atleast_1d(result.x_resp)
+            self.response_matrix = mobility.reshape(n_freq, self.x_resp.size)
+        elif hasattr(result, 'x'):
+            # EBB / TSB: mobility with shape (n_resp, n_freq)
+            self.x_resp = np.atleast_1d(result.x)
+            self.response_matrix = mobility.reshape(self.x_resp.size, n_freq).T
+        else:
+            msg = 'Analytical result must provide its response positions (x_resp or x).'
+            raise TypeError(msg)
+
+        self.freq_response = np.asarray(result.f)
+        self.x_excit = result.x_excit
+        self.track = result.track
+
+        # No time or space discretization: the mobility is already given in the frequency domain
+        self.excitation = None
+        self.dt = None
+        self.dx = None
 
     def validate_excitation_position(self):
         r"""Check that the TDR starts in the centre of a sleeper bay."""
@@ -524,7 +563,7 @@ class TrackDecayRate(PostProcessing):
             return
 
         x_mp = np.array(list(self.track.mount_prop.keys()))
-        x_excit = self.ind_excit * self.dx
+        x_excit = self.x_excit
 
         before = np.where(x_mp <= x_excit)[0]
         after = np.where(x_mp > x_excit)[0]
@@ -534,7 +573,10 @@ class TrackDecayRate(PostProcessing):
 
         x_left, x_right = x_mp[before[-1]], x_mp[after[0]]
         x_centre = (x_left + x_right) / 2
-        tol = self.dx / 2 if self.tol_excit is None else self.tol_excit
+        tol = self.tol_excit
+        if tol is None:
+            # On a grid, the excitation can only lie on grid points; analytically it is exact
+            tol = self.dx / 2 if self.dx is not None else 0.0
 
         deviation = abs(x_excit - x_centre)
         if deviation > tol + 1e-9:
@@ -545,9 +587,8 @@ class TrackDecayRate(PostProcessing):
         r"""Determine the TDR measurement positions x_n and their grid indices."""
         if isinstance(self.track, (DiscrSlabSingleRailTrack, DiscrBallastedSingleRailTrack)):
             x_mp = np.array(list(self.track.mount_prop.keys()))
-            ind_mp = (x_mp / self.dx).astype(int)
 
-            before = np.where(ind_mp < self.ind_excit)[0]
+            before = np.where(x_mp < self.x_excit)[0]
             if before.size == 0:
                 msg = 'No mounting position found before the excitation index.'
                 raise ValueError(msg)
@@ -606,8 +647,11 @@ class TrackDecayRate(PostProcessing):
                 - x_sc[0]
             )
 
-            ind_tdr = np.rint(self.x_tdr.round(5) / self.dx) + self.ind_excit
-            self.ind_tdr = list(ind_tdr.astype(int))
+            if self.dx is None:
+                self.ind_tdr = self._match_response_positions(self.x_excit + self.x_tdr)
+            else:
+                ind_tdr = np.rint(self.x_tdr.round(5) / self.dx) + self.ind_excit
+                self.ind_tdr = list(ind_tdr.astype(int))
 
         else:
             l_s = 0.6
@@ -648,8 +692,22 @@ class TrackDecayRate(PostProcessing):
                 * l_s
             )
             self.x_tdr = x_tdr - l_s / 2
-            ind_tdr = np.rint(self.x_tdr / self.dx) + self.ind_excit
-            self.ind_tdr = list(ind_tdr.astype(int))
+            if self.dx is None:
+                self.ind_tdr = self._match_response_positions(self.x_excit + self.x_tdr)
+            else:
+                ind_tdr = np.rint(self.x_tdr / self.dx) + self.ind_excit
+                self.ind_tdr = list(ind_tdr.astype(int))
+
+    def _match_response_positions(self, x_required):
+        r"""Find the indices of the TDR positions within the analytical response positions."""
+        is_match = np.isclose(x_required[:, None], self.x_resp[None, :], rtol=0.0, atol=TOL_POSITION)
+        if not is_match.any(axis=1).all():
+            msg = (
+                'The analytical result does not contain all TDR measurement positions. '
+                f'Please compute it with the response positions (x_resp or x) = {np.round(x_required, 5).tolist()}.'
+            )
+            raise ValueError(msg)
+        return list(is_match.argmax(axis=1))
 
     @staticmethod
     def _interval_weights(x):
@@ -676,12 +734,17 @@ class TrackDecayRate(PostProcessing):
 
     def _calculate_mobility_spectra(self):
         r"""Calculate the mobility spectrum at every TDR measurement point."""
-        mobility_rows = []
-        frequency = None
-        for ind in self.ind_tdr:
-            defl = self.response_matrix[:, ind]
-            frequency, _, mobility, _ = compute_frf(defl, self.excitation, self.dt)
-            mobility_rows.append(mobility)
+        if self.dt is None:
+            # Analytical result: mobility is already given in the frequency domain
+            frequency = self.freq_response
+            mobility_rows = self.response_matrix[:, self.ind_tdr].T
+        else:
+            mobility_rows = []
+            frequency = None
+            for ind in self.ind_tdr:
+                defl = self.response_matrix[:, ind]
+                frequency, _, mobility, _ = compute_frf(defl, self.excitation, self.dt)
+                mobility_rows.append(mobility)
 
         mask = frequency > self.f_min
         if self.f_max is not None:
