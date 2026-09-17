@@ -24,7 +24,7 @@ and lateral frequency responses of a track model with structural irregularity.
 
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast
-    from rolland.database.rail.db_rail import UIC60
+    from rolland.database.rail.db_rail import rail_60E1
     from rolland import ArrangedBallastedSingleRailTrack
     from rolland import PeriodicArrangement
     from rolland import CFSPML
@@ -34,7 +34,7 @@ and lateral frequency responses of a track model with structural irregularity.
     from rolland.postprocessing import TrackResponse
 
     # 1. TRACK & ARRANGEMENT DEFINITION -------------------------------------------
-    rail = UIC60
+    rail = rail_60E1
 
     pad_A = DiscrPad(
         # Stiffness [N/m]

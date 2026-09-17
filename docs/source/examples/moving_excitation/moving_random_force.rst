@@ -25,7 +25,7 @@ and evaluate the moving receptance spectrum using the Rolland library.
 
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast
-    from rolland.database.rail.db_rail import UIC60
+    from rolland.database.rail.db_rail import rail_60E1
     from rolland import SimplePeriodicBallastedSingleRailTrack
     from rolland import CFSPML
     from rolland.excitation import RandomForce
@@ -35,7 +35,7 @@ and evaluate the moving receptance spectrum using the Rolland library.
 
     # 1. TRACK DEFINITION ----------------------------------------------------------
     track = SimplePeriodicBallastedSingleRailTrack(
-        rail=UIC60,
+        rail=rail_60E1,
         pad=DiscrPad(
             sp_z=120e6, sp_y=40e6, sp_x=40e6,
             etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2, wdthp=0.15

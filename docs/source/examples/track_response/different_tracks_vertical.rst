@@ -23,7 +23,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
 
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast, ContPad, Slab
-    from rolland.database.rail.db_rail import UIC60
+    from rolland.database.rail.db_rail import rail_60E1
     from rolland import (
         ContSlabSingleRailTrack,
         ContBallastedSingleRailTrack,
@@ -38,7 +38,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
 
     # 1. PARAMETERS DEFINITION -----------------------------------------------------
     slep_dist = 0.6
-    rail = UIC60
+    rail = rail_60E1
 
     contpad = ContPad(
         # Stiffness [N/m^2]

@@ -23,7 +23,7 @@ The track is excited between two sleepers by a Gaussian impulse.
 
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast
-    from rolland.database.rail.db_rail import UIC60
+    from rolland.database.rail.db_rail import rail_60E1
     from rolland.track import SimplePeriodicBallastedSingleRailTrack
     from rolland.boundary import CFSPML
     from rolland.excitation import GaussianImpulse
@@ -81,7 +81,7 @@ The track is excited between two sleepers by a Gaussian impulse.
 
     # 2. TRACK DEFINITIONS ---------------------------------------------------------
     track = SimplePeriodicBallastedSingleRailTrack(
-        rail=UIC60,
+        rail=rail_60E1,
         pad=pad,
         sleeper=sleeper,
         ballast=ballast,
