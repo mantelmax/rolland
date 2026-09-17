@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 project = 'Rolland'
 copyright = '2026, Maximilian Mantel, Ennes Sarradj'
 author = 'Maximilian Mantel, Ennes Sarradj'
-release = '0.1'
+release = '26.08'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

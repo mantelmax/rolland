@@ -50,21 +50,24 @@ Citation
 --------
 If you use **Rolland** for academic work, please consider citing both our publication:
 
-   Mantel, M., & Sarradj, E. (in press). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures.
+   Mantel, M., & Sarradj, E. (2026). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures, 332, 108432. https://doi.org/10.1016/j.compstruc.2026.108432
 
 .. code-block:: bibtex
 
     @article{mantel2026timedomain,
-      author   = {Mantel, Maximilian and Sarradj, Ennes},
-      title    = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
-      journal  = {Computers \& Structures},
-      pubstate = {inpress}
+      author  = {Mantel, Maximilian and Sarradj, Ennes},
+      title   = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
+      journal = {Computers \& Structures},
+      volume  = {332},
+      pages   = {108432},
+      year    = {2026},
+      doi     = {https://doi.org/10.1016/j.compstruc.2026.108432},
     }
 
 
 and our software:
 
-   Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A time-domain simulation framework for railway track dynamics and rolling noise (Version 26.08a1) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21920225
+   Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A time-domain simulation framework for railway track dynamics and rolling noise (Version 26.08) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21920225
 
 .. code-block:: bibtex
 
@@ -72,7 +75,7 @@ and our software:
       author  = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
       title   = {Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise},
       year    = {2026},
-      version = {v26.08a1},
+      version = {v26.08},
       doi     = {10.5281/zenodo.21920225},
       url     = {https://github.com/mantelmax/rolland}
     }
