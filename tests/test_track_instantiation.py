@@ -7,7 +7,7 @@ and concrete track classes can be instantiated.
 import pytest
 
 from rolland.components import Ballast, ContPad, DiscrPad, Slab, Sleeper
-from rolland.database.rail.db_rail import UIC60
+from rolland.database.rail.db_rail import rail_60E1
 from rolland.track import (
     ArrangedBallastedSingleRailTrack,
     ArrangedSlabSingleRailTrack,
@@ -28,7 +28,7 @@ from rolland.track import (
 @pytest.fixture
 def rail():
     """Provide a pre-defined rail instance."""
-    return UIC60
+    return rail_60E1
 
 
 @pytest.fixture

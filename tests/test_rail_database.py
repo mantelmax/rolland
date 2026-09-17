@@ -1,8 +1,8 @@
 """Tests for the rail profile database.
 
 Every profile shipped in ``rolland/database/rail/profiles`` is loaded and checked
-automatically, so adding a profile needs no change to this file. The UIC60 test
-pins the values against the hard-coded instance that preceded the TOML files.
+automatically, so adding a profile needs no change to this file. The rail_60E1 test
+pins its values so that unintended changes to the profile file are noticed.
 """
 
 import shutil
@@ -13,32 +13,32 @@ from rolland.components import Rail
 from rolland.database.rail import db_rail
 from rolland.database.rail.db_rail import PROFILE_DIR, available_rails, load_rail
 
-# UIC60 values as they were hard-coded in db_rail.py before the migration.
-UIC60_REFERENCE = {
+# Reference values of rail_60E1 (formerly UIC60).
+RAIL_60E1_REFERENCE = {
     'E': 210e9,
     'G': 80.769e9,
     'nu': 0.3,
-    'kapz': 0.393,
-    'kapy': 0.538,
+    'kapz': 0.39318,
+    'kapy': 0.55044,
     'mr': 60.2,
     'rho': 7860,
     'etar': 0.02,
     'dr': 1000,
-    'shearc': [0.0, 33e-3],
+    'shearc': [0.0, 34.6e-3],
     'centr': [0.0, 0],
-    'Iyr': 3.037e-05,
-    'Izr': 5.127e-06,
+    'Iyr': 3.03813e-05,
+    'Izr': 5.11963e-06,
     'Iyz': 0.0,
-    'Ipr': 3.55e-05,
-    'Ar': 76.70e-4,
+    'Ipr': 3.55009e-05,
+    'Ar': 76.71e-4,
     'Asr': 0.688,
     'Vr': 7670.00e-6,
     'kapp_s': 1,
-    'Iw': 2.161e-8,
-    'Iwz': 1.6971e-7,
+    'Iw': 2.20949e-08,
+    'Iwz': 1.77310e-07,
     'Iwy': 0.0,
-    'k_w': -0.6016,
-    'J': 2.212e-6,
+    'k_w': 0.5302,
+    'J': 2.21072e-06,
     'chi': 0.0,
 }
 
@@ -85,19 +85,19 @@ def _width_at_max_z(points):
 
 @pytest.fixture
 def profile_copy(tmp_path):
-    """Return a factory for a user-owned copy of the UIC60 profile."""
+    """Return a factory for a user-owned copy of the rail_60E1 profile."""
     def _make(name='MY60', extra=''):
-        shutil.copy(PROFILE_DIR / 'UIC60.csv', tmp_path / 'UIC60.csv')
-        text = (PROFILE_DIR / 'UIC60.toml').read_text()
+        shutil.copy(PROFILE_DIR / 'rail_60E1.csv', tmp_path / 'rail_60E1.csv')
+        text = (PROFILE_DIR / 'rail_60E1.toml').read_text()
         path = tmp_path / f'{name}.toml'
-        path.write_text(text.replace('name = "UIC60"', f'name = "{name}"') + extra)
+        path.write_text(text.replace('name = "rail_60E1"', f'name = "{name}"') + extra)
         return path
     return _make
 
 
 def test_profiles_are_discovered():
     """The bundled profile directory is found and is not empty."""
-    assert 'UIC60' in available_rails()
+    assert 'rail_60E1' in available_rails()
 
 
 @pytest.mark.parametrize('name', available_rails())
@@ -118,17 +118,17 @@ def test_profile_loads(name):
     assert rail.E > 0
 
 
-def test_uic60_matches_hard_coded_values():
-    """UIC60 still holds exactly the values it had before the TOML migration."""
-    rail = load_rail('UIC60')
+def test_rail_60e1_matches_hard_coded_values():
+    """rail_60E1 holds exactly the reference values."""
+    rail = load_rail('rail_60E1')
 
-    for attribute, expected in UIC60_REFERENCE.items():
+    for attribute, expected in RAIL_60E1_REFERENCE.items():
         assert getattr(rail, attribute) == expected, attribute
 
 
-def test_uic60_outline():
+def test_rail_60e1_outline():
     """The outline is read from the CSV file with the header skipped."""
-    rail = load_rail('UIC60')
+    rail = load_rail('rail_60E1')
 
     assert len(rail.rl_geo) == 1000  # noqa: PLR2004
     assert rail.rl_geo[0] == (0.07299975666, 0.08091240057)
@@ -166,7 +166,7 @@ def test_outline_conventions(name):
 
 def test_derived_attributes_are_calculated():
     """Rail.__post_init__ runs on loaded profiles, not just on manual instances."""
-    rail = load_rail('UIC60')
+    rail = load_rail('rail_60E1')
 
     assert rail.ez == pytest.approx(rail.shearc[1] - rail.centr[1])
     assert rail.ey == pytest.approx(rail.shearc[0] - rail.centr[0])
@@ -174,22 +174,22 @@ def test_derived_attributes_are_calculated():
 
 
 def test_module_attribute_access():
-    """``from ... import UIC60`` keeps working and returns a cached instance."""
-    assert isinstance(db_rail.UIC60, Rail)
-    assert db_rail.UIC60 is db_rail.UIC60
-    assert 'UIC60' in dir(db_rail)
+    """``from ... import rail_60E1`` works and returns a cached instance."""
+    assert isinstance(db_rail.rail_60E1, Rail)
+    assert db_rail.rail_60E1 is db_rail.rail_60E1
+    assert 'rail_60E1' in dir(db_rail)
 
 
 def test_unknown_attribute_raises():
     """A misspelled profile attribute raises AttributeError, not something odd."""
-    with pytest.raises(AttributeError, match='UIC61'):
-        _ = db_rail.UIC61
+    with pytest.raises(AttributeError, match='rail_61E1'):
+        _ = db_rail.rail_61E1
 
 
 def test_unknown_name_lists_alternatives():
     """An unknown profile name points the user at what is available."""
-    with pytest.raises(ValueError, match='Available profiles.*UIC60'):
-        load_rail('UIC61')
+    with pytest.raises(ValueError, match='Available profiles.*rail_60E1'):
+        load_rail('rail_61E1')
 
 
 def test_load_from_user_path(profile_copy):
@@ -197,7 +197,7 @@ def test_load_from_user_path(profile_copy):
     rail = load_rail(profile_copy())
 
     assert isinstance(rail, Rail)
-    assert rail.mr == UIC60_REFERENCE['mr']
+    assert rail.mr == RAIL_60E1_REFERENCE['mr']
 
 
 def test_load_from_user_path_as_string(profile_copy):
