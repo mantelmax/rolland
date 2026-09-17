@@ -50,7 +50,7 @@ def _damping_mode(eta_values, viscous_values, eta_name, viscous_name):
 class Rail:
     r"""Represents a rail with specific physical and geometric properties.
 
-    UIC 60 rail is typically used as the default rail profile.
+    UIC 60 (60E1) rail is typically used as the default rail profile.
 
     .. hint::
         A set of predefined rail instances is available in the :mod:`database` module.

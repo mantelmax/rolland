@@ -8,12 +8,12 @@ This module turns them into :class:`~rolland.components.Rail` instances.
 Bundled profiles are exposed as module attributes and are loaded on first
 access, so the usual import keeps working::
 
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
 
 Equivalently, and without hard-coding the name::
 
     >>> from rolland.database.rail.db_rail import available_rails, load_rail
-    >>> load_rail('UIC60')  # doctest: +ELLIPSIS
+    >>> load_rail('rail_60E1')  # doctest: +ELLIPSIS
     Rail(...)
 
 Own profiles are loaded from anywhere by passing a path instead of a name::
@@ -31,7 +31,7 @@ to the TOML file, which is read into ``Rail.rl_geo``.
 The ``[meta]`` table describes the profile itself and is not passed on. Its
 ``name`` entry must match the file name.
 
-See ``profiles/UIC60.toml`` for a documented example.
+See ``profiles/rail_60E1.toml`` for a documented example.
 """
 
 import csv
@@ -127,7 +127,7 @@ def load_rail(profile: str | Path) -> Rail:
     Examples
     --------
     >>> from rolland.database.rail.db_rail import load_rail
-    >>> rail = load_rail('UIC60')
+    >>> rail = load_rail('rail_60E1')
     >>> rail.mr
     60.2
     """

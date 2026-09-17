@@ -249,14 +249,14 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import ContPad, Slab
     >>> from rolland.track import ContSlabSingleRailTrack
 
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
     >>> track = ContSlabSingleRailTrack(
-    ...     rail=UIC60, pad=thepad, slab=theslab, l_track=145, z_f=0.076, y_f=0.0
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, l_track=145, z_f=0.076, y_f=0.0
     ... )
     """
 
@@ -361,14 +361,14 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Slab
     >>> from rolland.track import SimplePeriodicSlabSingleRailTrack
 
     >>> thepad = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
     >>> track = SimplePeriodicSlabSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=thepad,
     ...     slab=theslab,
     ...     distance=0.6,
@@ -466,7 +466,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Slab
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedSlabSingleRailTrack
@@ -477,7 +477,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     >>> pad = PeriodicArrangement(item=[thepadA, thepadB])
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
     >>> track = ArrangedSlabSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=pad,
     ...     slab=theslab,
     ...     distance=distance,
@@ -592,14 +592,14 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import ContPad, Slab
     >>> from rolland.track import ContBallastedSingleRailTrack
 
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
     >>> track = ContBallastedSingleRailTrack(
-    ...     rail=UIC60, pad=thepad, slab=theslab, z_f=0.076, y_f=0.0
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, z_f=0.076, y_f=0.0
     ... )
     """
 
@@ -711,7 +711,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.track import SimplePeriodicBallastedSingleRailTrack
 
@@ -719,7 +719,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     >>> thesleeper = Sleeper(ms = 150)
     >>> distance = 0.6
     >>> tr = SimplePeriodicBallastedSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=thepad,
     ...     sleeper=thesleeper,
     ...     ballast=theballast,
@@ -824,7 +824,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
@@ -837,7 +837,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
     >>> sleeper = PeriodicArrangement(item=[thesleeperA, thesleeperB])
     >>> track = ArrangedBallastedSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
     ...     ballast=ballast_arr,
