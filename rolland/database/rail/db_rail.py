@@ -1,8 +1,9 @@
 """Rail profile database.
 
 Rail profiles are stored as data: every profile consists of a TOML
-file holding the scalar parameters and a CSV file holding the outline
-coordinates, both located in the ``profiles`` directory next to this module.
+file holding the scalar parameters, a CSV file holding the outline
+coordinates and optionally an NPY file holding the warping function, all
+located in the ``profiles`` directory next to this module.
 This module turns them into :class:`~rolland.components.Rail` instances.
 
 Bundled profiles are exposed as module attributes and are loaded on first
@@ -29,6 +30,8 @@ import tomllib
 from dataclasses import MISSING, fields
 from pathlib import Path
 
+import numpy as np
+
 from rolland.components import Rail
 
 PROFILE_DIR = Path(__file__).parent / 'profiles'
@@ -36,6 +39,7 @@ PROFILE_DIR = Path(__file__).parent / 'profiles'
 _SUFFIX = '.toml'
 _META_TABLE = 'meta'
 _OUTLINE_KEY = 'outline'
+_WARPING_KEY = 'warping'
 
 
 def available_rails() -> list[str]:
@@ -92,6 +96,40 @@ def load_rail_geo(file_path: str | Path) -> list[tuple[float, float]]:
     return outline
 
 
+def load_rail_warping(file_path: str | Path) -> np.ndarray:
+    """Load the warping function of a rail cross-section from an NPY file.
+
+    Parameters
+    ----------
+    file_path : str or pathlib.Path
+        NPY file holding an array of shape ``(n, 3)`` with the columns ``Y``, ``Z``
+        in metres and the warping function with respect to the shear center in
+        :math:`[m^2]`.
+
+    Returns
+    -------
+    numpy.ndarray
+        Warping function as an array of shape ``(n, 3)``.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the file does not exist.
+    ValueError
+        If the array does not have the shape ``(n, 3)``.
+    """
+    path = Path(file_path).expanduser()
+    if not path.is_file():
+        msg = f'Rail warping file not found: {path}'
+        raise FileNotFoundError(msg)
+
+    warping = np.load(path)
+    if warping.ndim != 2 or warping.shape[1] != 3 or len(warping) == 0:  # noqa: PLR2004
+        msg = f'{path.name}: expected an array of shape (n, 3) with the columns Y, Z, chi, got {warping.shape}.'
+        raise ValueError(msg)
+    return warping
+
+
 def load_rail(profile: str | Path) -> Rail:
     """Build a :class:`~rolland.components.Rail` instance from a profile file.
 
@@ -110,7 +148,7 @@ def load_rail(profile: str | Path) -> Rail:
     Raises
     ------
     FileNotFoundError
-        If a profile path or its outline file does not exist.
+        If a profile path, its outline file or its warping file does not exist.
     ValueError
         If the profile name is unknown or the profile file is malformed.
 
@@ -133,6 +171,10 @@ def load_rail(profile: str | Path) -> Rail:
         msg = f'{path.name}: missing {_OUTLINE_KEY!r} key naming the outline CSV file.'
         raise ValueError(msg)
     parameters['rl_geo'] = load_rail_geo(path.parent / outline)
+
+    warping = parameters.pop(_WARPING_KEY, None)
+    if warping is not None:
+        parameters['chi'] = load_rail_warping(path.parent / warping)
 
     _check_parameters(parameters, path)
     return Rail(**parameters)
