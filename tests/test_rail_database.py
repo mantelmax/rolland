@@ -5,13 +5,15 @@ automatically, so adding a profile needs no change to this file. The rail_60E1 t
 pins its values so that unintended changes to the profile file are noticed.
 """
 
+import dataclasses
 import shutil
 
+import numpy as np
 import pytest
 
 from rolland.components import Rail
 from rolland.database.rail import db_rail
-from rolland.database.rail.db_rail import PROFILE_DIR, available_rails, load_rail
+from rolland.database.rail.db_rail import PROFILE_DIR, available_rails, load_rail, load_rail_warping
 
 # Reference values of rail_60E1 (formerly UIC60).
 RAIL_60E1_REFERENCE = {
@@ -39,7 +41,6 @@ RAIL_60E1_REFERENCE = {
     'Iwy': 0.0,
     'k_w': 0.5302,
     'J': 2.21072e-06,
-    'chi': 0.0,
 }
 
 
@@ -88,6 +89,7 @@ def profile_copy(tmp_path):
     """Return a factory for a user-owned copy of the rail_60E1 profile."""
     def _make(name='MY60', extra=''):
         shutil.copy(PROFILE_DIR / 'rail_60E1.csv', tmp_path / 'rail_60E1.csv')
+        shutil.copy(PROFILE_DIR / 'rail_60E1_warping.npy', tmp_path / 'rail_60E1_warping.npy')
         text = (PROFILE_DIR / 'rail_60E1.toml').read_text()
         path = tmp_path / f'{name}.toml'
         path.write_text(text.replace('name = "rail_60E1"', f'name = "{name}"') + extra)
@@ -251,3 +253,81 @@ def test_missing_required_parameter_is_rejected(profile_copy):
 
     with pytest.raises(ValueError, match='missing required parameter.*mr'):
         load_rail(path)
+
+
+@pytest.mark.parametrize('name', available_rails())
+def test_warping_function_loads(name):
+    """Every bundled profile carries its warping function covering the whole section."""
+    rail = load_rail(name)
+
+    assert rail.chi.ndim == 2  # noqa: PLR2004
+    assert rail.chi.shape[1] == 3  # noqa: PLR2004
+    assert np.isfinite(rail.chi).all()
+
+    outline = np.asarray(rail.rl_geo)
+    assert outline[:, 0].min() == pytest.approx(rail.chi[:, 0].min())
+    assert outline[:, 0].max() == pytest.approx(rail.chi[:, 0].max())
+    assert outline[:, 1].min() == pytest.approx(rail.chi[:, 1].min())
+    assert outline[:, 1].max() == pytest.approx(rail.chi[:, 1].max())
+
+
+@pytest.mark.parametrize('name', available_rails())
+def test_warping_function_contains_outline(name):
+    """Every outline point is a point of the warping function, so chi is known along the outline."""
+    rail = load_rail(name)
+    outline = np.asarray(rail.rl_geo)
+
+    distance = np.hypot(*(outline[:, None, :] - rail.chi[None, :, :2]).transpose(2, 0, 1)).min(axis=1)
+    assert distance.max() < 1e-9  # noqa: PLR2004
+
+
+def test_chi_at_matches_stored_points():
+    """At a stored point chi_at returns the stored value."""
+    rail = load_rail('rail_60E1')
+
+    for y, z, value in rail.chi[::200]:
+        assert rail.chi_at(y, z) == pytest.approx(value)
+
+
+def test_chi_at_outside_uses_nearest_point():
+    """A point outside the stored points gets the value of the nearest point instead of NaN."""
+    rail = load_rail('rail_60E1')
+    nearest = rail.chi[np.argmax(rail.chi[:, 1])]
+
+    assert rail.chi_at(nearest[0], nearest[1] + 0.01) == pytest.approx(nearest[2])
+
+
+def test_chi_at_without_warping_function_is_zero(profile_copy):
+    """Without a warping function the warping is neglected."""
+    path = profile_copy()
+    path.write_text(path.read_text().replace('warping = "rail_60E1_warping.npy"', ''))
+    rail = load_rail(path)
+
+    assert rail.chi is None
+    assert rail.chi_at(0.0, 0.08) == 0.0
+
+
+def test_missing_warping_file_raises(profile_copy, tmp_path):
+    """A warping key pointing to a missing file fails with a clear FileNotFoundError."""
+    path = profile_copy()
+    (tmp_path / 'rail_60E1_warping.npy').unlink()
+
+    with pytest.raises(FileNotFoundError, match='warping file not found'):
+        load_rail(path)
+
+
+def test_malformed_warping_file_is_rejected(tmp_path):
+    """A warping file that is not an (n, 3) array is reported."""
+    path = tmp_path / 'bad_warping.npy'
+    np.save(path, np.zeros((10, 2)))
+
+    with pytest.raises(ValueError, match=r'shape \(n, 3\)'):
+        load_rail_warping(path)
+
+
+def test_rail_rejects_malformed_chi():
+    """A manually created rail checks the shape of chi as well."""
+    rail = load_rail('rail_60E1')
+
+    with pytest.raises(ValueError, match=r'shape \(n, 3\)'):
+        dataclasses.replace(rail, chi=np.zeros(5))
