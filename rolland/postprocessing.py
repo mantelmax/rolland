@@ -414,9 +414,9 @@ class TrackDecayRate(PostProcessing):
         must be computed at the measurement positions ``x_excit + x_n``, passed as ``x_resp``
         (Kostovasilis) or ``x`` (EBB, TSB). For continuous tracks,
         x_n = 0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.5, 1.8, 2.1, 2.4, 3.0, 3.6,
-        4.2, 4.8, 6.0, 7.2, 9.6, 12.0, 14.4, 18.0, 21.6, 25.2, 28.8, 32.4, 39.6 :math:`[m]`.
-        For discrete tracks, x_n depends on the sleeper positions; missing positions are listed
-        in the error message.
+        4.2, 4.8, 6.0, 7.2, 9.6, 12.0, 14.4, 18.0, 21.6, 25.2, 28.8, 32.4, 39.6 :math:`[m]`
+        assuming a theoretical sleeper spacing of 0.6 m. For discrete tracks, x_n depends on the
+        sleeper positions; missing positions are listed in the error message.
     position_index : int, optional
         The spatial index at which to evaluate the response.
     direction : str, optional
@@ -459,6 +459,9 @@ class TrackDecayRate(PostProcessing):
     >>> # Narrowband (raw frequencies):
     >>> tdr_narrow = TrackDecayRate(result=deflection_results, octave_fraction=None)
     >>> # Analytical method (here Kostovasilis), evaluated at the measurement positions:
+    >>> x_n = np.array([0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.5, 1.8, 2.1, 2.4,
+    >>>                  3.0, 3.6, 4.2, 4.8, 6.0, 7.2, 9.6, 12.0, 14.4, 18.0, 21.6, 25.2, 28.8,
+    >>>                  32.4, 39.6])
     >>> kosto = TBCont1LKosto(track=track, f=f, x_excit=10.0, x_resp=10.0 + x_n)
     >>> tdr_kosto = TrackDecayRate(result=kosto)
     """
