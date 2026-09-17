@@ -84,16 +84,19 @@ An own profile is loaded by passing the path to its TOML file instead of a name:
 
    rail = load_rail('path/to/my_rail.toml')
 
-A profile consists of two files located in the same directory:
+A profile consists of the following files located in the same directory:
 
-* a TOML file holding the scalar rail parameters, and
+* a TOML file holding the scalar rail parameters,
 * a CSV file holding the rail outline coordinates with the columns ``Y,Z`` in metres and
-  one header line.
+  one header line, and
+* optionally an NPY file holding the warping function with respect to the shear center as
+  an array of shape ``(n, 3)`` with the columns ``Y``, ``Z`` in metres and the warping
+  value in :math:`\mathrm{m^2}`. Without this file, the warping is neglected.
 
 The TOML file groups its values into tables. The ``[meta]`` table describes the profile,
 and its ``name`` must match the file name. All other tables pass their keys directly as
 arguments to :class:`~rolland.components.Rail`, so their names only serve to structure
-the file. The key ``outline`` names the CSV file.
+the file. The key ``outline`` names the CSV file and the key ``warping`` names the NPY file.
 
 .. code-block:: toml
 
@@ -111,6 +114,7 @@ the file. The key ``outline`` names the CSV file.
 
    [geometry]
    outline = "my_rail.csv"         # rail outline coordinates [m]
+   warping = "my_rail_warping.npy" # warping function (optional)
    mr = 60.2                       # mass per unit length [kg/m]
    # ...
 
@@ -131,3 +135,4 @@ Functions
    available_rails
    load_rail
    load_rail_geo
+   load_rail_warping
