@@ -25,6 +25,7 @@ dr = 1000.0                    # viscous damping coefficient [Ns/m]
 
 [geometry]
 outline = "rail_54E4.csv"      # rail outline coordinates [m]
+warping = "rail_54E4_warping.npy"  # warping function about the shear center: Y [m], Z [m], chi [m^2]
 mr = 54.37510                  # mass per unit length [kg/m]
 Ar = 6.91795e-03               # cross-section area [m^2]
 Asr = 5.87146e-01              # surface area per unit length [m^2/m]
@@ -45,4 +46,3 @@ Iw = 1.14627e-08               # warping constant [m^6]
 Iwz = 8.01442e-08              # warping product moment of area [m^5]
 Iwy = 0.0                      # warping product moment of area [m^5]
 k_w = 5.64293e-01              # warping factor for the rail foot [-] 
-chi = 0.0                      # warping function  # TODO: placeholder, see TODO in rolland.components.Rail
