@@ -1,4 +1,4 @@
-# 54E4 rail profile.
+# 54E3 rail profile.
 #
 # File format
 # -----------
@@ -9,9 +9,9 @@
 # located next to this file, which is loaded into ``Rail.rl_geo``.
 
 [meta]
-name = "54E4"                  # must match the file name
-standard = "EN 13674-1 (54E4)"
-description = "54 kg/m rail, variant of the 54 kg/m family."
+name = "rail_54E3"             # must match the file name
+standard = "EN 13674-1 (54E3, S54)"
+description = "54 kg/m rail, German S54 variant."
 # source = "https://grabcad.com/library/european-standard-most-common-rail-profiles-30e1-33e1-s33-39e1-bs80a-45e1-bs90a-45e3-rn45-46e2-u33-49e1-s49-49e5-50e6-u50-54e1-uic54-54e2-uic54e-54e3-s54-54e4-54e5-56e1-60e1-uic60-and-60e2-1"
 # Source for Profiles. The geometric and cross section values were calculated by our team. accessed 17.09.2026
 
@@ -24,25 +24,25 @@ etar = 0.02                    # loss factor [-]
 dr = 1000.0                    # viscous damping coefficient [Ns/m]
 
 [geometry]
-outline = "54E4.csv"           # rail outline coordinates [m]
-mr = 54.37510                  # mass per unit length [kg/m]
-Ar = 6.91795e-03               # cross-section area [m^2]
-Asr = 5.87146e-01              # surface area per unit length [m^2/m]
-Vr = 6.91795e-03               # volume per unit length [m^3/m]
-shearc = [0.0, 22.7e-03]       # shear centre [m]
+outline = "rail_54E3.csv"      # rail outline coordinates [m]
+mr = 54.64442                  # mass per unit length [kg/m]
+Ar = 6.95222e-03               # cross-section area [m^2]
+Asr = 5.88839e-01              # surface area per unit length [m^2/m]
+Vr = 6.95222e-03               # volume per unit length [m^3/m]
+shearc = [0.0, 22.6e-03]       # shear centre [m]
 centr = [0.0, 0.0]             # centroid [m]
 
 [cross_section]
-Iyr = 2.05577e-05              # second moment of area about y (vertical bending) [m^4]
-Izr = 3.52523e-06              # second moment of area about z (lateral bending) [m^4]
+Iyr = 2.07460e-05              # second moment of area about y (vertical bending) [m^4]
+Izr = 3.54769e-06              # second moment of area about z (lateral bending) [m^4]
 Iyz = 0.0                      # product moment of area [m^4]
-Ipr = 2.40829e-05              # polar moment of area [m^4]
-J = 2.21973e-06                # torsional constant [m^4]
-kapz = 0.38919                 # Timoshenko shear correction factor, vertical [-]
-kapy = 0.58435                 # Timoshenko shear correction factor, lateral [-]
+Ipr = 2.42937e-05              # polar moment of area [m^4]
+J = 2.24701e-06                # torsional constant [m^4]
+kapz = 0.38894                 # Timoshenko shear correction factor, vertical [-]
+kapy = 0.58606                 # Timoshenko shear correction factor, lateral [-]
 kapp_s = 1.0                   # correction factor for effective shear from restrained warping [-]
-Iw = 1.14627e-08               # warping constant [m^6]
-Iwz = 8.01442e-08              # warping product moment of area [m^5]
+Iw = 1.15977e-08               # warping constant [m^6]
+Iwz = 8.00539e-08              # warping product moment of area [m^5]
 Iwy = 0.0                      # warping product moment of area [m^5]
-k_w = 5.64293e-01              # warping factor for the rail foot [-] 
+k_w = 5.68826e-01              # warping factor for the rail foot [-]
 chi = 0.0                      # warping function  # TODO: placeholder, see TODO in rolland.components.Rail
