@@ -18,20 +18,10 @@ Equivalently, and without hard-coding the name::
 
 Own profiles are loaded from anywhere by passing a path instead of a name::
 
-    >>> load_rail('~/my_profiles/60E2.toml')  # doctest: +SKIP
+    >>> load_rail('~/my_profiles/my_rail.toml')  # doctest: +SKIP
 
-File format
------------
-Each ``<name>.toml`` file groups its values into tables. Every table except
-``[meta]`` contributes its keys directly as arguments to
-:class:`~rolland.components.Rail`, so the grouping is purely documentation.
-The special key ``outline`` names a CSV file (columns ``Y,Z``, in metres) next
-to the TOML file, which is read into ``Rail.rl_geo``.
-
-The ``[meta]`` table describes the profile itself and is not passed on. Its
-``name`` entry must match the file name.
-
-See ``profiles/rail_60E1.toml`` for a documented example.
+The available profiles and the file format are described in the
+:doc:`rail database </api_ref/buildtrack/database>` documentation.
 """
 
 import csv

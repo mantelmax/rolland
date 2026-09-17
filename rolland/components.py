@@ -53,7 +53,8 @@ class Rail:
     UIC 60 (60E1) rail is typically used as the default rail profile.
 
     .. hint::
-        A set of predefined rail instances is available in the :mod:`database` module.
+        Predefined rail profiles such as ``rail_60E1`` are available from the
+        :doc:`rail database </api_ref/buildtrack/database>`.
 
     Attributes
     ----------

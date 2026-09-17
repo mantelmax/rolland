@@ -8,6 +8,7 @@ API Reference
    :titlesonly:
 
    buildtrack/components
+   buildtrack/database
    buildtrack/track
    buildtrack/arrangement
 
@@ -50,7 +51,7 @@ API Reference
 
       The **Build Track** section contains all classes and functions to create a track model.
 
-      .. grid:: 1 2 3 3
+      .. grid:: 1 2 2 2
          :gutter: 3
 
          .. grid-item-card:: Components
@@ -58,6 +59,12 @@ API Reference
             :link-type: doc
 
             Rail profiles, pads, sleepers, slabs, and ballast component definitions.
+
+         .. grid-item-card:: Rail Database
+            :link: buildtrack/database
+            :link-type: doc
+
+            Bundled standard rail profiles and loading of own profiles.
 
          .. grid-item-card:: Track
             :link: buildtrack/track
