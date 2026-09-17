@@ -12,7 +12,8 @@
 name = "49E5"                  # must match the file name
 standard = "EN 13674-1 (49E5)"
 description = "49 kg/m rail, variant for lightly loaded track."
-# source = ""                  # TODO: add the reference for the material and damping values
+# source = "https://grabcad.com/library/european-standard-most-common-rail-profiles-30e1-33e1-s33-39e1-bs80a-45e1-bs90a-45e3-rn45-46e2-u33-49e1-s49-49e5-50e6-u50-54e1-uic54-54e2-uic54e-54e3-s54-54e4-54e5-56e1-60e1-uic60-and-60e2-1"
+# Source for Profiles. The geometric and cross section values were calculated by our team. accessed 17.09.2026
 
 [material]
 E = 210e9                      # Young's modulus [Pa]
