@@ -277,7 +277,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
             self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
-            self.rail.chi,
+            self.rail.chi_at(-self.y_f, self.z_f),
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -398,7 +398,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
             self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
-            self.rail.chi,
+            self.rail.chi_at(-self.y_f, self.z_f),
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -510,7 +510,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
                 self.y_f,
                 self.slab.z_st,
                 self.slab.z_sb,
-                self.rail.chi,
+                self.rail.chi_at(-self.y_f, self.z_f),
                 )
             self.E = build_equ_sleeper_matrix(self, seclay=self.slab) # noqa: N806
             Ms = build_sleep_mass_matrix(self, self.E, seclay=self.slab) # noqa: N806
@@ -621,7 +621,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
             self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
-            self.rail.chi,
+            self.rail.chi_at(-self.y_f, self.z_f),
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -750,7 +750,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
             self.y_f,
             self.sleeper.z_st,
             self.sleeper.z_sb,
-            self.rail.chi,
+            self.rail.chi_at(-self.y_f, self.z_f),
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -872,7 +872,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
                 self.y_f,
                 sleeper.z_st,
                 sleeper.z_sb,
-                self.rail.chi,
+                self.rail.chi_at(-self.y_f, self.z_f),
                 )
             self.E = build_equ_sleeper_matrix(self, seclay=sleeper) # noqa: N806
             Ms = build_sleep_mass_matrix(self, self.E, seclay=sleeper) # noqa: N806
