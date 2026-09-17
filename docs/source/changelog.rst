@@ -6,7 +6,7 @@ v26.08
 
 The initial release of **Rolland**, providing a highly optimized, Devito-based time-domain simulation framework designed for coupled wave propagation and dynamics in railway tracks. 
 
-This release introduces the foundational mechanics validated in our publication: *Time-domain modeling of coupled wave propagation in discretely supported railway tracks*.
+This release introduces the foundational mechanics validated in our publication: `Time-domain modeling of coupled wave propagation in discretely supported railway tracks <https://doi.org/10.1016/j.compstruc.2026.108432>`_ :cite:`mantel2026timedomain`.
 
 **Core Features**
 
