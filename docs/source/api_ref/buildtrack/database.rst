@@ -13,7 +13,9 @@ Using a bundled profile
 -----------------------
 
 A bundled profile can either be imported directly or loaded by its name. Both ways
-return the same :class:`~rolland.components.Rail` instance.
+return a :class:`~rolland.components.Rail` instance with the same properties. The
+imported profile is shared by all imports, whereas :func:`load_rail` creates a new
+instance on every call.
 
 .. tab-set::
 
@@ -89,9 +91,10 @@ A profile consists of the following files located in the same directory:
 * a TOML file holding the scalar rail parameters,
 * a CSV file holding the rail outline coordinates with the columns ``Y,Z`` in metres and
   one header line, and
-* optionally an NPY file holding the warping function with respect to the shear center as
-  an array of shape ``(n, 3)`` with the columns ``Y``, ``Z`` in metres and the warping
-  value in :math:`\mathrm{m^2}`. Without this file, the warping is neglected.
+* optionally an NPY file holding the warping function as an array of shape ``(n, 3)``
+  with the columns ``Y``, ``Z`` in metres, in the same coordinate system as the outline,
+  and the warping value with respect to the shear center in :math:`\mathrm{m^2}`.
+  Without this file, the warping is neglected.
 
 The TOML file groups its values into tables. The ``[meta]`` table describes the profile,
 and its ``name`` must match the file name. All other tables pass their keys directly as

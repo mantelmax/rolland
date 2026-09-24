@@ -7,6 +7,8 @@
 # [cross_section] is documentation only and carries no meaning for the loader.
 # The special key ``outline`` names a CSV file (columns ``Y,Z``, in metres)
 # located next to this file, which is loaded into ``Rail.rl_geo``.
+# The optional special key ``warping`` names an NPY file (columns ``Y, Z, chi``)
+# located next to this file, which is loaded into ``Rail.chi``.
 
 [meta]
 name = "rail_49E1"             # must match the file name
