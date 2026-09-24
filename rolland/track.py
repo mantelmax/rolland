@@ -245,6 +245,11 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
         Lateral distance from rail foot to centroid :math:`[m]`.
+    chi_yz: tuple[float, float], optional
+        Coordinates :math:`(y, z)` at which the warping function of the rail is evaluated
+        :math:`[m]`. Defaults to :math:`(y_f, z_f)`.
+    chi_f: float
+        Warping function of the rail at ``chi_yz`` :math:`[m^2]`.
 
 
     Example
@@ -265,6 +270,8 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     cof: ndarray | None = field(init=False, default=None)
     z_f: float
     y_f: float
+    chi_yz: tuple[float, float] | None = None
+    chi_f: float = field(init=False, default=0.0)
 
     def __post_init__(self):
         """post_init method to calculate derived properties after initialization."""
@@ -272,12 +279,13 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
         self.calc_equiv_slab_factors()
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
+        self.chi_f = self.rail.chi_at(*(self.chi_yz or (self.y_f, self.z_f)))
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
             self.z_f,
             self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
-            self.rail.chi_at(-self.y_f, self.z_f),
+            self.chi_f,
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -357,6 +365,11 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
         Lateral distance from rail foot to centroid :math:`[m]`.
+    chi_yz: tuple[float, float], optional
+        Coordinates :math:`(y, z)` at which the warping function of the rail is evaluated
+        :math:`[m]`. Defaults to :math:`(y_f, z_f)`.
+    chi_f: float
+        Warping function of the rail at ``chi_yz`` :math:`[m^2]`.
 
 
     Example
@@ -384,6 +397,8 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     cof: ndarray | None = field(init=False, default=None)
     z_f: float
     y_f: float
+    chi_yz: tuple[float, float] | None = None
+    chi_f: float = field(init=False, default=0.0)
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
@@ -393,12 +408,13 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         self.calc_equiv_slab_factors()
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
+        self.chi_f = self.rail.chi_at(*(self.chi_yz or (self.y_f, self.z_f)))
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
             self.z_f,
             self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
-            self.rail.chi_at(-self.y_f, self.z_f),
+            self.chi_f,
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -462,6 +478,11 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
         Lateral distance from rail foot to centroid :math:`[m]`.
+    chi_yz: tuple[float, float], optional
+        Coordinates :math:`(y, z)` at which the warping function of the rail is evaluated
+        :math:`[m]`. Defaults to :math:`(y_f, z_f)`.
+    chi_f: float
+        Warping function of the rail at ``chi_yz`` :math:`[m^2]`.
 
 
     Example
@@ -493,6 +514,8 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     cof: ndarray | None = field(init=False, default=None)
     z_f: float
     y_f: float
+    chi_yz: tuple[float, float] | None = None
+    chi_f: float = field(init=False, default=0.0)
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
@@ -500,6 +523,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
         self.cof = {}
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
+        self.chi_f = self.rail.chi_at(*(self.chi_yz or (self.y_f, self.z_f)))
 
         for x, (pad, _slab_unused, _ballast_unused) in self.mount_prop.items():
             self.calc_pad_warping_stiffn(pad=pad)
@@ -510,7 +534,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
                 self.y_f,
                 self.slab.z_st,
                 self.slab.z_sb,
-                self.rail.chi_at(-self.y_f, self.z_f),
+                self.chi_f,
                 )
             self.E = build_equ_sleeper_matrix(self, seclay=self.slab) # noqa: N806
             Ms = build_sleep_mass_matrix(self, self.E, seclay=self.slab) # noqa: N806
@@ -589,6 +613,11 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
         Lateral distance from rail foot to centroid :math:`[m]`.
+    chi_yz: tuple[float, float], optional
+        Coordinates :math:`(y, z)` at which the warping function of the rail is evaluated
+        :math:`[m]`. Defaults to :math:`(y_f, z_f)`.
+    chi_f: float
+        Warping function of the rail at ``chi_yz`` :math:`[m^2]`.
 
     Example
     --------
@@ -609,6 +638,8 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     cof: ndarray | None = field(init=False, default=None)
     z_f: float
     y_f: float
+    chi_yz: tuple[float, float] | None = None
+    chi_f: float = field(init=False, default=0.0)
 
     def __post_init__(self):
         """post_init method to calculate mounting properties after initialization."""
@@ -616,12 +647,13 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         self.calc_equiv_slab_factors()
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
+        self.chi_f = self.rail.chi_at(*(self.chi_yz or (self.y_f, self.z_f)))
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
             self.z_f,
             self.y_f,
             self.slab.z_st,
             self.slab.z_sb,
-            self.rail.chi_at(-self.y_f, self.z_f),
+            self.chi_f,
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -707,6 +739,11 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
         Lateral distance from rail foot to centroid :math:`[m]`.
+    chi_yz: tuple[float, float], optional
+        Coordinates :math:`(y, z)` at which the warping function of the rail is evaluated
+        :math:`[m]`. Defaults to :math:`(y_f, z_f)`.
+    chi_f: float
+        Warping function of the rail at ``chi_yz`` :math:`[m^2]`.
 
 
     Example
@@ -735,6 +772,8 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     cof: ndarray | None = field(init=False, default=None)
     z_f: float
     y_f: float
+    chi_yz: tuple[float, float] | None = None
+    chi_f: float = field(init=False, default=0.0)
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
@@ -745,12 +784,13 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         self.calc_ballast_rotational_stiffn()
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
+        self.chi_f = self.rail.chi_at(*(self.chi_yz or (self.y_f, self.z_f)))
         Tf, Tst, Tsb = build_transfm_matrices( # noqa: N806
             self.z_f,
             self.y_f,
             self.sleeper.z_st,
             self.sleeper.z_sb,
-            self.rail.chi_at(-self.y_f, self.z_f),
+            self.chi_f,
             )
         self.E = build_equ_sleeper_matrix(self) # noqa: N806
         Ms = build_sleep_mass_matrix(self, self.E) # noqa: N806
@@ -820,6 +860,11 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         Vertical distance from rail foot to centroid :math:`[m]`.
     y_f: float
         Lateral distance from rail foot to centroid :math:`[m]`.
+    chi_yz: tuple[float, float], optional
+        Coordinates :math:`(y, z)` at which the warping function of the rail is evaluated
+        :math:`[m]`. Defaults to :math:`(y_f, z_f)`.
+    chi_f: float
+        Warping function of the rail at ``chi_yz`` :math:`[m^2]`.
 
 
     Example
@@ -854,6 +899,8 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     cof: ndarray | None = field(init=False, default=None)
     z_f: float
     y_f: float
+    chi_yz: tuple[float, float] | None = None
+    chi_f: float = field(init=False, default=0.0)
 
     def __post_init__(self, *args, **kwargs):
         """post_init method to calculate mounting properties after initialization."""
@@ -861,6 +908,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
         self.cof = {}
 
         K0, K1, K2, Mr = build_rail_matrices(self.rail, "viscous")  # noqa: N806
+        self.chi_f = self.rail.chi_at(*(self.chi_yz or (self.y_f, self.z_f)))
 
         for x, (pad, sleeper, ballast) in self.mount_prop.items():
             self.calc_pad_warping_stiffn(pad=pad)
@@ -872,7 +920,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
                 self.y_f,
                 sleeper.z_st,
                 sleeper.z_sb,
-                self.rail.chi_at(-self.y_f, self.z_f),
+                self.chi_f,
                 )
             self.E = build_equ_sleeper_matrix(self, seclay=sleeper) # noqa: N806
             Ms = build_sleep_mass_matrix(self, self.E, seclay=sleeper) # noqa: N806
