@@ -3,7 +3,7 @@
 
 import numpy as np
 
-from rolland.database.rail.db_rail import UIC60
+from rolland.database.rail.db_rail import rail_60E1
 from rolland.helper.build_matrix import build_rail_matrices
 
 
@@ -14,7 +14,7 @@ def test_build_rail_matrices_symmetry_and_shape():
     And mass (Mr) matrices. Mass matrices must be symmetric and positive definite,
     and K2 (the structural stiffness matrix) must also be symmetric.
     """
-    K0, K1, K2, Mr = build_rail_matrices(UIC60, damp_type='viscous')
+    K0, K1, K2, Mr = build_rail_matrices(rail_60E1, damp_type='viscous')
 
     # Check shapes
     assert K0.shape == (7, 7)

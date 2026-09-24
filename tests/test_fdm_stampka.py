@@ -1,6 +1,7 @@
 """Tests for FDM Stampka methods."""
 
 import csv
+import dataclasses
 import os
 
 import numpy as np
@@ -17,7 +18,7 @@ from rolland import (
     Slab,
     Sleeper,
 )
-from rolland.database.rail.db_rail import UIC60
+from rolland.database.rail.db_rail import rail_60E1
 from rolland.methods.numerical.fdm_stampka import (
     DeflectionStampka,
     DiscretizationStampka,
@@ -27,6 +28,9 @@ from rolland.methods.numerical.fdm_stampka import (
 from rolland.postprocessing import TrackResponse
 
 RELATIVE_TOLERANCE = 1e-2
+
+# Rail the reference data was computed with; decoupled from later profile corrections.
+REFERENCE_RAIL = dataclasses.replace(rail_60E1, Iyr=3.037e-05)
 
 # Mapping between CSV keys and test keys
 CSV_KEY_MAPPING = {
@@ -139,14 +143,14 @@ def tracks():
     """Create track instances for testing."""
     return {
         'track_cont_slab': ContSlabSingleRailTrack(
-            rail=UIC60,
+            rail=REFERENCE_RAIL,
             pad=contpad,
             l_track=90,
             z_f=81 * 10**-3,
             y_f=0,
         ),
         'track_cont_ball': ContBallastedSingleRailTrack(
-            rail=UIC60,
+            rail=REFERENCE_RAIL,
             pad=contpad,
             slab=slab,
             ballast=contballast,
@@ -155,7 +159,7 @@ def tracks():
             y_f=0,
         ),
         'track_discr_slab': SimplePeriodicSlabSingleRailTrack(
-            rail=UIC60,
+            rail=REFERENCE_RAIL,
             pad=discrpad,
             num_mount=int(90 / 0.6),
             distance=0.6,
@@ -163,7 +167,7 @@ def tracks():
             y_f=0,
         ),
         'track_discr_ball': SimplePeriodicBallastedSingleRailTrack(
-            rail=UIC60,
+            rail=REFERENCE_RAIL,
             pad=discrpad_ballasted,
             sleeper=sleeper,
             ballast=discrballast,

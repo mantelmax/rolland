@@ -17,6 +17,7 @@ from typing import Literal
 
 import numpy as np
 from numpy import array, ndarray
+from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
 
 
 def _damping_mode(eta_values, viscous_values, eta_name, viscous_name):
@@ -50,10 +51,11 @@ def _damping_mode(eta_values, viscous_values, eta_name, viscous_name):
 class Rail:
     r"""Represents a rail with specific physical and geometric properties.
 
-    UIC 60 rail is typically used as the default rail profile.
+    UIC 60 (60E1) rail is typically used as the default rail profile.
 
     .. hint::
-        A set of predefined rail instances is available in the :mod:`database` module.
+        Predefined rail profiles such as ``rail_60E1`` are available from the
+        :doc:`rail database </api_ref/buildtrack/database>`.
 
     Attributes
     ----------
@@ -116,8 +118,11 @@ class Rail:
         restrained warping shear stresses and geometric eccentricities :math:`[m^4]`.
     J_rs : float, internal (automatically calculated)
         Effective shear area due to restrained torsional warping :math:`[m^4]`.
-    chi : float, optional, default: None
-        Warping function of the cross-section :math:`[m^2]`.
+    chi : ndarray, optional, default: None
+        Warping function of the cross-section, given as an array of shape ``(n, 3)`` with
+        the columns ``Y`` :math:`[m]` and ``Z`` :math:`[m]` in the same coordinate system as
+        :attr:`rl_geo`, and the warping value with respect to the shear center
+        :math:`[m^2]`. Values between the points are obtained with :meth:`chi_at`.
 
     Examples
     --------
@@ -164,7 +169,8 @@ class Rail:
     J: float
     J_t: float = field(init=False)
     J_rs: float = field(init=False)
-    chi: float | None=None
+    chi: ndarray | None = field(default=None, repr=False, compare=False)
+    _chi_interpolators: tuple | None = field(default=None, init=False, repr=False, compare=False)
 
     def __post_init__(self):
         """Post-initialization to calculate derived attributes."""
@@ -172,6 +178,47 @@ class Rail:
         self.ey = self.shearc[0] - self.centr[0]
         self.J_rs = self.kapp_s * (self.Ipr - self.J)
         self.J_t = self.J_rs + self.Ar * self.kapy * self.ez**2 + self.Ar * self.kapz * self.ey**2
+
+        if self.chi is not None:
+            self.chi = np.asarray(self.chi, dtype=float)
+            if self.chi.ndim != 2 or self.chi.shape[1] != 3:  # noqa: PLR2004
+                msg = f"chi must have the shape (n, 3) with the columns Y, Z, chi, got {self.chi.shape}."
+                raise ValueError(msg)
+
+    def chi_at(self, y: float, z: float) -> float:
+        r"""Return the warping function at a point of the cross-section.
+
+        Parameters
+        ----------
+        y : float
+            Lateral coordinate :math:`[m]`.
+        z : float
+            Vertical coordinate :math:`[m]`.
+
+        Returns
+        -------
+        float
+            Warping function at :math:`(y, z)` in :math:`[m^2]`. Between the points of
+            :attr:`chi` the value is interpolated linearly; outside of them the value of
+            the nearest point is used. If no warping function is given, the warping is
+            neglected and ``0.0`` is returned.
+        """
+        if self.chi is None:
+            return 0.0
+
+        # Building the interpolators is expensive, so it is done once per rail and reused.
+        if self._chi_interpolators is None:
+            points, values = self.chi[:, :2], self.chi[:, 2]
+            self._chi_interpolators = (
+                LinearNDInterpolator(points, values),
+                NearestNDInterpolator(points, values),
+            )
+
+        linear, nearest = self._chi_interpolators
+        value = linear(y, z)
+        if np.isnan(value):
+            value = nearest(y, z)
+        return float(np.squeeze(value))
 
 @dataclass(kw_only=True)
 class DiscrPad:

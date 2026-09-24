@@ -65,6 +65,7 @@ def test_domsetup_build_grid():
     mock_track.rail = mock_rail
     mock_track.z_f = 0.0
     mock_track.y_f = 0.0
+    mock_track.chi_f = 0.0
 
     # Mocking a CFSPML boundary object
     mock_bound = MagicMock(spec=CFSPML)

@@ -56,10 +56,6 @@ class AnalyticalMethodsKosto(ABC):
         Vertical eccentricity of excitation (rail head <--> centroid) :math:`[m]`.
     y_e : float
         Lateral eccentricity of excitation (rail head <--> centroid) :math:`[m]`.
-    z_f : float
-        Vertical eccentricity of reaction (rail foot <--> centroid) :math:`[m]`.
-    y_f : float
-        Lateral eccentricity of reaction (rail foot <--> centroid) :math:`[m]`.
     mobility : numpy.ndarray
         Calculated mobility of the track :math:`[m/s/N]`.
     """
@@ -70,8 +66,6 @@ class AnalyticalMethodsKosto(ABC):
     x_resp: float | list[float] | ndarray | None = None
     z_e: float = 0.0
     y_e: float = 0.0
-    z_f: float = 0.0
-    y_f: float = 0.0
     mobility: ndarray = field(init=False, default_factory=lambda: array([]),
                               metadata={"default_repr": "numpy.array([])"})
 
@@ -249,10 +243,6 @@ class TBCont1LKosto(AnalyticalMethodsKosto):
         Excitation z-coordinate :math:`[m]`.
     y_e : float
         Excitation y-coordinate :math:`[m]`.
-    z_f : float
-        Response z-coordinate :math:`[m]`.
-    y_f : float
-        Response y-coordinate :math:`[m]`.
     mobility : numpy.ndarray
         Calculated mobility.
     """
@@ -270,7 +260,7 @@ class TBCont1LKosto(AnalyticalMethodsKosto):
 
         # 1. Build Matrices (External functions assumed)
         K0r, K1r, K2r, Mr = build_rail_matrices(track.rail, self.damp_type)
-        Tf, _, _ = build_transfm_matrices(self.z_f, self.y_f, 0, 0, 0)
+        Tf, _, _ = build_transfm_matrices(track.z_f, track.y_f, 0, 0, track.chi_f)
         Kp, _ = build_pad_ballast_stiff_matrices(track, self.damp_type)
 
         # Foundation Stiffness
@@ -325,10 +315,6 @@ class TBCont2LKosto(AnalyticalMethodsKosto):
         Excitation z-coordinate :math:`[m]`.
     y_e : float
         Excitation y-coordinate :math:`[m]`.
-    z_f : float
-        Response z-coordinate :math:`[m]`.
-    y_f : float
-        Response y-coordinate :math:`[m]`.
     mobility : numpy.ndarray
         Calculated mobility.
     """
@@ -349,7 +335,7 @@ class TBCont2LKosto(AnalyticalMethodsKosto):
         # 1. Build Sub-Matrices
         K0r, K1r, K2r, Mr = build_rail_matrices(track.rail, self.damp_type)
         Tf, Tst, Tsb = build_transfm_matrices(
-            self.z_f, self.y_f, track.slab.z_st, track.slab.z_sb, 0,
+            track.z_f, track.y_f, track.slab.z_st, track.slab.z_sb, track.chi_f,
         )
         E = build_equ_sleeper_matrix(track)
         Kp, Kb = build_pad_ballast_stiff_matrices(track, self.damp_type, E)

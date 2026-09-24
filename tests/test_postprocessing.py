@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 from rolland import ContPad, ContSlabSingleRailTrack, DiscrPad, SimplePeriodicSlabSingleRailTrack, Slab
-from rolland.database.rail.db_rail import UIC60
+from rolland.database.rail.db_rail import rail_60E1
 from rolland.methods import EBBCont1L, TSBDiscr1L
 from rolland.methods.semi_analytical import TBCont1LKosto
 from rolland.postprocessing import DB_CONVERSION_FACTOR, TrackDecayRate, TrackResponse, compute_frf
@@ -68,7 +68,7 @@ class DummyRollandResult:
         self.track = None
 
 
-REFERENCE_RAIL = dataclasses.replace(UIC60, G=81e9, kapz=0.4, kapy=0.54, rho=7850, Iyr=3038.30e-8, Ipr=3550.60e-8)
+REFERENCE_RAIL = dataclasses.replace(rail_60E1, G=81e9, kapz=0.4, kapy=0.54, rho=7850, Iyr=3038.30e-8, Ipr=3550.60e-8)
 PAD_PROPS = {'sp_z': 300e6, 'sp_y': 0.0, 'sp_x': 0.0, 'etap_z': 0.25, 'etap_y': 0.0, 'etap_x': 0.0,
              'etap_r': 0.0, 'wdthp': 0.0}
 
