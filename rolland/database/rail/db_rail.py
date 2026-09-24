@@ -103,8 +103,8 @@ def load_rail_warping(file_path: str | Path) -> np.ndarray:
     ----------
     file_path : str or pathlib.Path
         NPY file holding an array of shape ``(n, 3)`` with the columns ``Y``, ``Z``
-        in metres and the warping function with respect to the shear center in
-        :math:`[m^2]`.
+        in metres, in the same coordinate system as the outline, and the warping
+        function with respect to the shear center in :math:`[m^2]`.
 
     Returns
     -------
