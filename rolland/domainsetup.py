@@ -269,7 +269,7 @@ class DomSetup:
         kap_z = Constant(name='kappa_z', value=rail.kapz)
         e_y = Constant(name='e_y', value=rail.ey)
         e_z = Constant(name='e_z', value=rail.ez)
-        chi_f = Constant(name='chi_f', value=0)
+        chi_f = Constant(name='chi_f', value=track.chi_f)
         Iw = Constant(name='I_w', value=rail.Iw)
         J = Constant(name='J', value=rail.J)
         Jt = Constant(name='J_t', value=rail.J_t)

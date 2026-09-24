@@ -18,7 +18,7 @@ from rolland import (
     Slab,
     Sleeper,
 )
-from rolland.database.rail.db_rail import UIC60
+from rolland.database.rail.db_rail import rail_60E1
 from rolland.methods import (
     EBBCont1L,
     EBBCont2L,
@@ -34,7 +34,7 @@ X_POSITION = 0
 X_EXCIT = 240 * 0.3
 
 REFERENCE_RAIL = dataclasses.replace(
-    UIC60, G=81e9, kapz=0.4, kapy=0.54, rho=7850, Iyr=3038.30e-8, Ipr=3550.60e-8,
+    rail_60E1, G=81e9, kapz=0.4, kapy=0.54, rho=7850, Iyr=3038.30e-8, Ipr=3550.60e-8, Ar=76.70e-4,
 )
 
 

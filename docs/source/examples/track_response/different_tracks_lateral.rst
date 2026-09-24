@@ -22,7 +22,7 @@ at the rail head under a lateral Gaussian impulse excitation.
 
     from matplotlib import pyplot as plt
     from rolland import DiscrPad, Sleeper, Ballast, ContPad, Slab
-    from rolland.database.rail.db_rail import UIC60
+    from rolland.database.rail.db_rail import rail_60E1
     from rolland.track import (
         ContSlabSingleRailTrack,
         ContBallastedSingleRailTrack,
@@ -37,7 +37,7 @@ at the rail head under a lateral Gaussian impulse excitation.
 
     # 1. PARAMETERS DEFINITION -----------------------------------------------------
     slep_dist = 0.6
-    rail = UIC60
+    rail = rail_60E1
 
     contpad = ContPad(
         # Stiffness [N/m^2]

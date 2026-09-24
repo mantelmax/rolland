@@ -59,7 +59,7 @@ class PeriodicArrangement(Arrangement):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
@@ -72,7 +72,7 @@ class PeriodicArrangement(Arrangement):
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
     >>> sleeper = PeriodicArrangement(item=[thesleeperA, thesleeperB])
     >>> tr = ArrangedBallastedSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
     ...     distance=distance,
@@ -118,7 +118,7 @@ class RandomArrangement(Arrangement):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.arrangement import RandomArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
@@ -131,7 +131,7 @@ class RandomArrangement(Arrangement):
     >>> distance = RandomArrangement(item=[0.65, 0.5])
     >>> sleeper = RandomArrangement(item=[thesleeperA, thesleeperB])
     >>> tr = ArrangedBallastedSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
     ...     distance=distance,
