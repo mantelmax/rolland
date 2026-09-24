@@ -71,7 +71,7 @@ class SingleRailTrack(Track):
         Based on the vertical eccentricity from the rail shear center.
         """
         p = pad if pad is not None else self.pad
-        e_s = self.rail.shearc[1] - self.z_f
+        e_s = self.z_f - self.rail.shearc[1]
         p.sp_w = (self.rail.k_w * e_s) ** 2 * p.wdthp**2 / 12 * p.sp_y
 
     def calc_pad_viscous_damp_cuton(self, pad=None, cof=None):
