@@ -119,10 +119,10 @@ class Rail:
     J_rs : float, internal (automatically calculated)
         Effective shear area due to restrained torsional warping :math:`[m^4]`.
     chi : ndarray, optional, default: None
-        Warping function of the cross-section with respect to the shear center, given as
-        an array of shape ``(n, 3)`` with the columns ``Y`` :math:`[m]`, ``Z`` :math:`[m]`
-        and the warping value :math:`[m^2]`. Values between the points are obtained with
-        :meth:`chi_at`.
+        Warping function of the cross-section, given as an array of shape ``(n, 3)`` with
+        the columns ``Y`` :math:`[m]` and ``Z`` :math:`[m]` in the same coordinate system as
+        :attr:`rl_geo`, and the warping value with respect to the shear center
+        :math:`[m^2]`. Values between the points are obtained with :meth:`chi_at`.
 
     Examples
     --------
