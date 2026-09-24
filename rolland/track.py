@@ -261,7 +261,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
     >>> track = ContSlabSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, slab=theslab, l_track=145, z_f=0.076, y_f=0.0
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, l_track=145, z_f=0.081, y_f=0.0
     ... )
     """
 
@@ -386,7 +386,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...     slab=theslab,
     ...     distance=0.6,
     ...     num_mount=100,
-    ...     z_f=0.076,
+    ...     z_f=0.081,
     ...     y_f=0.0)
     ...
     """
@@ -503,7 +503,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     ...     slab=theslab,
     ...     distance=distance,
     ...     num_mount=100,
-    ...     z_f=0.076,
+    ...     z_f=0.081,
     ...     y_f=0.0)
     ...
     """
@@ -628,7 +628,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
     >>> theslab = Slab(ms = 250)
     >>> track = ContBallastedSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, slab=theslab, z_f=0.076, y_f=0.0
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, z_f=0.081, y_f=0.0
     ... )
     """
 
@@ -761,7 +761,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...     sleeper=thesleeper,
     ...     ballast=theballast,
     ...     distance=distance,
-    ...     z_f=0.076,
+    ...     z_f=0.081,
     ...     y_f=0.0)
     """
 
@@ -887,7 +887,7 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...     sleeper=sleeper,
     ...     ballast=ballast_arr,
     ...     distance=distance,
-    ...     z_f=0.076,
+    ...     z_f=0.081,
     ...     y_f=0.0)
     """
 
