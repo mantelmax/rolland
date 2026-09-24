@@ -214,3 +214,21 @@ class TestConcreteBallastedTrackClasses:
             y_f=0.0,
         )
         assert isinstance(track, ArrangedBallastedSingleRailTrack)
+
+
+class TestChiEvaluationPoint:
+    """Tests for the point at which the warping function chi_f is evaluated."""
+
+    def test_chi_f_defaults_to_foot_coordinates(self, rail, cont_pad, slab):
+        """Without chi_yz, chi_f is evaluated at (y_f, z_f)."""
+        track = ContSlabSingleRailTrack(rail=rail, pad=cont_pad, slab=slab, z_f=0.081, y_f=0.03)
+        assert track.chi_f == pytest.approx(rail.chi_at(0.03, 0.081))
+        assert track.chi_f != 0.0
+
+    def test_chi_f_uses_chi_yz(self, rail, cont_pad, slab):
+        """With chi_yz, chi_f is evaluated at the given coordinates."""
+        track = ContSlabSingleRailTrack(
+            rail=rail, pad=cont_pad, slab=slab, z_f=0.081, y_f=0.0, chi_yz=(0.06, 0.08),
+        )
+        assert track.chi_f == pytest.approx(rail.chi_at(0.06, 0.08))
+        assert track.chi_f != pytest.approx(rail.chi_at(0.0, 0.081))
