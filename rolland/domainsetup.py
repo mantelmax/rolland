@@ -269,7 +269,7 @@ class DomSetup:
         kap_z = Constant(name='kappa_z', value=rail.kapz)
         e_y = Constant(name='e_y', value=rail.ey)
         e_z = Constant(name='e_z', value=rail.ez)
-        chi_f = Constant(name='chi_f', value=track.chi_f)
+        chi_f = Constant(name='chi_f', value=0)
         Iw = Constant(name='I_w', value=rail.Iw)
         J = Constant(name='J', value=rail.J)
         Jt = Constant(name='J_t', value=rail.J_t)
@@ -281,6 +281,10 @@ class DomSetup:
         rho_s = Constant(name='rho_s', value=rho_s_val)
 
         # --- 6. Physics Equations ---
+        # NOTE: Time derivatives deviate from :cite:p:`mantel2026timedomain`. Cross-coupling damping
+        # uses backward differences (.backward.dt) to maintain a strictly explicit scheme.
+        # Without this, implicit coupling causes numerical instabilities in the longitudinal
+        # wave after a few seconds, especially for moving sources.
 
         # Longitudinal Wave
         longw = Eq(
@@ -345,8 +349,10 @@ class DomSetup:
             - f['sp_z'] * y_f * u_z
             + y_f * f['dp_z'] * u_sz.backward.dt
             - y_f * f['dp_z'] * u_z.dt
+            - y_f * f['dp_z'] * u_z.backward.dt
             - z_f * f['dp_y'] * u_sy.backward.dt
             + z_f * f['dp_y'] * u_y.dt
+            + z_f * f['dp_y'] * u_y.backward.dt
             + (-f['dp_xr'] - z_f * z_st * f['dp_y']) * phi_sx.backward.dt
             + (-f['sp_xr'] - f['sp_y'] * z_f * z_st) * phi_sx
             + (f['dp_xr'] + y_f**2 * f['dp_z'] + z_f**2 * f['dp_y']) * phi_x.dt
@@ -367,6 +373,7 @@ class DomSetup:
             - f['dp_x'] * y_f * z_f * phi_y.backward.dt
             - f['dp_x'] * y_f * u_sx.backward.dt
             + f['dp_x'] * y_f * u_x.dt
+            + f['dp_x'] * y_f * u_x.backward.dt
             + rho * (-Iwz + Iz) * phi_z.dt2
             - f['sp_x'] * y_f * z_f * phi_y
             - f['sp_x'] * y_f * u_sx
@@ -387,9 +394,11 @@ class DomSetup:
             - Iyz * rho * phi_z.dt2
             # - chi_f * f['dp_x'] * z_f * u_w.backward.dt --> neglected
             - f['dp_x'] * y_f * z_f * phi_z.dt
+            - f['dp_x'] * y_f * z_f * phi_z.backward.dt
             + f['dp_x'] * z_f**2 * phi_y.dt
             + f['dp_x'] * z_f * u_sx.backward.dt
             - f['dp_x'] * z_f * u_x.dt
+            - f['dp_x'] * z_f * u_x.backward.dt
             + rho * (Iwy + Iy) * phi_y.dt2
             - f['sp_x'] * y_f * z_f * phi_z
             + f['sp_x'] * z_f * u_sx
@@ -413,8 +422,11 @@ class DomSetup:
             + chi_f**2 * f['dp_x'] * u_w.dt
             + chi_f * f['dp_x'] * y_f * phi_z.dt
             - chi_f * f['dp_x'] * z_f * phi_y.dt
+            + chi_f * f['dp_x'] * y_f * phi_z.backward.dt
+            - chi_f * f['dp_x'] * z_f * phi_y.backward.dt
             - chi_f * f['dp_x'] * u_sx.backward.dt
             + chi_f * f['dp_x'] * u_x.dt
+            + chi_f * f['dp_x'] * u_x.backward.dt
             - chi_f * f['sp_x'] * u_sx
             + chi_f * f['sp_x'] * u_x
             + (A * G * e_y * kap_z - chi_f * f['sp_x'] * z_f) * phi_y
@@ -453,10 +465,14 @@ class DomSetup:
             # Translational Sleeper Equation (x-direction)
             slep_trans_x = Eq(
                 -chi_f * f['dp_x'] * u_w.dt
+                -chi_f * f['dp_x'] * u_w.backward.dt
                 - chi_f * f['sp_x'] * u_w
                 - f['dp_x'] * y_f * phi_z.dt
                 + f['dp_x'] * z_f * phi_y.dt
                 - f['dp_x'] * u_x.dt
+                - f['dp_x'] * y_f * phi_z.backward.dt
+                + f['dp_x'] * z_f * phi_y.backward.dt
+                - f['dp_x'] * u_x.backward.dt
                 - f['sp_x'] * y_f * phi_z
                 + f['sp_x'] * z_f * phi_y
                 - f['sp_x'] * u_x
@@ -471,6 +487,8 @@ class DomSetup:
                 - f['sp_z'] * u_z
                 - y_f * (-f['dp_z']) * phi_x.dt
                 + (-f['dp_z']) * u_z.dt
+                - y_f * (-f['dp_z']) * phi_x.backward.dt
+                + (-f['dp_z']) * u_z.backward.dt
                 + (f['sp_z'] + f['sb_z'] * Ez) * u_sz
                 + (f['db_z'] * Ez + f['dp_z']) * u_sz.dt
                 + f['ms'] * u_sz.dt2 * Ez,
@@ -483,8 +501,11 @@ class DomSetup:
                 - f['sp_y'] * u_y
                 + z_f * (-f['dp_y']) * phi_x.dt
                 + (-f['dp_y']) * u_y.dt
+                + z_f * (-f['dp_y']) * phi_x.backward.dt
+                + (-f['dp_y']) * u_y.backward.dt
                 + (f['sb_y'] + f['sp_y']) * u_sy
                 + (f['db_y'] * z_sb + z_st * f['dp_y']) * phi_sx.dt
+                + (f['db_y'] * z_sb + z_st * f['dp_y']) * phi_sx.backward.dt
                 + (f['sb_y'] * z_sb + f['sp_y'] * z_st) * phi_sx
                 + (f['db_y'] + f['dp_y']) * u_sy.dt,
             )
@@ -495,8 +516,11 @@ class DomSetup:
                 - f['sp_y'] * z_st * u_y
                 - z_st * f['dp_y'] * u_y.dt
                 + (-f['dp_xr'] - z_f * z_st * f['dp_y']) * phi_x.dt
+                - z_st * f['dp_y'] * u_y.backward.dt
+                + (-f['dp_xr'] - z_f * z_st * f['dp_y']) * phi_x.backward.dt
                 + (-f['sp_xr'] - f['sp_y'] * z_f * z_st) * phi_x
                 + (f['db_y'] * z_sb + z_st * f['dp_y']) * u_sy.dt
+                + (f['db_y'] * z_sb + z_st * f['dp_y']) * u_sy.backward.dt
                 + (f['sb_y'] * z_sb + f['sp_y'] * z_st) * u_sy
                 + (f['db_xr'] + f['db_y'] * z_sb**2 + f['dp_xr'] + z_st**2 * f['dp_y']) * phi_sx.dt
                 + (f['sb_xr'] + f['sb_y'] * z_sb**2 + f['sp_xr'] + f['sp_y'] * z_st**2) * phi_sx,
@@ -535,3 +559,4 @@ class DomSetup:
         self.u_z = u_z
         self.u_y = u_y
         self.phi_x = phi_x
+
