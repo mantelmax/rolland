@@ -28,8 +28,8 @@ extensions = [
     'sphinxcontrib.bibtex',           # Citation support
     'sphinx.ext.autosummary',         # Generate autodoc summaries
     'sphinx_design',                  # Design extension
-    'myst_parser',                    # Markdown support
     'sphinx_docsearch',                # Docsearch extension
+    'myst_nb',                       # Jupyter Notebook support
 ]
 
 # Do not prefix class names with full module paths in signatures
@@ -209,3 +209,4 @@ def replace_factory_defaults(app, what, name, obj, options, signature, return_an
 
 def setup(app):
     app.connect("autodoc-process-signature", replace_factory_defaults)
+nb_execution_mode = 'off'

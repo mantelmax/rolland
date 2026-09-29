@@ -9,4 +9,5 @@ numpy
 scipy
 sphinx_docsearch
 matplotlib
-pygments-styles
+pygments-stylesmyst-nb
+ipykernel
