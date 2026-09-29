@@ -87,8 +87,8 @@ and our software:
    
    Installation <install/index>
    User Guide <user_guide/index>
-   API Reference <api_ref/index>
    Examples <examples/index>
+   API Reference <api_ref/index>
    Literature <literature/index>
    About <about>
    Changelog <changelog>
