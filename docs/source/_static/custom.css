@@ -193,3 +193,9 @@ div.cell, .cell, div.cell_input, div.cell_output {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
+
+/* Ensure images have adequate spacing from surrounding text and code blocks */
+img:not(header img, nav img, .sidebar img, #left-sidebar img) {
+    margin-top: 1.5rem !important;
+    margin-bottom: 1.5rem !important;
+}
