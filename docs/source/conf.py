@@ -32,6 +32,11 @@ extensions = [
     'myst_nb',                       # Jupyter Notebook support
 ]
 
+myst_enable_extensions = [
+    "dollarmath",
+    "amsmath",
+]
+
 # Do not prefix class names with full module paths in signatures
 add_module_names = False
 
