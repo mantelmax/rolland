@@ -22,7 +22,7 @@ To update **Rolland** to the latest version, run:
 
 After installing **Rolland**, you can verify the installation by running:
 
-..code-block:: bash
+.. code-block:: bash
 
    python -c "import rolland; print(rolland.__version__)"   
 
