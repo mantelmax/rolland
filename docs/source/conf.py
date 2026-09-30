@@ -210,3 +210,4 @@ def replace_factory_defaults(app, what, name, obj, options, signature, return_an
 def setup(app):
     app.connect("autodoc-process-signature", replace_factory_defaults)
 nb_execution_mode = 'off'
+nb_number_source_lines = True
