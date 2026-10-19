@@ -17,7 +17,9 @@ Classes used for subclassing and type hints.
    Track
    SingleRailTrack
    SlabSingleRailTrack
+   DiscrSlabSingleRailTrack
    BallastedSingleRailTrack
+   DiscrBallastedSingleRailTrack
 
 Slab Track Models
 -----------------
@@ -27,7 +29,6 @@ Concrete models for slab track structures.
    :toctree: track
 
    ContSlabSingleRailTrack
-   DiscrSlabSingleRailTrack
    SimplePeriodicSlabSingleRailTrack
    ArrangedSlabSingleRailTrack
 
@@ -39,7 +40,6 @@ Concrete models for ballasted track structures.
    :toctree: track
 
    ContBallastedSingleRailTrack
-   DiscrBallastedSingleRailTrack
    SimplePeriodicBallastedSingleRailTrack
    ArrangedBallastedSingleRailTrack
 
