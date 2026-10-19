@@ -4,7 +4,7 @@
 </picture>
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mantelmax/rolland)
-[![Documentation Status](https://readthedocs.org/projects/rolland-rolling-noise-and-dynamics/badge/?version=latest)](https://rolland-rolling-noise-and-dynamics.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://img.shields.io/readthedocs/rolland-rolling-noise-and-dynamics)](https://rolland-rolling-noise-and-dynamics.readthedocs.io/en/latest/?badge=latest)
 [![Python Version](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
 [![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21920225-blue.svg)](https://doi.org/10.5281/zenodo.21920225)
 
