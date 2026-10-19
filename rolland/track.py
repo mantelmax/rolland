@@ -453,7 +453,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
 @dataclass(kw_only=True)
 class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
-    """Single rail slab track with varying periodic support.
+    """Single rail slab track with varying support properties.
 
     Variations in the form of periodically or stochastically varying mounting properties are
     allowed. Slab is assumed to be rigid.
@@ -895,7 +895,7 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
 @dataclass(kw_only=True)
 class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
-    """Single rail ballasted track with varying periodic support.
+    """Single rail ballasted track with varying support properties.
 
     Variations in the form of periodically or stochastically varying mounting properties are
     allowed.
