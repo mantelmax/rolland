@@ -678,8 +678,17 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     ...        z_st=-0.185/2,
     ...        z_sb=0.185/2,
     ...    )
+    >>> theballast = Ballast(
+    ...        sb_z=200e6,
+    ...        sb_y=200e6,
+    ...        sb_x=200e6,
+    ...        etab_z=1,
+    ...        etab_y=2,
+    ...        etab_x=2,
+    ...        etab_r=2,
+    ...        )
     >>> track = ContBallastedSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, slab=theslab, z_f=0.081, y_f=0.0)
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, ballast=theballast, z_f=0.081, y_f=0.0)
     """
 
     pad: ContPad
@@ -825,9 +834,9 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     ...        z_sb=0.185/2,
     ...    )
     >>> theballast = Ballast(
-    ...        sb_z=200e6,
-    ...        sb_y=200e6,
-    ...        sb_x=200e6,
+    ...        sb_z=120e6,
+    ...        sb_y=120e6,
+    ...        sb_x=120e6,
     ...        etab_z=1,
     ...        etab_y=2,
     ...        etab_x=2,
