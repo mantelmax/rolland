@@ -1,29 +1,8 @@
 Rolland
 ========================
 
-.. note:: This repository is still under development!
-
-Rolling Noise and Dynamics (**Rolland**) is an advanced simulation and calculation model designed to analyze, predict,
-and optimize the acoustic properties of railway tracks, with a focus on realistic, efficient, and fast computations.
-
-
-Features
---------
-
-**Current Features**
-    #. Calculates the track response for a non-moving gaussian impulse at a certain position
-    #. Applies Finite Difference Method in time domain
-    #. Allows the definition of arbitrary track structures
-
-       * Enables periodic or stochastic variations of the track properties (e.g. stochastically varying sleeper distances)
-       * Enables the representation of track property deviations that occur in practise
-    #. Includes several analytical models for comparison and validation
-
-**Planned Features**
-    #. Full rail dynamics
-    #. Consideration of rail radiation
-    #. Consideration of non-linear effects
-    #. Excitation by multiple moving wheels
+.. note::
+   This repository is in an early stage of development and may still contain bugs or errors. Please be aware of this when using the software. Any feedback, bug reports, or suggestions are highly appreciated and will help us improve **Rolland**!
 
 
 .. image:: images/mwi_light.png
@@ -31,19 +10,85 @@ Features
    :width: 700px
    :class: light-mode-image
 
-.. image:: images/mwi_dark.png
+.. image:: images/mwi_animated_sphinx.gif
    :alt: MWI Image
    :width: 700px
    :class: dark-mode-image
 
 
+Rolling Noise and Dynamics (**Rolland**) is an open-source, high-performance time-domain simulation framework designed to analyze, predict, and optimize the dynamic and acoustic properties of railway tracks.
+
+By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solves 13 differential equations of motion alongside 14 additional auxiliary differential equations corresponding to the boundary domain. This captures full track dynamics—including coupled vertical and lateral bending, longitudinal waves, axial torsion, cross-sectional warping, and sleeper movement under eccentric excitation and support conditions. The framework incorporates Complex Frequency-Shifted Perfectly Matched Layers (CFS-PML) for infinite track modeling and supports spatially varying track properties as well as moving excitation sources.
+
+
+
+Key Features
+------------
+
+Current Features
+~~~~~~~~~~~~~~~~
+
+* **Full Track Dynamics:** Solves 13 differential equations of motion alongside 14 additional auxiliary differential equations to capture vertical and lateral bending waves, longitudinal waves, torsional waves, and warping effects together with sleeper movement and eccentric support reactions.
+* **Fast Time-Domain Solver:** Uses explicit Finite Difference Method (FDM) schemes with high-order stencils for fast simulations.
+* **Infinite Track Boundary (CFS-PML):** Uses absorbing boundary layers to eliminate artificial wave reflections.
+* **Flexible Track Structures:** Supports ballasted and slab tracks with continuous or discrete supports, including spatial (periodic or stochastic) track property variations.
+* **Excitation:** Includes stationary excitation (Gaussian impulse) and moving sources (e.g. moving random force).
+* **Post-Processing & Validation:** Computes point/transfer mobility, Track Decay Rate (TDR), and provides built-in reference models for easy validation.
+
+Planned Features
+~~~~~~~~~~~~~~~~
+
+* Non-linear Hertzian contact dynamics for wheel-rail interaction.
+* Multi-wheel vehicle pass-by excitation models.
+* Rail acoustic radiation modeling.
+
+.. image:: images/displ_sum_animated_sphinx.gif
+   :width: 1000px
+   :class: dark-mode-image
+
+Citation
+--------
+If you use **Rolland** for academic work, please consider citing both our publication:
+
+   Mantel, M., & Sarradj, E. (2026). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures, 332, 108432. https://doi.org/10.1016/j.compstruc.2026.108432
+
+.. code-block:: bibtex
+
+    @article{mantel2026timedomain,
+      author  = {Mantel, Maximilian and Sarradj, Ennes},
+      title   = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
+      journal = {Computers \& Structures},
+      volume  = {332},
+      pages   = {108432},
+      year    = {2026},
+      doi     = {https://doi.org/10.1016/j.compstruc.2026.108432},
+    }
+
+
+and our software:
+
+   Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A time-domain simulation framework for railway track dynamics and rolling noise (Version 26.11) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21920225
+
+.. code-block:: bibtex
+
+    @software{mantel2026rolland_api,
+      author  = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
+      title   = {Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise},
+      year    = {2026},
+      version = {v26.11},
+      doi     = {10.5281/zenodo.21920225},
+      url     = {https://github.com/mantelmax/rolland}
+    }
+
+
 .. toctree::
    :hidden:
+   :maxdepth: 2
    
    Installation <install/index>
    User Guide <user_guide/index>
-   API Reference <api_ref/index>
    Examples <examples/index>
-   What's New <whats_new/index>
-   License <license/index>
+   API Reference <api_ref/index>
    Literature <literature/index>
+   About <about>
+   Changelog <changelog>

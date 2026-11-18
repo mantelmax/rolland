@@ -4,30 +4,58 @@
     :toctree: components
 
     Rail
-    RailRoughness
     DiscrPad
     ContPad
     Sleeper
     Slab
     Ballast
     Wheel
-    WheelRoughness
-    WheelGreensfunc
 """
 
 from dataclasses import dataclass, field
+from typing import Literal
 
-from numpy import ndarray
+import numpy as np
+from numpy import array, ndarray
+from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
+
+
+def _damping_mode(eta_values, viscous_values, eta_name, viscous_name):
+    """Determine the damping mode (viscous or hysteretic) based on provided values."""
+    missing_eta = np.sum(array([value is None for value in eta_values]))
+    missing_d = np.sum(array([value is None for value in viscous_values]))
+
+    if 0 < missing_eta < len(eta_values):
+        msg = f"{eta_name} values are missing ({missing_eta} of {len(eta_values)} values are missing)."
+        raise ValueError(msg)
+
+    if 0 < missing_d < len(viscous_values):
+        msg = f"{viscous_name} are missing ({missing_d} of {len(viscous_values)} values are missing)."
+        raise ValueError(msg)
+
+    if missing_eta == len(eta_values) and missing_d == len(viscous_values):
+        msg = f"Both {eta_name} and {viscous_name} are missing. Please provide one set of values."
+        raise ValueError(msg)
+
+    if missing_eta == 0 and missing_d == 0:
+        msg = f"Both {eta_name} and {viscous_name} are provided. Please provide one set of values."
+        raise ValueError(msg)
+
+    if missing_eta == 0:
+        return "hysteretic"
+
+    return "viscous"
 
 
 @dataclass(kw_only=True)
 class Rail:
     r"""Represents a rail with specific physical and geometric properties.
 
-    UIC 60 rail is typically used as the default rail profile.
+    UIC 60 (60E1) rail is typically used as the default rail profile.
 
     .. hint::
-        A set of predefined rail instances is available in the :mod:`database` module.
+        Predefined rail profiles such as ``rail_60E1`` are available from the
+        :doc:`rail database </api_ref/buildtrack/database>`.
 
     Attributes
     ----------
@@ -37,38 +65,64 @@ class Rail:
         Young's modulus of rail in :math:`[\mathrm{Pa}]`.
     G : float
         Shear modulus of rail in :math:`[\mathrm{Pa}]`.
-    nu : float
+    nu : float, optional, default: None
         Poisson's ratio of rail :math:`[-]`.
-    kap : list[float]
-        Timoshenko shear correction factor (vertical, lateral) :math:`[-]`.
+    kapz : float
+        Timoshenko shear correction factor in z direction (vertical) :math:`[-]`.
+    kapy : float
+        Timoshenko shear correction factor in y direction (lateral) :math:`[-]`.
     mr : float
         Rail mass per unit length in :math:`[\mathrm{kg/m}]`.
     rho : float
         Density of rail in :math:`[\mathrm{kg/m^3}]`.
     etar : float
         Rail loss factor :math:`[-]`.
-    fresr : float
-        Rail resonance frequency in :math:`[\mathrm{Hz}]`.
     dr : float
         Rail damping coefficient (viscous) in :math:`[\mathrm{Ns/m}]`.
-    gamr : list[float]
-        Coordinates of rail shear center in :math:`[\mathrm{m}]`.
-    epsr : list[float]
-        Coordinates of center of gravity in :math:`[\mathrm{m}]`.
+    shearc : list[float]
+        Coordinates of rail shear center :math:`[m]`.
+    centr : list[float]
+        Coordinates of centroid :math:`[m]`.
+    ez : float, internal (automatically calculated)
+        Vertical eccentricity between the rail centroid and rail shear center :math:`[m]`.
+    ey : float, internal (automatically calculated)
+        Lateral eccentricity between the rail centroid and rail shear center :math:`[m]`.
     Iyr : float
-        Area moment of inertia of rail around y-axis in :math:`[\mathrm{m^4}]`.
+        Second moment of area around y-axis :math:`[m^4]`.
     Izr : float
-        Area moment of inertia of rail around z-axis in :math:`[\mathrm{m^4}]`.
-    Itr : float
-        Torsional constant of rail in :math:`[\mathrm{m^4}]`.
+        Second moment of area around z-axis :math:`[m^4]`.
+    Iyz : float
+        Product moment of area :math:`[m^4]`.
     Ipr : float
-        Polar moment of inertia of rail in :math:`[\mathrm{m^4}]`.
+        Polar moment of area :math:`[m^4]`.
     Ar : float
-        Cross-sectional area of rail in :math:`[\mathrm{m^2}]`.
-    Asr : float
-        Surface area per unit length of rail in :math:`[\mathrm{m^2/m}]`.
-    Vr : float
-        Volume per unit length of rail in :math:`[\mathrm{m^3/m}]`.
+        Cross-section area :math:`[m^2]`.
+    Asr : float, optional, default: None
+        Surface area per unit length of rail :math:`[m^2/m]`.
+    Vr : float, optional, default: None
+        Volume per unit length of rail :math:`[m^3/m]`.
+    kapp_s : float
+        Correction factor for the effective shear due to restrained torsional warping :math:`[-]`.
+    Iw : float
+        Warping constant :math:`[m^6]`.
+    Iwz : float
+        Warping product moment of area :math:`[m^5]`.
+    Iwy : float
+        Warping product moment of area :math:`[m^5]`.
+    k_w : float
+        Warping factor for rail foot :math:`[-]`.
+    J : float
+        Torsional constant :math:`[m^4]`.
+    J_t : float, internal (automatically calculated)
+        Secondary torsional constant, accounting for effective shear area due to
+        restrained warping shear stresses and geometric eccentricities :math:`[m^4]`.
+    J_rs : float, internal (automatically calculated)
+        Effective shear area due to restrained torsional warping :math:`[m^4]`.
+    chi : ndarray, optional, default: None
+        Warping function of the cross-section, given as an array of shape ``(n, 3)`` with
+        the columns ``Y`` :math:`[m]` and ``Z`` :math:`[m]` in the same coordinate system as
+        :attr:`rl_geo`, and the warping value with respect to the shear center
+        :math:`[m^2]`. Values between the points are obtained with :meth:`chi_at`.
 
     Examples
     --------
@@ -79,7 +133,8 @@ class Rail:
     ...     E=2.1e11,
     ...     G=8.1e10,
     ...     nu=0.3,
-    ...     kap=[0.4, 0.4],
+    ...     kapz=0.4,
+    ...     kapy=0.4,
     ...     mr=60.0,
     ...     # ... specify remaining parameters ...
     ... )
@@ -88,100 +143,244 @@ class Rail:
     rl_geo: list[tuple[float, float]]
     E: float
     G: float
-    nu: float
-    kap: list[float]
+    nu: float | None=None
+    kapz: float
+    kapy: float
     mr: float
     rho: float
     etar: float
-    fresr: float
     dr: float
-    gamr: list[float]
-    epsr: list[float]
+    shearc: list[float]
+    centr: list[float]
+    ez: float = field(init=False)
+    ey: float = field(init=False)
     Iyr: float
     Izr: float
-    Itr: float
+    Iyz: float
     Ipr: float
     Ar: float
-    Asr: float
-    Vr: float
+    Asr: float | None=None
+    Vr: float | None=None
+    kapp_s: float
+    Iw: float
+    Iwz: float
+    Iwy: float
+    k_w: float
+    J: float
+    J_t: float = field(init=False)
+    J_rs: float = field(init=False)
+    chi: ndarray | None = field(default=None, repr=False, compare=False)
+    _chi_interpolators: tuple | None = field(default=None, init=False, repr=False, compare=False)
 
-@dataclass(kw_only=True)
-class RailRoughness:
-    r"""Rail Roughness Class.
+    def __post_init__(self):
+        """Post-initialization to calculate derived attributes."""
+        self.ez = self.shearc[1] - self.centr[1]
+        self.ey = self.shearc[0] - self.centr[0]
+        self.J_rs = self.kapp_s * (self.Ipr - self.J)
+        self.J_t = self.J_rs + self.Ar * self.kapy * self.ez**2 + self.Ar * self.kapz * self.ey**2
 
-    Contains a rail roughness spectrum in frequency domain, which can later be used to calculate the
-    rail roughness along the track.
+        if self.chi is not None:
+            self.chi = np.asarray(self.chi, dtype=float)
+            if self.chi.ndim != 2 or self.chi.shape[1] != 3:  # noqa: PLR2004
+                msg = f"chi must have the shape (n, 3) with the columns Y, Z, chi, got {self.chi.shape}."
+                raise ValueError(msg)
 
-    Attributes
-    ----------
-    r_rough : tuple[list[float], list[float]]
-        Rail roughness spectrum :math:`[f, m]`.
-    """
+    def chi_at(self, y: float, z: float) -> float:
+        r"""Return the warping function at a point of the cross-section.
 
-    r_rough: tuple[list[float], list[float]]
+        Parameters
+        ----------
+        y : float
+            Lateral coordinate :math:`[m]`.
+        z : float
+            Vertical coordinate :math:`[m]`.
+
+        Returns
+        -------
+        float
+            Warping function at :math:`(y, z)` in :math:`[m^2]`. Between the points of
+            :attr:`chi` the value is interpolated linearly; outside of them the value of
+            the nearest point is used. If no warping function is given, the warping is
+            neglected and ``0.0`` is returned.
+        """
+        if self.chi is None:
+            return 0.0
+
+        # Building the interpolators is expensive, so it is done once per rail and reused.
+        if self._chi_interpolators is None:
+            points, values = self.chi[:, :2], self.chi[:, 2]
+            self._chi_interpolators = (
+                LinearNDInterpolator(points, values),
+                NearestNDInterpolator(points, values),
+            )
+
+        linear, nearest = self._chi_interpolators
+        value = linear(y, z)
+        if np.isnan(value):
+            value = nearest(y, z)
+        return float(np.squeeze(value))
 
 @dataclass(kw_only=True)
 class DiscrPad:
     r"""Discrete Pad Class.
 
-    Contains the properties of a discrete pad.
+    Contains the properties of a discrete pad. The rotational pad stiffnesses are
+    derived automatically from the translational stiffnesses and the pad geometry
+    according to :cite:p:`thompson_developments_1998`.
 
     Attributes
     ----------
-    sp : list[float], default=[0.0, 0.0]
-        Vertical/lateral pad stiffness (total value) :math:`[N/m]`. Lateral value can be set to zero
-        when lateral rail deflections are omitted.
+    sp_z : float
+        Vertical pad stiffness (total value) :math:`[N/m]`.
+    sp_y : float
+        Lateral pad stiffness (total value) :math:`[N/m]`.
+    sp_x : float
+        Longitudinal pad stiffness (total value) :math:`[N/m]`.
+    sp_w : float, internal (automatically calculated)
+        Warping pad stiffness based on foundation resistance to
+        warping (total value) :math:`[Nm/m]`.
+    sp_xr : float, internal (automatically calculated)
+        Longitudinal rotational pad stiffness (total value) :math:`[Nm/rad]`.
+    sp_yr : float, internal (automatically calculated)
+        Lateral rotational pad stiffness (total value) :math:`[Nm/rad]`.
+    sp_zr : float, internal (automatically calculated)
+        Vertical rotational pad stiffness (total value) :math:`[Nm/rad]`.
+    etap_z : float, optional, default: None
+        Vertical pad loss factor :math:`[-]`.
+    etap_y : float, optional, default: None
+        Lateral pad loss factor :math:`[-]`.
+    etap_x : float, optional, default: None
+        Longitudinal pad loss factor :math:`[-]`.
+    etap_r : float, optional, default: None
+        Rotational pad loss factor :math:`[-]`.
+    dp_z : float, optional, default: None
+        Vertical pad damping coefficient (viscous) :math:`[Ns/m]`.
+    dp_y : float, optional, default: None
+        Lateral pad damping coefficient (viscous) :math:`[Ns/m]`.
+    dp_x : float, optional, default: None
+        Longitudinal pad damping coefficient (viscous) :math:`[Ns/m]`.
+    dp_xr : float, optional, default: None
+        Rotational pad damping coefficient (viscous) :math:`[Nms/rad]`.
+    damping_mode : Literal["viscous", "hysteretic"], internal (automatically calculated)
+        Damping model type.
     wdthp : float
         Pad width in x-direction :math:`[m]`.
-    etap : float
-        Pad loss factor :math:`[-]`.
-    fresp : list[float], default=[0.0, 0.0]
-        Vertical/lateral pad resonance frequencies [Hz]. This frequency is needed for calculating
-        the viscous damping coefficient if it is not provided. Lateral value can be set to zero when
-        lateral rail deflections are omitted.
-    dp : list[float], default=[0.0, 0.0]
-        Vertical/lateral pad damping coefficient (viscous) :math:`[Ns/m]`. Lateral value can be set
-        to zero when lateral rail deflections are omitted.
     """
 
-    sp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    wdthp: float = 0.0
-    etap: float= 0
-    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    dp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
+    sp_z: float
+    sp_y: float
+    sp_x: float
+    sp_w: float = field(init=False)
+    sp_xr: float = field(init=False)
+    sp_yr: float = field(init=False)
+    sp_zr: float = field(init=False)
+    etap_z: float | None = None
+    etap_y: float | None = None
+    etap_x: float | None = None
+    etap_r: float | None = None
+    damping_mode: Literal["viscous", "hysteretic"] = field(init=False)
+    dp_z: float | None = None
+    dp_y: float | None = None
+    dp_x: float | None = None
+    dp_xr: float | None = None
+    wdthp: float
+
+    def __post_init__(self):
+        """Post-initialization to calculate derived attributes."""
+        self.sp_xr = self.sp_z * (self.wdthp**2) / 12.0
+        self.sp_yr = self.sp_z * (self.wdthp**2) / 12.0
+        self.sp_zr = (self.sp_y + self.sp_x) * (self.wdthp ** 2) / 12
+
+        self.damping_mode = _damping_mode(
+            (self.etap_z, self.etap_y, self.etap_x, self.etap_r),
+            (self.dp_z, self.dp_y, self.dp_x, self.dp_xr),
+            "Loss factors",
+            "viscous damping coefficients",
+        )
 
 
 @dataclass(kw_only=True)
 class ContPad:
     r"""Cont Pad Class.
 
-    Contains the properties of a continuous pad.
+    Contains the properties of a continuous pad. The rotational pad stiffnesses are
+    derived automatically from the translational stiffnesses and the pad geometry
+    according to :cite:p:`thompson_developments_1998`.
 
     Attributes
     ----------
-    sp : list[float], default=[0.0, 0.0]
-        Vertical/lateral pad stiffness (per meter) :math:`[N/m^2]`. Lateral value can be set to zero
-        when lateral rail deflections are omitted.
-    etap : float
-        Pad loss factor :math:`[-]`.
-    fresp : list[float], default=[0.0, 0.0]
-        Vertical/lateral pad resonance frequencies :math:`[Hz]`. These frequencies are needed for
-        calculating the viscous damping coefficients if they are not provided. Lateral value can be
-        set to zero when lateral rail deflections are omitted.
-    dp : list[float], default=[0.0, 0.0]
-        Vertical/lateral viscous damping coefficient (per meter) :math:`[Ns/m^2]`. Lateral value can
-        be set to zero when lateral rail deflections are omitted.
+    sp_z : float
+        Vertical pad stiffness (per meter) :math:`[N/m^2]`.
+    sp_y : float
+        Lateral pad stiffness (per meter) :math:`[N/m^2]`.
+    sp_x : float
+        Longitudinal pad stiffness (per meter) :math:`[N/m^2]`.
+    sp_w : float, internal (automatically calculated)
+        Warping pad stiffness based on foundation resistance to warping (per meter) :math:`[N/m^2]`.
+    sp_zr : float, internal (automatically calculated)
+        Vertical rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
+    sp_yr : float, internal (automatically calculated)
+        Lateral rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
+    sp_xr : float, internal (automatically calculated)
+        Longitudinal rotational pad stiffness (per meter) :math:`[Nm/rad/m]`.
+    etap_z : float, optional, default: None
+        Vertical pad loss factor :math:`[-]`.
+    etap_y : float, optional, default: None
+        Lateral pad loss factor :math:`[-]`.
+    etap_x : float, optional, default: None
+        Longitudinal pad loss factor :math:`[-]`.
+    etap_r : float, optional, default: None
+        Rotational pad loss factor :math:`[-]`.
+    dp_z : float, optional, default: None
+        Vertical pad damping coefficient (viscous) :math:`[Ns/m^2]`.
+    dp_y : float, optional, default: None
+        Lateral pad damping coefficient (viscous) :math:`[Ns/m^2]`.
+    dp_x : float, optional, default: None
+        Longitudinal pad damping coefficient (viscous) :math:`[Ns/m^2]`.
+    dp_xr : float, optional, default: None
+        Rotational pad damping coefficient (viscous) :math:`[Ns/m^2]`.
+    damping_mode : Literal["viscous", "hysteretic"], internal (automatically calculated)
+        Damping model type.
+    wdthp : float
+        Equivalent pad width in x- and y-direction :math:`[m]`.
     """
 
-    sp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    etap: float = 0
-    fresp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    dp: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
+    sp_z: float
+    sp_y: float
+    sp_x: float
+    sp_w: float = field(init=False)
+    sp_zr: float = field(init=False)
+    sp_yr: float = field(init=False)
+    sp_xr: float = field(init=False)
+    etap_z: float | None = None
+    etap_y: float | None = None
+    etap_x: float | None = None
+    etap_r: float | None = None
+    damping_mode: Literal["viscous", "hysteretic"] = field(init=False)
+    dp_z: float | None = None
+    dp_y: float | None = None
+    dp_x: float | None = None
+    dp_xr: float | None = None
+    wdthp: float
+
+    def __post_init__(self):
+        """Post-initialization to calculate derived attributes."""
+        self.sp_xr = self.sp_z * (self.wdthp**2) / 12.0
+        self.sp_yr = self.sp_z * (self.wdthp**2) / 12.0
+        self.sp_zr = (self.sp_y + self.sp_x) * (self.wdthp ** 2) / 12
+        self.damping_mode = _damping_mode(
+            (self.etap_z, self.etap_y, self.etap_x, self.etap_r),
+            (self.dp_z, self.dp_y, self.dp_x, self.dp_xr),
+            "Loss factors",
+            "viscous damping coefficients",
+        )
 
 
 @dataclass(kw_only=True)
 class Sleeper:
     r"""Sleeper Class.
+
+    Equivalent sleeper model formulation based on :cite:p:`kostovasilis_analytical_2017`.
 
     Contains the properties of a sleeper.
 
@@ -189,36 +388,114 @@ class Sleeper:
     ----------
     ms : float
         Sleeper mass :math:`[kg]`.
-    Bs : float
+    Is_x : float
+        Sleeper moment of inertia around x-axis :math:`[m^4]`.
+    Is_y : float
+        Sleeper moment of inertia around y-axis :math:`[m^4]`.
+    Is_z : float
+        Sleeper moment of inertia around z-axis :math:`[m^4]`.
+    rhos : float
+        Density of sleeper :math:`[kg/m^3]`.
+    Bs : float, optional, default: None
         Sleeper bending stiffness :math:`[Nm^2]`.
-    ls : float
+    lengs : float
         Sleeper length in y-direction :math:`[m]`.
     wdths : float
         Sleeper width in x-direction :math:`[m]`.
+    heights : float
+        Sleeper height in z-direction :math:`[m]`.
+    z_st : float
+        Vertical distance from sleeper centroid to top of sleeper :math:`[m]`.
+    z_sb : float
+        Vertical distance from sleeper centroid to bottom of sleeper :math:`[m]`.
+    y_sc : float, optional, default: 0.7175
+        Lateral sleeper eccentricity :math:`[m]`.
+        It is half of the track gauge (0.7175 m for standard gauge).
+    f_x : float, optional, default: 1.0
+        Equivalent sleeper factor (x-direction) :math:`[-]`.
+    f_z : float, optional, default: 1.0
+        Equivalent sleeper factor (z-direction) :math:`[-]`.
+    equi_sm : bool, optional, default: True
+        If True the model uses the equivalent sleeper model, otherwise the real sleeper model is
+        used.
     """
 
-    ms: float = 0.0
-    Bs: float = 0.0
-    ls: float = 0.0
-    wdths: float = 0.0
+    ms: float
+    Is_x: float
+    Is_y: float
+    Is_z: float
+    rhos: float
+    Bs: float | None = None
+    lengs: float
+    wdths: float
+    heights: float
+    z_st: float
+    z_sb: float
+    y_sc: float = 0.7175
+    f_z: float = 1.0
+    f_x: float = 1.0
+    equi_sm: bool = True
 
 
 @dataclass(kw_only=True)
 class Slab:
     r"""Slab class.
 
+    Equivalent slab model formulation based on :cite:p:`kostovasilis_analytical_2017`.
+
     Contains the properties of the slab.
 
     Attributes
     ----------
     ms : float
-        Slab mass per unit length :math:`[kg/m]`.
-    ls : float
-        Slab depth :math:`[m]`.
+        Slab mass per meter :math:`[kg/m]`.
+    Is_z : float
+        Slab moment of inertia around z-axis :math:`[m^4/m]`.
+    Is_y : float
+        Slab moment of inertia around y-axis :math:`[m^4/m]`.
+    Is_x : float
+        Slab moment of inertia around x-axis :math:`[m^4/m]`.
+    rhos : float
+        Density of slab :math:`[kg/m^3]`.
+    Bs : float, optional, default: None
+        Slab bending stiffness :math:`[Nm^2]`.
+    lengs : float
+        Slab length in y-direction :math:`[m]`.
+    equ_wdths : float
+        Equivalent slab width in x-direction :math:`[m]`.
+    heights : float
+        Slab height in z-direction :math:`[m]`.
+    z_st : float
+        Vertical distance from slab centroid to top of slab :math:`[m]`.
+    z_sb : float
+        Vertical distance from slab centroid to bottom of slab :math:`[m]`.
+    y_sc : float, optional, default: 0.7175
+        Lateral slab eccentricity :math:`[m]`.
+        It is half of the track gauge (0.7175 m for standard gauge).
+    f_x : float, optional, default: 1.0
+        Equivalent slab factor (x-direction) :math:`[-]`.
+    f_z : float, optional, default: 1.0
+        Equivalent slab factor (z-direction) :math:`[-]`.
+    equi_sm : bool, optional, default: True
+        If True the model uses the equivalent slab model, otherwise the real slab model is
+        used.
     """
 
     ms: float
-    ls: float = 0.0
+    Is_z: float
+    Is_y: float
+    Is_x: float
+    rhos: float
+    Bs: float | None = None
+    lengs: float
+    equ_wdths: float
+    heights: float
+    z_st: float
+    z_sb: float
+    y_sc: float = 0.7175
+    f_z: float = 1.0
+    f_x: float = 1.0
+    equi_sm: bool = True
 
 
 @dataclass(kw_only=True)
@@ -234,25 +511,68 @@ class Ballast:
 
     Attributes
     ----------
-    sb : list[float], default=[0.0, 0.0]
-        Vertical/lateral ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
-        Lateral value can be set to zero when lateral rail deflections are omitted.
-
-    etab : float
-        Ballast loss factor :math:`[-]`.
-    fresb : list[float], default=[0.0, 0.0]
-        Vertical/lateral ballast resonance frequencies :math:`[Hz]`. These frequencies are needed
-        for calculating the viscous damping coefficients if they are not provided. Lateral value can
-        be set to zero when lateral rail deflections are omitted.
-    db : list[float], default=[0.0, 0.0]
-        Vertical/lateral viscous damping coefficient (per meter) :math:`[Ns/m]`. Lateral value can
-        be set to zero when lateral rail deflections are omitted.
+    sb_z : float
+        Vertical ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
+    sb_y : float
+        Lateral ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
+    sb_x : float
+        Longitudinal ballast stiffness (total value :math:`[N/m]` or per meter :math:`[N/m^2]`).
+    sb_zr : float, internal (automatically calculated)
+        Vertical rotational ballast stiffness :math:`[Nm/rad]`.
+    sb_yr : float, internal (automatically calculated)
+        Lateral rotational ballast stiffness :math:`[Nm/rad]`.
+    sb_xr : float, internal (automatically calculated)
+        Longitudinal rotational ballast stiffness :math:`[Nm/rad]`.
+    etab_z : float, optional, default: None
+        Vertical ballast loss factor :math:`[-]`.
+    etab_y : float, optional, default: None
+        Lateral ballast loss factor :math:`[-]`.
+    etab_x : float, optional, default: None
+        Longitudinal ballast loss factor :math:`[-]`.
+    etab_r : float, optional, default: None
+        Rotational ballast loss factor :math:`[-]`.
+    db_z : float, optional, default: None
+        Vertical ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
+    db_y : float, optional, default: None
+        Lateral ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
+    db_x : float, optional, default: None
+        Longitudinal ballast damping coefficient (viscous) :math:`[Ns/m^2]`.
+    db_zr : float, optional, default: None
+        Rotational ballast damping coefficient for z-axis (viscous) :math:`[Nms/rad]`.
+    db_yr : float, optional, default: None
+        Rotational ballast damping coefficient for y-axis (viscous) :math:`[Nms/rad]`.
+    db_xr : float, optional, default: None
+        Rotational ballast damping coefficient for x-axis (viscous) :math:`[Nms/rad]`.
+    damping_mode : Literal["viscous", "hysteretic"], internal (automatically calculated)
+        Damping model type.
     """
 
-    sb: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    etab: float = 0.0
-    fresb: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
-    db: list[float] = field(default_factory=lambda: [0.0, 0.0], metadata={"default_repr": "[0.0, 0.0]"})
+    sb_z: float
+    sb_y: float
+    sb_x: float
+    sb_xr: float = field(init=False)
+    sb_yr: float = field(init=False)
+    sb_zr: float = field(init=False)
+    etab_z: float | None = None
+    etab_y: float | None = None
+    etab_x: float | None = None
+    etab_r: float | None = None
+    damping_mode: Literal["viscous", "hysteretic"] = field(init=False)
+    db_z: float | None = None
+    db_y: float | None = None
+    db_x: float | None = None
+    db_xr: float | None = None
+    db_yr: float | None = None
+    db_zr: float | None = None
+
+    def __post_init__(self):
+        """Validate that one complete damping representation is provided."""
+        self.damping_mode = _damping_mode(
+            (self.etab_z, self.etab_y, self.etab_x, self.etab_r),
+            (self.db_z, self.db_y, self.db_x, self.db_xr, self.db_yr, self.db_zr),
+            "Loss factors",
+            "viscous damping coefficients",
+        )
 
 
 @dataclass(kw_only=True)

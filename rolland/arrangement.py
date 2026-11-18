@@ -30,7 +30,18 @@ class Arrangement(ABC):
 
     @abstractmethod
     def generate(self, num_mount):
-        """Generate count repetitions of objects."""
+        """Generate `num_mount` repetitions of objects.
+
+        Parameters
+        ----------
+        num_mount : int
+            The number of repetitions to generate.
+
+        Yields
+        ------
+        Any
+            The repeated item(s).
+        """
 
 
 class PeriodicArrangement(Arrangement):
@@ -48,7 +59,7 @@ class PeriodicArrangement(Arrangement):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
@@ -61,7 +72,7 @@ class PeriodicArrangement(Arrangement):
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
     >>> sleeper = PeriodicArrangement(item=[thesleeperA, thesleeperB])
     >>> tr = ArrangedBallastedSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
     ...     distance=distance,
@@ -69,7 +80,18 @@ class PeriodicArrangement(Arrangement):
     """
 
     def generate(self, num_mount):
-        """Generate count repetitions of objects."""
+        """Generate `num_mount` repetitions of objects.
+
+        Parameters
+        ----------
+        num_mount : int
+            The number of repetitions to generate.
+
+        Yields
+        ------
+        Any
+            The repeated item(s).
+        """
         c = 0
         while c < num_mount:
             if isinstance(self.item, list):
@@ -96,7 +118,7 @@ class RandomArrangement(Arrangement):
 
     Example
     --------
-    >>> from rolland.database.rail.db_rail import UIC60
+    >>> from rolland.database.rail.db_rail import rail_60E1
     >>> from rolland.components import DiscrPad, Sleeper
     >>> from rolland.arrangement import RandomArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
@@ -109,7 +131,7 @@ class RandomArrangement(Arrangement):
     >>> distance = RandomArrangement(item=[0.65, 0.5])
     >>> sleeper = RandomArrangement(item=[thesleeperA, thesleeperB])
     >>> tr = ArrangedBallastedSingleRailTrack(
-    ...     rail=UIC60,
+    ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
     ...     distance=distance,
@@ -117,7 +139,18 @@ class RandomArrangement(Arrangement):
     """
 
     def generate(self, num_mount):
-        """Generate count repetitions of objects."""
+        """Generate `num_mount` repetitions of objects.
+
+        Parameters
+        ----------
+        num_mount : int
+            The number of repetitions to generate.
+
+        Yields
+        ------
+        Any
+            The repeated item(s).
+        """
         for _ in range(num_mount):
             if isinstance(self.item, list):
                 yield random.choice(self.item)
@@ -141,7 +174,8 @@ class RandomArrangement(Arrangement):
 
         Returns
         -------
-        object
+        float
+            A random value from the truncated normal distribution.
         """
         sd = sd + 1e-6  # Low value added to avoid error.
         minv = minv - 1e-6

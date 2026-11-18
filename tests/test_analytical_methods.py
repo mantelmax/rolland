@@ -1,6 +1,7 @@
 """Tests for analytical methods in rolland package."""
 
 import csv
+import dataclasses
 
 import numpy as np
 import pytest
@@ -17,12 +18,12 @@ from rolland import (
     Slab,
     Sleeper,
 )
-from rolland.database.rail.db_rail import UIC60
+from rolland.database.rail.db_rail import rail_60E1
 from rolland.methods import (
-    EBBCont1LSupp,
-    EBBCont2LSupp,
-    TSDiscr1LSupp,
-    TSDiscr2LSupp,
+    EBBCont1L,
+    EBBCont2L,
+    TSBDiscr1L,
+    TSBDiscr2L,
 )
 
 # Constants
@@ -31,7 +32,42 @@ FREQUENCY_RANGE = linspace(20, 3000, 1500)
 FORCE = 1
 X_POSITION = 0
 X_EXCIT = 240 * 0.3
-RELATIVE_TOLERANCE = 1e-5
+
+REFERENCE_RAIL = dataclasses.replace(
+    rail_60E1, G=81e9, kapz=0.4, kapy=0.54, rho=7850, Iyr=3038.30e-8, Ipr=3550.60e-8, Ar=76.70e-4,
+)
+
+
+RELATIVE_TOLERANCE = 1e-9
+ABSOLUTE_TOLERANCE = 0.0
+
+# Sleeper/slab geometry.
+SL_LEN, SL_WIDTH, SL_HEIGHT, RHOS = 2.5, 0.245, 0.185, 2648
+_M = RHOS * SL_LEN * SL_WIDTH * SL_HEIGHT
+_GEOMETRY = {
+    'Is_x': (SL_LEN**2 + SL_HEIGHT**2) * _M / 12 / RHOS,
+    'Is_y': (SL_HEIGHT**2 + SL_WIDTH**2) * _M / 12 / RHOS,
+    'Is_z': (SL_LEN**2 + SL_WIDTH**2) * _M / 12 / RHOS,
+    'rhos': RHOS,
+    'lengs': SL_LEN,
+    'heights': SL_HEIGHT,
+    'z_st': -SL_HEIGHT / 2,
+    'z_sb': SL_HEIGHT / 2,
+    'equi_sm': False,
+}
+
+
+def _viscous_pad():
+    """Pad for the Euler-Bernoulli methods, which use viscous damping."""
+    return ContPad(sp_z=300e6, sp_y=0.0, sp_x=0.0,
+                   dp_z=30000, dp_y=0.0, dp_x=0.0, dp_xr=0.0, wdthp=0.0)
+
+
+def _hysteretic_pad():
+    """Pad for the Timoshenko methods, which use loss factors."""
+    return DiscrPad(sp_z=300e6, sp_y=0.0, sp_x=0.0,
+                    etap_z=0.25, etap_y=0.0, etap_x=0.0, etap_r=0.0, wdthp=0.0)
+
 
 @pytest.fixture(scope="module")
 def load_csv_data():
@@ -51,54 +87,69 @@ def load_csv_data():
         pytest.fail(f"Data format error in CSV: {e}")
     return data
 
+
 @pytest.fixture(scope="module")
 def tracks():
     """Create different types of tracks for testing."""
     return {
         'track_cont_slab': ContSlabSingleRailTrack(
-            rail=UIC60,
-            pad=ContPad(sp=[300e6, 0], dp=[30000, 0], etap=0.25),
+            rail=REFERENCE_RAIL,
+            pad=_viscous_pad(),
+            slab=Slab(ms=250, equ_wdths=SL_WIDTH, **_GEOMETRY),
+            z_f=81e-3,
+            y_f=0.0,
         ),
         'track_cont_ball': ContBallastedSingleRailTrack(
-            rail=UIC60,
-            pad=ContPad(sp=[300e6, 0], dp=[30000, 0], etap=0.25),
-            slab=Slab(ms=250),
-            ballast=Ballast(sb=[100e6, 0], db=[80000, 0]),
+            rail=REFERENCE_RAIL,
+            pad=_viscous_pad(),
+            slab=Slab(ms=250, equ_wdths=SL_WIDTH, **_GEOMETRY),
+            ballast=Ballast(sb_z=100e6, sb_y=0.0, sb_x=0.0,
+                            db_z=80000, db_y=0.0, db_x=0.0,
+                            db_xr=0.0, db_yr=0.0, db_zr=0.0),
+            z_f=81e-3,
+            y_f=0.0,
         ),
         'track_discr_slab': SimplePeriodicSlabSingleRailTrack(
-            rail=UIC60,
-            pad=DiscrPad(sp=[300e6, 0], etap=0.25),
-            slab=Slab(ms=162),
+            rail=REFERENCE_RAIL,
+            pad=_hysteretic_pad(),
+            slab=Slab(ms=162, equ_wdths=SL_WIDTH, **_GEOMETRY),
             num_mount=241,
             distance=0.6,
+            z_f=81e-3,
+            y_f=0.0,
         ),
         'track_discr_ball': SimplePeriodicBallastedSingleRailTrack(
-            rail=UIC60,
-            pad=DiscrPad(sp=[300e6, 0], etap=0.25),
-            sleeper=Sleeper(ms=162),
-            ballast=Ballast(sb=[50e6, 0], etab=1),
+            rail=REFERENCE_RAIL,
+            pad=_hysteretic_pad(),
+            sleeper=Sleeper(ms=162, wdths=SL_WIDTH, **_GEOMETRY),
+            ballast=Ballast(sb_z=50e6, sb_y=0.0, sb_x=0.0,
+                            etab_z=1.0, etab_y=0.0, etab_x=0.0, etab_r=0.0),
             num_mount=241,
             distance=0.6,
+            z_f=81e-3,
+            y_f=0.0,
         ),
     }
+
 
 @pytest.fixture(scope="module")
 def methods(tracks):
     """Create analytical methods for testing."""
     return [
-        EBBCont1LSupp(track=tracks['track_cont_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION),
-        EBBCont2LSupp(track=tracks['track_cont_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION),
-        TSDiscr2LSupp(track=tracks['track_discr_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_EXCIT,
-                      x_excit=X_EXCIT),
-        TSDiscr1LSupp(track=tracks['track_discr_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_EXCIT,
-                      x_excit=X_EXCIT),
+        EBBCont1L(track=tracks['track_cont_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION, damp_type='viscous'),
+        EBBCont2L(track=tracks['track_cont_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_POSITION, damp_type='viscous'),
+        TSBDiscr2L(track=tracks['track_discr_ball'], f=FREQUENCY_RANGE, force=FORCE, x=X_EXCIT,
+                      x_excit=X_EXCIT, damp_type='hysteretic'),
+        TSBDiscr1L(track=tracks['track_discr_slab'], f=FREQUENCY_RANGE, force=FORCE, x=X_EXCIT,
+                      x_excit=X_EXCIT, damp_type='hysteretic'),
     ]
 
+
 @pytest.mark.parametrize("method_name", [
-    'EBBCont1LSupp',
-    'EBBCont2LSupp',
-    'TSDiscr2LSupp',
-    'TSDiscr1LSupp',
+    'EBBCont1L',
+    'EBBCont2L',
+    'TSBDiscr2L',
+    'TSBDiscr1L',
 ])
 def test_analytical_methods(method_name, methods, load_csv_data):
     """Test analytical methods against precomputed data."""
@@ -108,8 +159,18 @@ def test_analytical_methods(method_name, methods, load_csv_data):
         pytest.fail(f"Method {method_name} not found in the created methods.")
 
     method.compute_mobility()
+    csv_key_map = {
+        'EBBCont1L': 'EBBCont1LSupp',
+        'EBBCont2L': 'EBBCont2LSupp',
+        'TSBDiscr1L': 'TSDiscr1LSupp',
+        'TSBDiscr2L': 'TSDiscr2LSupp',
+    }
     for i, freq in enumerate(method.f):
-        expected_value = load_csv_data[freq][method_name]
+        expected_value = load_csv_data[freq][csv_key_map[method_name]]
         actual_value = abs(method.mobility[i])
-        assert np.isclose(actual_value, expected_value, rtol=RELATIVE_TOLERANCE), \
+        assert np.isclose(actual_value, expected_value,
+                          rtol=RELATIVE_TOLERANCE, atol=ABSOLUTE_TOLERANCE), \
             f"Mismatch in {method_name} at frequency {freq}: expected {expected_value}, got {actual_value}"
+
+
+

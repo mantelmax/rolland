@@ -1,136 +1,98 @@
 <picture>
-  <source srcset="docs/source/images/logo_rolland_light.svg" media="(prefers-color-scheme: dark)">
-  <img src="docs/source/images/logo_rolland_dark.svg" alt="Logo" width="100">
+  <source srcset="docs/source/images/logo_rolland_light.svg" media="(prefers-color-scheme: light)">
+  <img src="docs/source/images/logo_rolland_dark.svg" alt="Logo" width="160">
 </picture>
 
-
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/mantelmax/rolland)
-[![Documentation Status](https://readthedocs.org/projects/rolland-rolling-noise-and-dynamics/badge/?version=latest)](https://rolland-rolling-noise-and-dynamics.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://img.shields.io/readthedocs/rolland-rolling-noise-and-dynamics)](https://rolland-rolling-noise-and-dynamics.readthedocs.io/en/latest/?badge=latest)
 [![Python Version](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://www.python.org/)
-
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21920225-blue.svg)](https://doi.org/10.5281/zenodo.21920225)
 
 # Rolland
-Rolling Noise and Dynamics (Rolland) is an advanced simulation and calculation model designed to analyze, predict, 
-and optimize the acoustic properties of railway tracks, with a focus on realistic, efficient, and fast computations. 
 
-# Features
-**Current Features:**
-- Calculates the track response for a non-moving gaussian impulse at a certain position
-- Applies Finite Difference Method in time domain
-- Allows the definition of arbitrary track structures
-  - Enables periodic or stochastic variations of the track properties (e.g. stochastically varying sleeper distances)
-  - Enables the representation of track property deviations that occur in practise
-- Includes several analytical models for comparison and validation
+Rolling Noise and Dynamics (**Rolland**) is an open-source, high-performance time-domain simulation framework designed to analyze, predict, and optimize the dynamic and acoustic properties of railway tracks.
 
-**Planned Features:**
-- Full rail dynamics
-- Consideration of rail radiation
-- Consideration of non-linear effects
-- Excitation by multiple moving wheels
+By employing an explicit Finite Difference Method (FDM) scheme, **Rolland** solves 13 differential equations of motion alongside 14 additional auxiliary differential equations corresponding to the boundary domain. This captures full track dynamics—including coupled vertical and lateral bending, longitudinal waves, axial torsion, cross-sectional warping, and sleeper movement under eccentric excitation and support conditions. The framework incorporates Complex Frequency-Shifted Perfectly Matched Layers (CFS-PML) for infinite track modeling and supports spatially varying track properties as well as moving excitation sources.
 
 <picture>
-  <source srcset="docs/source/images/mwi_github_dark.png" media="(prefers-color-scheme: dark)">
-  <img src="docs/source/images/mwi_light.png">
+  <source srcset="docs/source/images/mwi_animated_github_dark.gif" media="(prefers-color-scheme: dark)">
+  <img src="docs/source/images/mwi_animated_github_white.gif">
+</picture>
+
+# Key Features
+
+- **Full Track Dynamics:** Solves 13 differential equations of motion alongside 14 additional auxiliary differential equations to capture vertical and lateral bending waves, longitudinal waves, torsional waves, and warping effects together with sleeper movement and eccentric support reactions.
+- **Fast Time-Domain Solver:** Uses explicit Finite Difference Method (FDM) schemes with high-order stencils for fast simulations.
+- **Infinite Track Boundary (CFS-PML):** Uses absorbing boundary layers to eliminate artificial wave reflections.
+- **Flexible Track Structures:** Supports ballasted and slab tracks with continuous or discrete supports, including spatial (periodic/stochastic) track property variations.
+- **Excitation:** Includes stationary excitation (Gaussian impulse) and moving sources (e.g. moving random force).
+- **Post-Processing & Validation:** Computes point/transfer mobility, Track Decay Rate (TDR), and provides built-in reference models for easy validation.
+
+**Planned Features:**
+
+- Non-linear Hertzian contact dynamics for wheel-rail interaction.
+- Multi-wheel vehicle pass-by excitation models.
+- Rail acoustic radiation modeling.
+
+<picture>
+  <source srcset="docs/source/images/displ_sum_animated_github_dark.gif" media="(prefers-color-scheme: dark)">
+  <img src="docs/source/images/displ_sum_animated_github_white.gif">
 </picture>
 
 # Installation
-To install Rolland, you can use pip. It is recommended to create a virtual environment first.
+
+To install **Rolland**, run:
+
 ```bash
-pip install git+https://github.com/mantelmax/rolland.git
+pip install rolland
 ```
 
 # Documentation
-Documentation is available [here](https://rolland-rolling-noise-and-dynamics.readthedocs.io) with a 
-how to section and examples.
 
-# Example
-This example determines the track response of a double layer track with discrete mounting positions.
-The track is excited between two sleepers by a Gaussian impulse.
+Documentation is available [here](https://rolland-rolling-noise-and-dynamics.readthedocs.io) with how-to guides and detailed API reference.
 
-```python
-"""
-Example: Track Vibration Analysis using Rolland API
+# Contributing
 
-This example demonstrates how to:
-    1. Create a railway track model
-    2. Apply excitation and boundary conditions
-    3. Run a vibration simulation
-    4. Analyze and plot the results
-"""
+Contributions to **Rolland** are welcome! Whether you are reporting bugs, improving documentation, or submitting pull requests for new features:
 
-# Import required components from Rolland library
-from rolland import DiscrPad, Sleeper, Ballast
-from rolland.database.rail.db_rail import UIC60  # Standard rail profile
-from rolland import SimplePeriodicBallastedSingleRailTrack
-from rolland import (
-    PMLRailDampVertic, 
-    GaussianImpulse, 
-    DiscretizationEBBVerticConst, 
-    DeflectionEBBVertic
-)
-from rolland.postprocessing import Response as resp, TDR
+1. Fork the repository on GitHub.
+2. Create a feature branch (`git checkout -b feature/amazing-feature`).
+3. Ensure code formatting meets requirements using `ruff check` and tests pass with `pytest`.
+4. Submit a Pull Request with a clear summary of your changes.
 
-# 1. TRACK DEFINITION ----------------------------------------------------------
-# Create a ballasted single rail track model with periodic supports
-track = SimplePeriodicBallastedSingleRailTrack(
-    rail=UIC60,                 # Standard UIC60 rail profile
-    pad=DiscrPad(
-        sp=[180e6, 0],          # Stiffness properties [N/m]
-        dp=[18000, 0]           # Damping properties [Ns/m]
-    ),
-    sleeper=Sleeper(ms=150),    # Sleeper mass [kg]
-    ballast=Ballast(
-        sb=[105e6, 0],          # Ballast stiffness [N/m]
-        db=[48000, 0]           # Ballast damping [Ns/m]
-    ),
-    num_mount=243,              # Number of discrete mounting positions
-    distance=0.6                # Distance between sleepers [m]
-)
+# License
 
-# 2. SIMULATION SETUP ---------------------------------------------------------
-# Define boundary conditions (Perfectly Matched Layer absorbing boundary)
-boundary = PMLRailDampVertic(l_bound=33.0)  # 33.0 m boundary domain
+This project is licensed under the **BSD 3-Clause License**. See the `pyproject.toml` file for licensing metadata.
 
-# Define excitation (Gaussian impulse between sleepers at 71.7m)
-excitation = GaussianImpulse(x_excit=71.7)
+# Citation
 
-# 3. DISCRETIZATION & SIMULATION ----------------------------------------------
-# Set up numerical discretization parameters
-discretization = DiscretizationEBBVerticConst(
-    track=track,
-    bound=boundary,
-)
+If you use **Rolland** for academic work, please consider citing both our publication:
 
-# Run the simulation and calculate deflection over time
-deflection_results = DeflectionEBBVertic(
-    discr=discretization, 
-    excit=excitation
-)
+> Mantel, M., & Sarradj, E. (2026). Time-domain modeling of coupled wave propagation in discretely supported railway tracks. Computers & Structures, 332, 108432. https://doi.org/10.1016/j.compstruc.2026.108432
 
-# 4. POSTPROCESSING & VISUALIZATION -------------------------------------------
-# 4.1 Calculate frequency response at excitation point
-response = resp(results=deflection_results)
-
-# Plot mobility frequency response
-resp.plot(
-    [(response.freq, abs(response.mob))],
-    ['SimplePeriodicBallastedSingleRailTrack'],
-    title='Frequency Response',
-    x_label='Frequency [Hz]',
-    y_label='Mobility [m/Ns]',
-)
-
-# 4.2 Calculate Track Decay Rate (TDR)
-tdr = TDR(results=deflection_results)
-
-# Plot TDR
-resp.plot([(tdr.freq, tdr.tdr)],
-    ['SimplePeriodicBallastedSingleRailTrack'],
-    title='Track-Decay-Rate',
-    x_label='f [Hz]',
-    y_label='TDR [dB/m]',
-    plot_type='loglog')
+```bibtex
+@article{mantel2026timedomain,
+  author  = {Mantel, Maximilian and Sarradj, Ennes},
+  title   = {Time-domain modeling of coupled wave propagation in discretely supported railway tracks},
+  journal = {Computers \& Structures},
+  volume  = {332},
+  pages   = {108432},
+  year    = {2026},
+  doi     = {https://doi.org/10.1016/j.compstruc.2026.108432},
+}
 ```
 
-![Example](docs/source/images/example_readme.png)
-![Example](docs/source/images/example_readme_tdr.png)
+and our software:
+
+> Mantel, M., Wagner, B., & Sarradj, E. (2026). Rolland: A time-domain simulation framework for railway track dynamics and rolling noise (Version 26.11) [Computer software]. Zenodo. https://doi.org/10.5281/zenodo.21920225
+
+```bibtex
+@software{mantel2026rolland_api,
+  author  = {Mantel, Maximilian and Wagner, Benjamin and Sarradj, Ennes},
+  title   = {Rolland: A Time-Domain Simulation Framework for Railway Track Dynamics and Rolling Noise},
+  year    = {2026},
+  version = {v26.11},
+  doi     = {10.5281/zenodo.21920225},
+  url     = {https://github.com/mantelmax/rolland}
+}
+```
