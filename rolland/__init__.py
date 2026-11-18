@@ -4,7 +4,7 @@
 
 """The Rolland library: several classes for the implementation of rolling noise calculation."""
 
-__version__ = "26.08"
+__version__ = "26.11"
 
 from .arrangement import Arrangement, PeriodicArrangement, RandomArrangement
 from .boundary import CFSPML
