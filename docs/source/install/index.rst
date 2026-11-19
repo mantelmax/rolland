@@ -23,6 +23,11 @@ To update Rolland to the latest version, run:
 
 *(Optional: To install a specific version, use `pip install rolland==<version>`)*
 
+Sound Radiation Dependencies
+----------------------------
+The sound radiation module (:mod:`rolland.radiation`) uses ``gmsh``, ``librosa`` and ``soundfile``, which are installed automatically.
+On Linux, ``gmsh`` may additionally require the system library ``libGLU`` (e.g. ``sudo apt-get install libglu1-mesa``).
+
 Platform Support & Windows
 --------------------------
 Rolland is fully supported and tested on **Linux** and **macOS**.

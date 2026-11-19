@@ -28,7 +28,7 @@ In this section, you can find various examples that demonstrate the capabilities
    :maxdepth: 2
    :titlesonly:
 
-   radiation/index
+   radiation/vertical_impulse_radiation
 
 
 .. tab-set::
@@ -79,4 +79,13 @@ In this section, you can find various examples that demonstrate the capabilities
 
    .. tab-item:: Radiation
 
-      Examples for this category will be added shortly.
+      Examples demonstrating the sound radiation of the rail.
+
+      .. grid:: 1 2 2 2
+         :gutter: 3
+
+         .. grid-item-card:: Sound Radiation of a Vertically Excited Rail
+            :link: radiation/vertical_impulse_radiation
+            :link-type: doc
+
+            Monopole radiation of a discrete slab track (1-layer discr.) under a vertical Gaussian impulse.
