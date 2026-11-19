@@ -9,6 +9,9 @@ The full deflection wavefield of the rail is recorded and radiated to a receiver
 using a simplified monopole model: every surface triangle of the rail mesh acts as a monopole source.
 The resulting A-weighted sound pressure is plotted and exported as a calibrated WAV file.
 
+.. note:: The radiation module is still under development and has not yet been validated against measurements
+   or reference models.
+
 .. note:: The radiation model requires the full wavefield, i.e. ``Deflection(store="full")``. Use ``skip`` to
    reduce the stored time steps and memory usage (here ``skip=10`` gives an effective sample rate of 20 kHz).
 
