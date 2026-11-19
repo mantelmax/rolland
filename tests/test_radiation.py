@@ -7,6 +7,7 @@ import numpy as np
 import pytest
 import soundfile as sf
 
+import rolland
 from rolland.radiation import NORMALIZE_PEAK, Radiation, SimplifiedMonopoleRadiation, a_weighting
 
 mpl.use('Agg')
@@ -96,6 +97,21 @@ def make_radiation(result=None, **kwargs):
 def rad():
     """Radiation model with default settings."""
     return make_radiation()
+
+
+# --- Package import ----------------------------------------------------------------
+
+
+def test_lazy_import_from_package():
+    """Radiation classes are available from the package namespace."""
+    assert rolland.SimplifiedMonopoleRadiation is SimplifiedMonopoleRadiation
+    assert rolland.a_weighting is a_weighting
+
+
+def test_unknown_package_attribute():
+    """Unknown attributes still raise AttributeError."""
+    with pytest.raises(AttributeError):
+        _ = rolland.does_not_exist
 
 
 # --- A-weighting ------------------------------------------------------------------
