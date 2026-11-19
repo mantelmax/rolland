@@ -22,6 +22,7 @@ API Reference
    rolland/boundary
    rolland/excitation
    rolland/deflection
+   rolland/radiation
 
 .. toctree::
    :hidden:
@@ -108,6 +109,12 @@ API Reference
             :link-type: doc
 
             Time-domain finite difference wavefield deflection solvers and record stores.
+
+         .. grid-item-card:: Radiation
+            :link: rolland/radiation
+            :link-type: doc
+
+            Sound radiation of the rail with a simplified monopole model and A-weighting.
 
    .. tab-item:: Reference Models
 
