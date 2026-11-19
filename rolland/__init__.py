@@ -13,7 +13,7 @@ from .deflection import Deflection
 from .domainsetup import DomSetup
 from .excitation import Excitation, GaussianImpulse
 from .postprocessing import PostProcessing, TrackDecayRate, TrackResponse, VehicleResponse
-from .radiation import SimplifiedMonopoleRadiation
+from .radiation import Radiation, SimplifiedMonopoleRadiation, a_weighting
 from .track import (
     ArrangedBallastedSingleRailTrack,
     ArrangedSlabSingleRailTrack,
@@ -50,5 +50,7 @@ __all__ = [
     'TrackResponse',
     'TrackDecayRate',
     'VehicleResponse',
+    'Radiation',
     'SimplifiedMonopoleRadiation',
+    'a_weighting',
 ]
