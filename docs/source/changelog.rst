@@ -1,6 +1,14 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+**New Features**
+
+* **Sound radiation (experimental)**: New module :mod:`rolland.radiation` with :class:`~rolland.radiation.SimplifiedMonopoleRadiation`. The radiated sound pressure is computed from a full ``Deflection`` wavefield using a monopole model on a GMSH surface mesh of the rail, with optional ground reflection (image source method). Results are available as amplitude spectrum, spectral density and time signal, optionally A-weighted (IEC 61672-1, default), and can be exported as calibrated WAV file (0 dBFS = 20 Pa). Adds ``gmsh``, ``librosa`` and ``soundfile`` as dependencies.
+* New example: :doc:`Sound Radiation of a Vertically Excited Rail </examples/radiation/vertical_impulse_radiation>`.
+
 v26.11
 ------
 
