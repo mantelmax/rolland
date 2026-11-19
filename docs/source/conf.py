@@ -37,6 +37,9 @@ myst_enable_extensions = [
     'amsmath',
 ]
 
+# Optional dependencies of rolland.radiation (not required to build the docs)
+autodoc_mock_imports = ['gmsh', 'librosa', 'soundfile']
+
 # Do not prefix class names with full module paths in signatures
 add_module_names = False
 
@@ -81,6 +84,9 @@ autosummary_filename_map = {
     'rolland.deflection.Deflection': 'Deflection',
     'rolland.domainsetup.DomSetup': 'DomSetup',
     'rolland.postprocessing.PostProcessing': 'PostProcessing',
+    'rolland.radiation.Radiation': 'Radiation',
+    'rolland.radiation.SimplifiedMonopoleRadiation': 'SimplifiedMonopoleRadiation',
+    'rolland.radiation.a_weighting': 'a_weighting',
 }
 
 
