@@ -356,6 +356,12 @@ class SimplifiedMonopoleRadiation(Radiation):
     are both stored; ``a_weighting`` selects which ones are used by
     :meth:`show` and :meth:`to_wav`.
 
+    .. note:: This is a simplified approach that has not yet been validated
+       against measurements or reference models (e.g. BEM). Near-field terms
+       are neglected, i.e. the model assumes :math:`kr \gg 1` and receiver
+       distances that are large compared to the rail cross-section. It requires
+       the optional dependencies ``pip install rolland[radiation]``.
+
     Attributes
     ----------
     measurement_point : ndarray
