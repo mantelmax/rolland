@@ -28,6 +28,7 @@ dependencies = [
     "devito>=4.8.22",
     "gmsh",
     "librosa",
+    "soundfile",
 ]
 
 # Optional dependencies (pip install rolland[dev,docs,io])
@@ -68,8 +69,6 @@ all = [
     "sphinx-rtd-theme>=1.0",
     "pandas>=2.0",
     "pyyaml>=6.0",
-    "gmsh",
-    "librosa",
 ]
 
 [build-system]
