@@ -77,7 +77,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
         ms=300.05,
         rhos=2648,
         
-        # Inertia [kg*m^2]
+        # Moments of inertia, normalized by density [m^5]
         Is_x=0.0593,
         Is_y=0.00089,
         Is_z=0.0596,
@@ -94,7 +94,7 @@ with a single or double layer. See :cite:`thompson2024j` for more information.
         # Mass per unit length [kg/m]
         ms=300.05 / slep_dist,
         
-        # Inertia per unit length [kg*m^2/m]
+        # Moments of inertia per unit length, normalized by density [m^4]
         Is_x=0.0593 / slep_dist,
         Is_y=0.00089 / slep_dist,
         Is_z=0.0596 / slep_dist,
