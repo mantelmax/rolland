@@ -57,7 +57,7 @@ and lateral frequency responses of a track model with structural irregularity.
     sleeper = Sleeper(
         # Mass [kg] and Density [kg/m^3]
         ms=300.05, rhos=2648,
-        # Inertia [kg*m^2]
+        # Moments of inertia, normalized by density [m^5]
         Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
         # Geometry [m]
         lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925

@@ -54,7 +54,7 @@ The track is excited between two sleepers by a Gaussian impulse.
         ms=300.05,
         rhos=2648,
         
-        # Inertia [kg*m^2]
+        # Moments of inertia, normalized by density [m^5]
         Is_x=0.0593,
         Is_y=0.00089,
         Is_z=0.0596,
