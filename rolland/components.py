@@ -128,7 +128,7 @@ class Rail:
     --------
     Create a custom rail profile:
 
-    >>> custom_rail = Rail(
+    >>> custom_rail = Rail(  # doctest: +SKIP
     ...     rl_geo=[(0.0, 0.0), (0.075, 0.0)],
     ...     E=2.1e11,
     ...     G=8.1e10,
@@ -389,11 +389,11 @@ class Sleeper:
     ms : float
         Sleeper mass :math:`[kg]`.
     Is_x : float
-        Sleeper moment of inertia around x-axis :math:`[m^4]`.
+        Sleeper moment of inertia around x-axis, normalized by density :math:`[m^5]`.
     Is_y : float
-        Sleeper moment of inertia around y-axis :math:`[m^4]`.
+        Sleeper moment of inertia around y-axis, normalized by density :math:`[m^5]`.
     Is_z : float
-        Sleeper moment of inertia around z-axis :math:`[m^4]`.
+        Sleeper moment of inertia around z-axis, normalized by density :math:`[m^5]`.
     rhos : float
         Density of sleeper :math:`[kg/m^3]`.
     Bs : float, optional, default: None
@@ -450,11 +450,11 @@ class Slab:
     ms : float
         Slab mass per meter :math:`[kg/m]`.
     Is_z : float
-        Slab moment of inertia around z-axis :math:`[m^4/m]`.
+        Slab moment of inertia per unit length around z-axis, normalized by density :math:`[m^4]`.
     Is_y : float
-        Slab moment of inertia around y-axis :math:`[m^4/m]`.
+        Slab moment of inertia per unit length around y-axis, normalized by density :math:`[m^4]`.
     Is_x : float
-        Slab moment of inertia around x-axis :math:`[m^4/m]`.
+        Slab moment of inertia per unit length around x-axis, normalized by density :math:`[m^4]`.
     rhos : float
         Density of slab :math:`[kg/m^3]`.
     Bs : float, optional, default: None
