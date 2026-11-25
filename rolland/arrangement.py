@@ -60,23 +60,37 @@ class PeriodicArrangement(Arrangement):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import DiscrPad, Sleeper
+    >>> from rolland.components import Ballast, DiscrPad, Sleeper
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
 
-    >>> thepadA = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> thepadB = DiscrPad(sp = [400*10**6, 0], dp = [40000, 0])
-    >>> thesleeperA = Sleeper(ms = 150)
-    >>> thesleeperB = Sleeper(ms = 200)
+    >>> thepadA = DiscrPad(
+    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thepadB = DiscrPad(
+    ...     sp_z=60e6, sp_y=20e6, sp_x=20e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thesleeper = Sleeper(
+    ...     ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
+    ...     lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    >>> theballast = Ballast(
+    ...     sb_z=120e6, sb_y=120e6, sb_x=120e6,
+    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
     >>> pad = PeriodicArrangement(item=[thepadA, thepadB])
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
-    >>> sleeper = PeriodicArrangement(item=[thesleeperA, thesleeperB])
+    >>> sleeper = PeriodicArrangement(item=[thesleeper])
+    >>> ballast = PeriodicArrangement(item=[theballast])
     >>> tr = ArrangedBallastedSingleRailTrack(
     ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
+    ...     ballast=ballast,
     ...     distance=distance,
-    ...     num_mount=100)
+    ...     num_mount=100,
+    ...     z_f=0.081,
+    ...     y_f=0.0)
     """
 
     def generate(self, num_mount):
@@ -119,23 +133,37 @@ class RandomArrangement(Arrangement):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import DiscrPad, Sleeper
+    >>> from rolland.components import Ballast, DiscrPad, Sleeper
     >>> from rolland.arrangement import RandomArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
 
-    >>> thepadA = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> thepadB = DiscrPad(sp = [400*10**6, 0], dp = [40000, 0])
-    >>> thesleeperA = Sleeper(ms = 150)
-    >>> thesleeperB = Sleeper(ms = 200)
+    >>> thepadA = DiscrPad(
+    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thepadB = DiscrPad(
+    ...     sp_z=60e6, sp_y=20e6, sp_x=20e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thesleeper = Sleeper(
+    ...     ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
+    ...     lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    >>> theballast = Ballast(
+    ...     sb_z=120e6, sb_y=120e6, sb_x=120e6,
+    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
     >>> pad = RandomArrangement(item=[thepadA, thepadB])
     >>> distance = RandomArrangement(item=[0.65, 0.5])
-    >>> sleeper = RandomArrangement(item=[thesleeperA, thesleeperB])
+    >>> sleeper = RandomArrangement(item=[thesleeper])
+    >>> ballast = RandomArrangement(item=[theballast])
     >>> tr = ArrangedBallastedSingleRailTrack(
     ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
+    ...     ballast=ballast,
     ...     distance=distance,
-    ...     num_mount=100)
+    ...     num_mount=100,
+    ...     z_f=0.081,
+    ...     y_f=0.0)
     """
 
     def generate(self, num_mount):
