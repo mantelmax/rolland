@@ -255,13 +255,16 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import ContPad, Slab
+    >>> from rolland.components import ContPad
     >>> from rolland.track import ContSlabSingleRailTrack
 
-    >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> theslab = Slab(ms = 250)
+    >>> slep_dist = 0.6
+    >>> thepad = ContPad(
+    ...     sp_z=120e6 / slep_dist, sp_y=40e6 / slep_dist, sp_x=40e6 / slep_dist,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
     >>> track = ContSlabSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, slab=theslab, l_track=145, z_f=0.081, y_f=0.0
+    ...     rail=rail_60E1, pad=thepad, l_track=145, z_f=0.081, y_f=0.0
     ... )
     """
 
@@ -375,15 +378,16 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import DiscrPad, Slab
+    >>> from rolland.components import DiscrPad
     >>> from rolland.track import SimplePeriodicSlabSingleRailTrack
 
-    >>> thepad = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> theslab = Slab(ms = 250)
+    >>> thepad = DiscrPad(
+    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
     >>> track = SimplePeriodicSlabSingleRailTrack(
     ...     rail=rail_60E1,
     ...     pad=thepad,
-    ...     slab=theslab,
     ...     distance=0.6,
     ...     num_mount=100,
     ...     z_f=0.081,
@@ -488,19 +492,23 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import DiscrPad, Slab
+    >>> from rolland.components import DiscrPad
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedSlabSingleRailTrack
 
-    >>> thepadA = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> thepadB = DiscrPad(sp = [400*10**6, 0], dp = [40000, 0])
-    >>> theslab = Slab(ms = 250)
+    >>> thepadA = DiscrPad(
+    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thepadB = DiscrPad(
+    ...     sp_z=60e6, sp_y=20e6, sp_x=20e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
     >>> pad = PeriodicArrangement(item=[thepadA, thepadB])
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
     >>> track = ArrangedSlabSingleRailTrack(
     ...     rail=rail_60E1,
     ...     pad=pad,
-    ...     slab=theslab,
     ...     distance=distance,
     ...     num_mount=100,
     ...     z_f=0.081,
@@ -622,13 +630,23 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import ContPad, Slab
+    >>> from rolland.components import Ballast, ContPad, Slab
     >>> from rolland.track import ContBallastedSingleRailTrack
 
-    >>> thepad = ContPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> theslab = Slab(ms = 250)
+    >>> slep_dist = 0.6
+    >>> thepad = ContPad(
+    ...     sp_z=120e6 / slep_dist, sp_y=40e6 / slep_dist, sp_x=40e6 / slep_dist,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> theslab = Slab(
+    ...     ms=300.05 / slep_dist, rhos=2648,
+    ...     Is_x=0.0593 / slep_dist, Is_y=0.00089 / slep_dist, Is_z=0.0596 / slep_dist,
+    ...     lengs=2.5, equ_wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    >>> theballast = Ballast(
+    ...     sb_z=120e6 / slep_dist, sb_y=120e6 / slep_dist, sb_x=120e6 / slep_dist,
+    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
     >>> track = ContBallastedSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, slab=theslab, z_f=0.081, y_f=0.0
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, ballast=theballast, z_f=0.081, y_f=0.0
     ... )
     """
 
@@ -749,11 +767,19 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import DiscrPad, Sleeper
+    >>> from rolland.components import Ballast, DiscrPad, Sleeper
     >>> from rolland.track import SimplePeriodicBallastedSingleRailTrack
 
-    >>> thepad = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> thesleeper = Sleeper(ms = 150)
+    >>> thepad = DiscrPad(
+    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thesleeper = Sleeper(
+    ...     ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
+    ...     lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    >>> theballast = Ballast(
+    ...     sb_z=120e6, sb_y=120e6, sb_x=120e6,
+    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
     >>> distance = 0.6
     >>> tr = SimplePeriodicBallastedSingleRailTrack(
     ...     rail=rail_60E1,
@@ -870,22 +896,33 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     Example
     --------
     >>> from rolland.database.rail.db_rail import rail_60E1
-    >>> from rolland.components import DiscrPad, Sleeper
+    >>> from rolland.components import Ballast, DiscrPad, Sleeper
     >>> from rolland.arrangement import PeriodicArrangement
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
 
-    >>> thepadA = DiscrPad(sp = [300*10**6, 0], dp = [30000, 0])
-    >>> thepadB = DiscrPad(sp = [400*10**6, 0], dp = [40000, 0])
-    >>> thesleeperA = Sleeper(ms = 150)
-    >>> thesleeperB = Sleeper(ms = 200)
+    >>> thepadA = DiscrPad(
+    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thepadB = DiscrPad(
+    ...     sp_z=60e6, sp_y=20e6, sp_x=20e6,
+    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
+    ...     wdthp=0.15)
+    >>> thesleeper = Sleeper(
+    ...     ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
+    ...     lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    >>> theballast = Ballast(
+    ...     sb_z=120e6, sb_y=120e6, sb_x=120e6,
+    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
     >>> pad = PeriodicArrangement(item=[thepadA, thepadB])
     >>> distance = PeriodicArrangement(item=[0.65, 0.5])
-    >>> sleeper = PeriodicArrangement(item=[thesleeperA, thesleeperB])
+    >>> sleeper = PeriodicArrangement(item=[thesleeper])
+    >>> ballast = PeriodicArrangement(item=[theballast])
     >>> track = ArrangedBallastedSingleRailTrack(
     ...     rail=rail_60E1,
     ...     pad=pad,
     ...     sleeper=sleeper,
-    ...     ballast=ballast_arr,
+    ...     ballast=ballast,
     ...     distance=distance,
     ...     z_f=0.081,
     ...     y_f=0.0)
