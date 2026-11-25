@@ -1,6 +1,33 @@
 Changelog
 =========
 
+Unreleased
+----------
+
+**New Features**
+
+* **Sound radiation (experimental)**: New module :mod:`rolland.radiation` with :class:`~rolland.radiation.SimplifiedMonopoleRadiation`. The radiated sound pressure is computed from a full ``Deflection`` wavefield using a monopole model on a GMSH surface mesh of the rail, with optional ground reflection (image source method). Results are available as amplitude spectrum, spectral density and time signal, optionally A-weighted (IEC 61672-1, default), and can be exported as calibrated WAV file (0 dBFS = 20 Pa). Adds ``gmsh``, ``librosa`` and ``soundfile`` as dependencies.
+* New example: :doc:`Sound Radiation of a Vertically Excited Rail </examples/radiation/vertical_impulse_radiation>`.
+
+v26.11
+------
+
+**Breaking Changes**
+
+* The ``UIC60`` rail profile instance has been removed. Use ``rail_60E1`` or ``load_rail('rail_60E1')`` from :mod:`rolland.database.rail.db_rail` instead.
+
+**New Features**
+
+* **File-based rail profile database**: Rail profiles are now stored as TOML/CSV/NPY files and loaded via ``load_rail()`` / ``available_rails()``. Seven profiles are bundled: 49E1, 49E5, 54E1, 54E3, 54E4, 60E1, 60E2.
+* **Spatially resolved warping function**: ``Rail.chi`` is now an array of shape ``(n, 3)`` with a new ``Rail.chi_at(y, z)`` interpolation method. All track classes evaluate the warping at the rail foot position ``(y_f, z_f)``.
+* **TDR for analytical methods**: :class:`~rolland.postprocessing.TrackDecayRate` now supports analytical/semi-analytical results (Kosto, EBB, TSB) in addition to Rolland and Stampka simulations.
+* **User guide notebooks**: Three new Jupyter notebooks (create track, excite track, evaluate results).
+
+**Bug Fixes**
+
+* Fixed sign of ``e_s`` in pad warping stiffness calculation.
+* ``chi_f`` in :class:`~rolland.domainsetup.DomSetup` is now correctly taken from the track instead of being hardcoded to 0.
+
 v26.08
 ------
 

@@ -15,3 +15,5 @@ docs/build/
 
 # private tests
 tests/sandbox/
+# local environment variables
+.env

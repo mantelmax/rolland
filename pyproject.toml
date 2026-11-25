@@ -1,6 +1,6 @@
 [project]
 name = "rolland"
-version = "26.08"
+version = "26.11"
 description = "Time-domain simulation framework for coupled wave propagation and dynamics in railway tracks"
 authors = [
     { name = "Maximilian Mantel", email = "maximilian.mantel@tu-berlin.de" },
@@ -25,7 +25,10 @@ dependencies = [
     "numpy>=1.24.0",
     "scipy>=1.10.0",
     "matplotlib>=3.5.0",
-    "devito>=4.8.22"
+    "devito>=4.8.22",
+    "gmsh",
+    "librosa",
+    "soundfile",
 ]
 
 # Optional dependencies (pip install rolland[dev,docs,io])
