@@ -208,8 +208,8 @@ class TrackResponse(PostProcessing):
     Example
     -------
     >>> from rolland.postprocessing import TrackResponse
-    >>> response = TrackResponse(result=deflection_results)
-    >>> response.show(quantity='mobility')
+    >>> response = TrackResponse(result=deflection_results)  # doctest: +SKIP
+    >>> response.show(quantity='mobility')  # doctest: +SKIP
     """
 
     position_index: int | None = None
@@ -453,17 +453,20 @@ class TrackDecayRate(PostProcessing):
 
     Example
     -------
+    >>> import numpy as np
+    >>> from rolland.methods.semi_analytical import TBCont1LKosto
     >>> from rolland.postprocessing import TrackDecayRate
     >>> # 1/3 Octave bands (default per EN 15461):
-    >>> tdr_calc = TrackDecayRate(result=deflection_results)
+    >>> tdr_calc = TrackDecayRate(result=deflection_results)  # doctest: +SKIP
     >>> # Narrowband (raw frequencies):
-    >>> tdr_narrow = TrackDecayRate(result=deflection_results, octave_fraction=None)
+    >>> tdr_narrow = TrackDecayRate(  # doctest: +SKIP
+    ...     result=deflection_results, octave_fraction=None)
     >>> # Analytical method (here Kostovasilis), evaluated at the measurement positions:
     >>> x_n = np.array([0.0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2, 1.35, 1.5, 1.8, 2.1, 2.4,
-    >>>                  3.0, 3.6, 4.2, 4.8, 6.0, 7.2, 9.6, 12.0, 14.4, 18.0, 21.6, 25.2, 28.8,
-    >>>                  32.4, 39.6])
-    >>> kosto = TBCont1LKosto(track=track, f=f, x_excit=10.0, x_resp=10.0 + x_n)
-    >>> tdr_kosto = TrackDecayRate(result=kosto)
+    ...                 3.0, 3.6, 4.2, 4.8, 6.0, 7.2, 9.6, 12.0, 14.4, 18.0, 21.6, 25.2, 28.8,
+    ...                 32.4, 39.6])
+    >>> kosto = TBCont1LKosto(track=track, f=f, x_excit=10.0, x_resp=10.0 + x_n)  # doctest: +SKIP
+    >>> tdr_kosto = TrackDecayRate(result=kosto)  # doctest: +SKIP
     """
 
     position_index: int | None = None
