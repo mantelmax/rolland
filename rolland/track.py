@@ -214,6 +214,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Single rail slab track with continuous support.
 
     All superstructure properties are continuous along the track. The slab is assumed to be rigid.
+    Assigning slab properties is not required.
 
     +------------------+-----------+--------------------+-------------+
     | Layer of Support | Component | Condition          | Variability |
@@ -224,7 +225,7 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     +------------------+-----------+--------------------+-------------+
     | 1st/2nd          | slab      | continuous (rigid) | no          |
     +------------------+-----------+--------------------+-------------+
-    | 2nd              | ballast   | /                  | /           |
+    | 2nd              | /         | /                  | /           |
     +------------------+-----------+--------------------+-------------+
 
 
@@ -258,14 +259,17 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
     >>> from rolland.components import ContPad
     >>> from rolland.track import ContSlabSingleRailTrack
 
-    >>> slep_dist = 0.6
     >>> thepad = ContPad(
-    ...     sp_z=120e6 / slep_dist, sp_y=40e6 / slep_dist, sp_x=40e6 / slep_dist,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
-    >>> track = ContSlabSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, l_track=145, z_f=0.081, y_f=0.0
-    ... )
+    ...        sp_z=200e6,
+    ...        sp_y=66.7e6,
+    ...        sp_x=66.7e6,
+    ...        etap_z=0.2,
+    ...        etap_y=0.2,
+    ...        etap_x=0.2,
+    ...        etap_r=0.2,
+    ...        wdthp=0.15
+    ...    )
+    >>> track = ContSlabSingleRailTrack(rail=rail_60E1, pad=thepad, l_track=100, z_f=0.081, y_f=0.0)
     """
 
     pad: ContPad
@@ -306,14 +310,15 @@ class ContSlabSingleRailTrack(SlabSingleRailTrack):
 class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
     r"""Abstract base class for discrete slab single rail track classes.
 
-    The pad and sleeper properties are discrete and the slab is assumed to be rigid.
+    The pad and sleeper properties are discrete. The slab is assumed to be rigid.
+    Assigning slab properties is not required.
 
     Attributes
     ----------
     rail : Rail
         Rail instance.
     slab : Slab
-        Slab instance.
+        Slab placeholder instance.
     mount_prop : dict[float, tuple[DiscrPad, None, None]]
         Dictionary for discrete mounting positions (x-> (Pad, None, None)).
     """
@@ -331,7 +336,8 @@ class DiscrSlabSingleRailTrack(SlabSingleRailTrack):
 class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     r"""Single rail slab track with simple periodic support.
 
-    All mounting properties are uniform and no variation is allowed. Slab is assumed to be rigid.
+    All mounting properties are uniform and no variation is allowed.
+    The slab is assumed to be rigid. Assigning slab properties is not required.
 
     +---------+-----------+------------------+-------------+
     | Layer   | Component | Condition        | Variability |
@@ -342,7 +348,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     +---------+-----------+------------------+-------------+
     | 1st/2nd | slab      | discrete (rigid) | no          |
     +---------+-----------+------------------+-------------+
-    | 2nd     | ballast   | /                | /           |
+    | 2nd     | /         | /                | /           |
     +---------+-----------+------------------+-------------+
 
     Attributes
@@ -350,7 +356,7 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     rail : Rail
         Rail instance.
     slab : Slab
-        Slab instance.
+        Slab placeholder instance.
     pad : DiscrPad
         Discrete pad instance.
     distance : float, default=0.6
@@ -382,17 +388,22 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     >>> from rolland.track import SimplePeriodicSlabSingleRailTrack
 
     >>> thepad = DiscrPad(
-    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
-    >>> track = SimplePeriodicSlabSingleRailTrack(
-    ...     rail=rail_60E1,
+    ...     sp_z=120e6,
+    ...     sp_y=40e6,
+    ...     sp_x=40e6,
+    ...     etap_z=0.2,
+    ...     etap_y=0.2,
+    ...     etap_x=0.2,
+    ...     etap_r=0.2,
+    ...     wdthp=0.15
+    ...     )
+    >>> track = SimplePeriodicSlabSingleRailTrack(rail=rail_60E1,
     ...     pad=thepad,
     ...     distance=0.6,
-    ...     num_mount=100,
+    ...     num_mount=167,
     ...     z_f=0.081,
-    ...     y_f=0.0)
-    ...
+    ...     y_f=0.0
+    ...     )
     """
 
     pad: DiscrPad
@@ -442,10 +453,10 @@ class SimplePeriodicSlabSingleRailTrack(DiscrSlabSingleRailTrack):
 
 @dataclass(kw_only=True)
 class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
-    """Single rail slab track with varying periodic support.
+    """Single rail slab track with varying support properties.
 
-    Variations in the form of periodicaly or stochasticaly varying mounting properties are allowed.
-    Slab is assumed to be rigid.
+    Variations in the form of periodically or stochastically varying mounting properties are
+    allowed. Slab is assumed to be rigid.
 
     +---------+-----------+------------------+---------------------+
     | Layer   | Component | Condition        | Variability         |
@@ -456,7 +467,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     +---------+-----------+------------------+---------------------+
     | 1st/2nd | slab      | discrete (rigid) | periodic/stochastic |
     +---------+-----------+------------------+---------------------+
-    | 2nd     | ballast   | /                | /                   |
+    | 2nd     | /         | /                | /                   |
     +---------+-----------+------------------+---------------------+
 
     Attributes
@@ -464,7 +475,7 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     rail : Rail
         Rail instance.
     slab : Slab
-        Slab instance.
+        Slab placeholder instance.
     pad : Arrangement
         Arrangement instance containing multiple pads.
     distance : Arrangement
@@ -497,23 +508,35 @@ class ArrangedSlabSingleRailTrack(DiscrSlabSingleRailTrack):
     >>> from rolland.track import ArrangedSlabSingleRailTrack
 
     >>> thepadA = DiscrPad(
-    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
+    ...     sp_z=120e6,     # Low vertical stiffness
+    ...     sp_y=40e6,
+    ...     sp_x=40e6,
+    ...     etap_z=0.2,
+    ...     etap_y=0.2,
+    ...     etap_x=0.2,
+    ...     etap_r=0.2,
+    ...     wdthp=0.15
+    ...     )
     >>> thepadB = DiscrPad(
-    ...     sp_z=60e6, sp_y=20e6, sp_x=20e6,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
-    >>> pad = PeriodicArrangement(item=[thepadA, thepadB])
-    >>> distance = PeriodicArrangement(item=[0.65, 0.5])
+    ...     sp_z=700e6,     # High vertical stiffness
+    ...     sp_y=40e6,
+    ...     sp_x=40e6,
+    ...     etap_z=0.2,
+    ...     etap_y=0.2,
+    ...     etap_x=0.2,
+    ...     etap_r=0.2,
+    ...     wdthp=0.15
+    ...     )
+    >>> pads = PeriodicArrangement(item=[thepadA, thepadB])
+    >>> distances = PeriodicArrangement(item=[0.65, 0.5]) # Varying sleeper spacings
     >>> track = ArrangedSlabSingleRailTrack(
     ...     rail=rail_60E1,
-    ...     pad=pad,
-    ...     distance=distance,
-    ...     num_mount=100,
+    ...     pad=pads,
+    ...     distance=distances,
+    ...     num_mount=167,
     ...     z_f=0.081,
-    ...     y_f=0.0)
-    ...
+    ...     y_f=0.0
+    ...     )
     """
 
     pad: Arrangement
@@ -588,7 +611,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
 
     All superstructure properties are continuous along the track.
 
-    .. note:: Properties of ballast need to be defined as continious values (per meter).
+    .. note:: Properties of ballast need to be defined as continuous values (per meter).
 
     +---------+-----------+------------+-------------+
     | Layer   | Component | Condition  | Variability |
@@ -614,7 +637,7 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
         Ballast instance.
     l_track : float, default=100.0
         Track length :math:`[m]`. (May change slightly after discretization.
-        The inclusion of boundary and calculation domain is required).
+        The inclusion of boundary and interior domain is required).
     cof : ndarray
         Cut-on frequencies corresponding to the DOFs :math:`[Hz]`.
     z_f: float
@@ -633,21 +656,39 @@ class ContBallastedSingleRailTrack(BallastedSingleRailTrack):
     >>> from rolland.components import Ballast, ContPad, Slab
     >>> from rolland.track import ContBallastedSingleRailTrack
 
-    >>> slep_dist = 0.6
     >>> thepad = ContPad(
-    ...     sp_z=120e6 / slep_dist, sp_y=40e6 / slep_dist, sp_x=40e6 / slep_dist,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
+    ...        sp_z=200e6,
+    ...        sp_y=66.7e6,
+    ...        sp_x=66.7e6,
+    ...        etap_z=0.2,
+    ...        etap_y=0.2,
+    ...        etap_x=0.2,
+    ...        etap_r=0.2,
+    ...        wdthp=0.15
+    ...    )
     >>> theslab = Slab(
-    ...     ms=300.05 / slep_dist, rhos=2648,
-    ...     Is_x=0.0593 / slep_dist, Is_y=0.00089 / slep_dist, Is_z=0.0596 / slep_dist,
-    ...     lengs=2.5, equ_wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    ...        ms=300/0.6,
+    ...        Is_x=0.05934/0.6,
+    ...        Is_y=0.00089/0.6,
+    ...        Is_z=0.05934/0.6,
+    ...        lengs=2.5,
+    ...        rhos=2648,
+    ...        equ_wdths=0.245,
+    ...        heights=0.185,
+    ...        z_st=-0.185/2,
+    ...        z_sb=0.185/2,
+    ...    )
     >>> theballast = Ballast(
-    ...     sb_z=120e6 / slep_dist, sb_y=120e6 / slep_dist, sb_x=120e6 / slep_dist,
-    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
+    ...        sb_z=200e6,
+    ...        sb_y=200e6,
+    ...        sb_x=200e6,
+    ...        etab_z=1,
+    ...        etab_y=2,
+    ...        etab_x=2,
+    ...        etab_r=2,
+    ...        )
     >>> track = ContBallastedSingleRailTrack(
-    ...     rail=rail_60E1, pad=thepad, slab=theslab, ballast=theballast, z_f=0.081, y_f=0.0
-    ... )
+    ...     rail=rail_60E1, pad=thepad, slab=theslab, ballast=theballast, z_f=0.081, y_f=0.0)
     """
 
     pad: ContPad
@@ -771,22 +812,42 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     >>> from rolland.track import SimplePeriodicBallastedSingleRailTrack
 
     >>> thepad = DiscrPad(
-    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
+    ...        sp_z=120e6,
+    ...        sp_y=40e6,
+    ...        sp_x=40e6,
+    ...        etap_z=0.2,
+    ...        etap_y=0.2,
+    ...        etap_x=0.2,
+    ...        etap_r=0.2,
+    ...        wdthp=0.15
+    ...    )
     >>> thesleeper = Sleeper(
-    ...     ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
-    ...     lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    ...        ms=300,
+    ...        Is_x=0.05934,
+    ...        Is_y=0.00089,
+    ...        Is_z=0.05934,
+    ...        lengs=2.5,
+    ...        rhos=2648,
+    ...        wdths=0.245,
+    ...        heights=0.185,
+    ...        z_st=-0.185/2,
+    ...        z_sb=0.185/2,
+    ...    )
     >>> theballast = Ballast(
-    ...     sb_z=120e6, sb_y=120e6, sb_x=120e6,
-    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
-    >>> distance = 0.6
+    ...        sb_z=120e6,
+    ...        sb_y=120e6,
+    ...        sb_x=120e6,
+    ...        etab_z=1,
+    ...        etab_y=2,
+    ...        etab_x=2,
+    ...        etab_r=2,
+    ...        )
     >>> tr = SimplePeriodicBallastedSingleRailTrack(
     ...     rail=rail_60E1,
     ...     pad=thepad,
     ...     sleeper=thesleeper,
     ...     ballast=theballast,
-    ...     distance=distance,
+    ...     distance=0.6,
     ...     z_f=0.081,
     ...     y_f=0.0)
     """
@@ -843,9 +904,10 @@ class SimplePeriodicBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
 
 @dataclass(kw_only=True)
 class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
-    """Single rail ballasted track with varying periodic support.
+    """Single rail ballasted track with varying support properties.
 
-    Variations in the form of periodicaly or stochasticaly varying mounting properties are allowed.
+    Variations in the form of periodically or stochastically varying mounting properties are
+    allowed.
 
     .. note:: Properties of ballast need to be defined as discrete values.
 
@@ -901,29 +963,69 @@ class ArrangedBallastedSingleRailTrack(DiscrBallastedSingleRailTrack):
     >>> from rolland.track import ArrangedBallastedSingleRailTrack
 
     >>> thepadA = DiscrPad(
-    ...     sp_z=120e6, sp_y=40e6, sp_x=40e6,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
+    ...        sp_z=120e6,      # Low vertical stiffness
+    ...        sp_y=40e6,
+    ...        sp_x=40e6,
+    ...        etap_z=0.2,
+    ...        etap_y=0.2,
+    ...        etap_x=0.2,
+    ...        etap_r=0.2,
+    ...        wdthp=0.15
+    ...    )
     >>> thepadB = DiscrPad(
-    ...     sp_z=60e6, sp_y=20e6, sp_x=20e6,
-    ...     etap_z=0.2, etap_y=0.2, etap_x=0.2, etap_r=0.2,
-    ...     wdthp=0.15)
-    >>> thesleeper = Sleeper(
-    ...     ms=300.05, rhos=2648, Is_x=0.0593, Is_y=0.00089, Is_z=0.0596,
-    ...     lengs=2.5, wdths=0.245, heights=0.185, z_st=-0.0925, z_sb=0.0925)
+    ...        sp_z=700e6,      # High vertical stiffness
+    ...        sp_y=40e6,
+    ...        sp_x=40e6,
+    ...        etap_z=0.2,
+    ...        etap_y=0.2,
+    ...        etap_x=0.2,
+    ...        etap_r=0.2,
+    ...        wdthp=0.15
+    ...    )
+    >>> thesleeperA = Sleeper(
+    ...        ms=300/2,        # Low mass
+    ...        Is_x=0.05934/2,
+    ...        Is_y=0.00089/2,
+    ...        Is_z=0.05934/2,
+    ...        lengs=2.5,
+    ...        rhos=2648,
+    ...        wdths=0.245,
+    ...        heights=0.185,
+    ...        z_st=-0.185/2,
+    ...        z_sb=0.185/2,
+    ...    )
+    >>> thesleeperB = Sleeper(
+    ...        ms=300*2,        # High mass
+    ...        Is_x=0.05934*2,
+    ...        Is_y=0.00089*2,
+    ...        Is_z=0.05934*2,
+    ...        lengs=2.5,
+    ...        rhos=2648,
+    ...        wdths=0.245,
+    ...        heights=0.185,
+    ...        z_st=-0.185/2,
+    ...        z_sb=0.185/2,
+    ...    )
     >>> theballast = Ballast(
-    ...     sb_z=120e6, sb_y=120e6, sb_x=120e6,
-    ...     etab_z=1.0, etab_y=2.0, etab_x=2.0, etab_r=2.0)
-    >>> pad = PeriodicArrangement(item=[thepadA, thepadB])
-    >>> distance = PeriodicArrangement(item=[0.65, 0.5])
-    >>> sleeper = PeriodicArrangement(item=[thesleeper])
-    >>> ballast = PeriodicArrangement(item=[theballast])
+    ...        sb_z=120e6,
+    ...        sb_y=120e6,
+    ...        sb_x=120e6,
+    ...        etab_z=1,
+    ...        etab_y=2,
+    ...        etab_x=2,
+    ...        etab_r=2,
+    ...        )
+    >>> pads = PeriodicArrangement(item=[thepadA, thepadB])
+    >>> distances = PeriodicArrangement(item=[0.65, 0.5])    #Varying sleeper spacings
+    >>> sleepers = PeriodicArrangement(item=[thesleeperA, thesleeperB])
+    >>> ballasts = PeriodicArrangement(item=[theballast])
     >>> track = ArrangedBallastedSingleRailTrack(
     ...     rail=rail_60E1,
-    ...     pad=pad,
-    ...     sleeper=sleeper,
-    ...     ballast=ballast,
-    ...     distance=distance,
+    ...     pad=pads,
+    ...     sleeper=sleepers,
+    ...     ballast=ballasts,
+    ...     distance=distances,
+    ...     num_mount=167,
     ...     z_f=0.081,
     ...     y_f=0.0)
     """
