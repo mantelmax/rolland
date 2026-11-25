@@ -7,8 +7,8 @@ Wheel types:
     - w_type_b
 
 Green's functions:
-    - w_type_a_gf
-    - w_type_b_gf
+    - gf_w_type_a
+    - gf_w_type_b
 
 
 Attributes (Wheel)
