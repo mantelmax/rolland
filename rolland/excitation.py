@@ -84,7 +84,7 @@ class GaussianImpulse(StationaryExcitation):
     sigma : float, default=0.7e-4
         Pulse parameter (regulates pulse-time) :math:`[s]`.
     a : float, default=0.5e2
-        Pulse parameter (regulates amplitude) :math:`[N]`.
+        Pulse parameter (regulates amplitude) :math:`[Ns]`.
     x_excit : float, default=50.0
         Excitation position :math:`[m]`.
     force_dir : str, default='vertical'
