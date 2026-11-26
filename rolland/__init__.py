@@ -22,6 +22,7 @@ from .track import (
     SimplePeriodicBallastedSingleRailTrack,
     SimplePeriodicSlabSingleRailTrack,
 )
+from .visualization import TrackSchematic
 
 __all__ = [
     'Arrangement',
@@ -53,4 +54,5 @@ __all__ = [
     'Radiation',
     'SimplifiedMonopoleRadiation',
     'a_weighting',
+    'TrackSchematic',
 ]
