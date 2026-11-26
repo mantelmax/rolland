@@ -87,6 +87,7 @@ autosummary_filename_map = {
     'rolland.radiation.Radiation': 'Radiation',
     'rolland.radiation.SimplifiedMonopoleRadiation': 'SimplifiedMonopoleRadiation',
     'rolland.radiation.a_weighting': 'a_weighting',
+    'rolland.visualization.TrackSchematic': 'TrackSchematic',
 }
 
 

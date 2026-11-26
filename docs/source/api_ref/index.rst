@@ -23,6 +23,7 @@ API Reference
    rolland/excitation
    rolland/deflection
    rolland/radiation
+   rolland/visualization
 
 .. toctree::
    :hidden:
@@ -115,6 +116,12 @@ API Reference
             :link-type: doc
 
             Sound radiation of the rail with a simplified monopole model and A-weighting.
+
+         .. grid-item-card:: Visualization
+            :link: rolland/visualization
+            :link-type: doc
+
+            Schematic side view of the track setup with excitation and boundary domains.
 
    .. tab-item:: Reference Models
 
